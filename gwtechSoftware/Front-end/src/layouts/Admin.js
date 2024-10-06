@@ -97,7 +97,11 @@ export default function Dashboard(props) {
       if (prop.category === "account") {
         return getRoutes(prop.views);
       }
-      if (prop.layout === "/admin" || prop.layout === "/subadmin") {
+      if (
+        prop.layout === "/admin" ||
+        prop.layout === "/subadmin" ||
+        prop.layout === "/superVisor"
+      ) {
         return (
           <Route
             path={prop.layout + prop.path}
@@ -111,7 +115,10 @@ export default function Dashboard(props) {
     });
   };
 
-  const matchRoutes = routes.filter((route) => (route.layout == {...rest}.match.path) || route.category == "account");
+  const matchRoutes = routes.filter(
+    (route) =>
+      route.layout == { ...rest }.match.path || route.category == "account"
+  );
   const { isOpen, onOpen, onClose } = useDisclosure();
   document.documentElement.dir = "ltr";
   // Chakra Color Mode
@@ -120,7 +127,7 @@ export default function Dashboard(props) {
       <Sidebar
         routes={matchRoutes}
         logoText={"LOTTERY"}
-        display='none'
+        display="none"
         sidebarVariant={sidebarVariant}
         {...rest}
       />
@@ -129,7 +136,8 @@ export default function Dashboard(props) {
         w={{
           base: "100%",
           xl: "calc(100% - 275px)",
-        }}>
+        }}
+      >
         <Portal>
           <AdminNavbar
             onOpen={onOpen}
@@ -145,7 +153,7 @@ export default function Dashboard(props) {
             <PanelContainer>
               <Switch>
                 {getRoutes(matchRoutes)}
-                <Redirect from='/auth' to='/auth/signin' />
+                <Redirect from="/auth" to="/auth/signin" />
               </Switch>
             </PanelContainer>
           </PanelContent>

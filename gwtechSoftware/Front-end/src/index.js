@@ -31,6 +31,7 @@ ReactDOM.render(
       <Route path={`/auth`} component={AuthLayout} />
       <Route path={`/admin`} component={AdminLayout} />
       <Route path={`/subadmin`} component={AdminLayout} />
+      <Route path={`/superVisor`} component={AdminLayout} />
       <Redirect from={`/`} to="/auth/signin" />
     </Switch>
   </HashRouter>,

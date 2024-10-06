@@ -62,28 +62,28 @@ function SignIn() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await api().post(`/auth/signin`,
-        {
-          userName: name.trim(),
-          password: password,
-        }
-      );
-      if(response?.data?.success) {
+      const response = await api().post(`/auth/signin`, {
+        userName: name.trim(),
+        password: password,
+      });
+      if (response?.data?.success) {
         // Redirect to dashboard or home page
         await sessionStorage.setItem("token", response?.data?.token);
-        handleShowToast(`Welcome Mr.${response?.data?.user.userName}`, `success`);
-  
-        if (response?.data?.user.role == 'admin') {
+        handleShowToast(
+          `Welcome Mr.${response?.data?.user.userName}`,
+          `success`
+        );
+
+        if (response?.data?.user.role == "admin") {
           history.push("/admin/SubAdminManagement"); // redirect to dashboard on successful login
-        } else if (response?.data?.user.role == 'subAdmin') {
+        } else if (response?.data?.user.role == "subAdmin") {
           history.push("/subadmin/SellerManagement"); // redirect to dashboard on successful login
-        } else {
-          history.push("/superVisor/"); // redirect to dashboard on successful login
+        } else if (response?.data?.user.role == "superVisor") {
+          history.push("/superVisor/SuperVisorSellerManagement"); // redirect to dashboard on successful login
         }
       } else {
         handleShowToast(`${response?.data?.message}`, `error`);
       }
-
     } catch (error) {
       console.log(error);
       handleShowToast(`${error.response?.data?.message}`, `error`);

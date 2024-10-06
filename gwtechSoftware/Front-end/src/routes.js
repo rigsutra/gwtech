@@ -33,6 +33,9 @@ import WinnerTickets from "views/SubAdmin/WinnerTickets.js";
 import SaleDetails from "views/SubAdmin/SaleDetails.js";
 import SaleReports from "views/SubAdmin/SaleReports.js";
 
+import SuperVisorSellerManagement from "views/SuperVisor/SuperVisorSellerManagement.js";
+import SuperVisorSaleDetails from "views/SuperVisor/SuperVisorSaleDetails.js";
+import SuperVisorWinNumber from "views/SuperVisor/SuperVisorWinNumber.js";
 
 import SignIn from "views/Pages/SignIn.js";
 
@@ -56,101 +59,125 @@ var dashRoutes = [
   {
     path: "/SubAdminManagement",
     name: "Sub Admin",
-    icon: <ImUsers color='inherit' size={22}/>,
+    icon: <ImUsers color="inherit" size={22} />,
     component: SubAdminManagement,
     layout: "/admin",
   },
   {
     path: "/LotteryCategoryManagement",
     name: "Lottery Category",
-    icon: <HiViewGridAdd color='inherit' size={22}/>,
+    icon: <HiViewGridAdd color="inherit" size={22} />,
     component: LotteryCategoryManagement,
     layout: "/admin",
   },
   {
     path: "/WinningNumberManagement",
     name: "Winning Numbers",
-    icon: <GiPodium color='inherit' size={22}/>,
+    icon: <GiPodium color="inherit" size={22} />,
     component: WinningNumberManagement,
     layout: "/admin",
   },
+
   {
     path: "/SellerManagement",
     name: "Seller",
-    icon: <FaUserTie color='inherit' size={22}/>,
+    icon: <FaUserTie color="inherit" size={22} />,
     component: SellerManagement,
     layout: "/subadmin",
   },
   {
     path: "/SupervisorManagement",
     name: "Supervisor",
-    icon: <FaUserSecret color='inherit' size={22}/>,
+    icon: <FaUserSecret color="inherit" size={22} />,
     component: SupervisorManagement,
     layout: "/subadmin",
   },
   {
     path: "/paymentcondition",
     name: "Payment Condition",
-    icon: <MdPayments color='inherit' size={22}/>,
+    icon: <MdPayments color="inherit" size={22} />,
     component: PaymentCondition,
     layout: "/subadmin",
   },
   {
     path: "/blocknumber",
     name: "Block Number",
-    icon: <SiAdblock color='inherit' size={22}/>,
+    icon: <SiAdblock color="inherit" size={22} />,
     component: BlockNumber,
     layout: "/subadmin",
   },
   {
     path: "/addlimit",
     name: "Add Limit",
-    icon: <MdProductionQuantityLimits color='inherit' size={22}/>,
+    icon: <MdProductionQuantityLimits color="inherit" size={22} />,
     component: LimitNumber,
     layout: "/subadmin",
   },
   {
     path: "/winningnumberviews",
     name: "Win Number View",
-    icon: <RiNumbersFill color='inherit' size={22}/>,
+    icon: <RiNumbersFill color="inherit" size={22} />,
     component: WinNumber,
     layout: "/subadmin",
   },
   {
     path: "/soldtickets",
     name: "Sold Tickets",
-    icon: <MdFactCheck color='inherit' size={22}/>,
+    icon: <MdFactCheck color="inherit" size={22} />,
     component: SoldTickets,
     layout: "/subadmin",
   },
   {
     path: "/deleteticket",
     name: "Deleted Ticket",
-    icon: <RiDeleteBin5Fill color='inherit' size={22}/>,
+    icon: <RiDeleteBin5Fill color="inherit" size={22} />,
     component: DeletedTickets,
     layout: "/subadmin",
   },
   {
     path: "/winningtickets",
     name: "Winning Tickets",
-    icon: <FaFortAwesome color='inherit' size={22}/>,
+    icon: <FaFortAwesome color="inherit" size={22} />,
     component: WinnerTickets,
     layout: "/subadmin",
   },
   {
     path: "/saledetails",
     name: "Sale Details",
-    icon: <BsTicketDetailedFill color='inherit' size={22}/>,
+    icon: <BsTicketDetailedFill color="inherit" size={22} />,
     component: SaleDetails,
     layout: "/subadmin",
   },
   {
     path: "/salereports",
     name: "Sale Reports",
-    icon: <FaInfoCircle color='inherit' size={22}/>,
+    icon: <FaInfoCircle color="inherit" size={22} />,
     component: SaleReports,
     layout: "/subadmin",
   },
+
+  {
+    path: "/SuperVisorSaleDetails",
+    name: "Sale Details",
+    icon: <BsTicketDetailedFill color="inherit" size={22} />,
+    component: SuperVisorSaleDetails,
+    layout: "/superVisor",
+  },
+  {
+    path: "/SuperVisorSellerManagement",
+    name: "Seller Management",
+    icon: <FaUserTie color="inherit" size={22} />,
+    component: SuperVisorSellerManagement,
+    layout: "/superVisor",
+  },
+  {
+    path: "/SuperVisorWinNumber",
+    name: "Winning Number",
+    icon: <FaFortAwesome color="inherit" size={22} />,
+    component: SuperVisorWinNumber,
+    layout: "/superVisor",
+  },
+
   // {
   //   path: "/dashboard",
   //   name: "Dashboard",
@@ -166,7 +193,7 @@ var dashRoutes = [
       {
         path: "/signin",
         name: "Sign Out",
-        icon: <GoSignOut color='inherit' size={22}/>,
+        icon: <GoSignOut color="inherit" size={22} />,
         component: SignIn,
         layout: "/auth",
       },
