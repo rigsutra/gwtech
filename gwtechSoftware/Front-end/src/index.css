@@ -1,0 +1,141 @@
+select,
+input {
+    border: 1px solid gray !important;
+    /* background-color: transparent !important; */
+}
+
+table,
+tr,
+td {
+    border: 1px solid gray !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+}
+
+th {
+    border: 1px solid gray !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+thead {
+    font-weight: bold;
+}
+
+table thead:first-child th {
+    color: black !important;
+}
+
+table thead:last-child th {
+    color: red !important;
+}
+
+th {
+    font-weight: bold;
+}
+
+table thead {
+    background-color: #b4cce1 !important;
+}
+
+th:first-child,
+td:first-child {
+    text-align: left !important;
+}
+
+th:not(:first-child),
+td:not(:first-child) {
+    text-align: right !important;
+}
+
+h4,
+h5 {
+    font-weight: bold !important;
+}
+
+.loading-panel {
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-block;
+    border-top: 4px solid #FFF;
+    border-right: 4px solid transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+.loader::after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border-left: 4px solid #FF3D00;
+    border-bottom: 4px solid transparent;
+    animation: rotation 0.5s linear infinite reverse;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media screen and (max-width: 500px) {
+    th {
+        font-size: 9px !important;
+        padding: 3px 2px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+    }
+
+    td {
+        padding: 0 1px !important;
+        font-size: 9px !important;
+        font-weight: bold !important;
+    }
+
+    th:first-child,
+    td:first-child {
+        text-align: left !important;
+    }
+
+    th:not(:first-child),
+    td:not(:first-child) {
+        text-align: right !important;
+    }
+
+
+    button,
+    select,
+    input,
+    label {
+        font-size: 12px !important;
+        font-weight: bold;
+    }
+
+    h5,
+    h4 {
+        font-size: 9px !important;
+    }
+
+    button.tableInterBtn {
+        height: 18px !important;
+        font-size: 10px !important;
+        border-radius: 2px !important;
+        padding: 0 !important;
+    }
+}
