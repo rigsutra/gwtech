@@ -9,6 +9,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: my-database
-          property: connectionString
+        value: mongodb+srv://databaseUser:aCAQ14_asdfCV000@project.ewo1t.mongodb.net/prod_lottery
