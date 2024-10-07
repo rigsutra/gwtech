@@ -42,8 +42,9 @@ const SaleDetails = () => {
   const [sellerInfo, setSellerInfo] = useState([]);
   const [selectedSellerId, setSelectedSellerId] = useState("");
   const [fromDate, setFromDate] = useState(
-    new Date().toLocaleDateString("en-CA")
+    new Date().toISOString().split("T")[0]
   );
+
   const [gameCategoryDetail, setGameCategoryDetail] = useState([]);
   const [lotteryDetail, setLotteryDetail] = useState([]);
   const [gameNumberDetail, setGameNumberDetail] = useState([]);
@@ -66,22 +67,24 @@ const SaleDetails = () => {
       setLoading(true);
 
       // Logging for debugging purposes
-      console.log(`Fetching data for seller: ${selectedSellerId}`);
+      console.log(selectedSellerId);
       console.log(
         `Fetching data for lottery category: ${lotteryCategoryName.trim()}`
       );
       console.log(`Fetching data for date: ${fromDate}`);
 
+      const sellerParam = selectedSellerId ? `seller=${selectedSellerId}` : "";
       const responseAllNumber = await api().get(
-        `/superVisor/getselldetails?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
+        `/superVisor/getselldetails?${sellerParam}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
-      console.log("Response for sale details:", responseAllNumber.data);
-      setSaleDetails(responseAllNumber.data.data);
+
+      console.log("Response for sale details:", responseAllNumber);
+      setSaleDetails(responseAllNumber);
 
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
-      setGameCategoryDetail(responseByGameCatetory.data.data);
+      setGameCategoryDetail(responseByGameCatetory);
 
       const responseAllLottery = await api().get(
         `/superVisor/getselldetailsallloterycategory?seller=${selectedSellerId}&fromDate=${fromDate}`

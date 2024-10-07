@@ -162,7 +162,7 @@ exports.getSaleReports = async (req, res) => {
 exports.getSellDetails = async (req, res) => {
   try {
     const { fromDate, lotteryCategoryName, seller } = req.query;
-    const superVisorId = mongoose.Types.ObjectId(req.userId);
+    const subAdminId = mongoose.Types.ObjectId(req.userId);
 
     let seller_query = null;
     const sellerIds = [];
@@ -175,10 +175,7 @@ exports.getSellDetails = async (req, res) => {
     }
 
     if (seller == "") {
-      const sellers = await User.find(
-        { superVisorId: superVisorId },
-        { _id: 1 }
-      );
+      const sellers = await User.find({ subAdminId: subAdminId }, { _id: 1 });
       sellers.map((item) => {
         sellerIds.push(item._id);
       });

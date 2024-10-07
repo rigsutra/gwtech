@@ -39,7 +39,7 @@ export default function HeaderLinks(props) {
   let mainText = "gray.400";
   let navbarIcon = "black";
   let searchIcon = "black";
-  
+
   const settingsRef = React.useRef();
 
   const signOut = async () => {

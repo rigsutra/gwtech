@@ -125,7 +125,9 @@ const PaymentCondition = () => {
   const [currentCondition, setCurrentCondition] = useState();
 
   useEffect(() => {
-    setConditions(initConditions);
+    if (lotteryCategoryName) {
+      setConditions(initConditions);
+    }
   }, [lotteryCategoryName]);
 
   useEffect(() => {
@@ -165,10 +167,11 @@ const PaymentCondition = () => {
     fetchConditions();
   }, []);
 
-  const handleNumberChange = (index1, value) => {
-    const newNumbers = [...conditions];
-    newNumbers[index1].condition = value.trim();
-    setConditions([...newNumbers]);
+  const handleNumberChange = (index, value) => {
+    const updatedConditions = conditions.map((condition, idx) =>
+      idx === index ? { ...condition, condition: value } : condition
+    );
+    setConditions(updatedConditions);
   };
 
   const handleCancel = () => {
@@ -176,38 +179,44 @@ const PaymentCondition = () => {
     onClose();
   };
 
-  const handleSubmit = async (event) => {
-    console.log("conditions: ", conditions);
-
+  const handleSubmit = (event) => {
     event.preventDefault();
-    if (editing) {
-      handleUpdate(currentCondition._id);
-    } else {
-      try {
-        const response = await api().post("/subadmin/addpaymentterm", {
-          lotteryCategoryName: lotteryCategoryName.trim(),
-          conditions: conditions,
-        });
-        setLotteryCategoryName("");
-        setConditions(initConditions);
-        setEditing(false);
-        onClose();
-        setAllConditions([...allConditions, response.data]);
-        toast({
-          title: "Payment condition created",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error creating payment condition",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
+    editing ? handleUpdate(currentCondition._id) : handleCreate();
+  };
+
+  const resetForm = () => {
+    setLotteryCategoryName("");
+    setConditions(initConditions);
+    setEditing(false);
+    onClose();
+  };
+
+  const showError = (message) => {
+    toast({
+      title: message,
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  };
+
+  const handleCreate = async () => {
+    try {
+      const response = await api().post("/subadmin/addpaymentterm", {
+        lotteryCategoryName: lotteryCategoryName.trim(),
+        conditions,
+      });
+      resetForm();
+      setAllConditions([...allConditions, response.data]);
+      toast({
+        title: "Payment condition created",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error(error);
+      showError("Error creating payment condition");
     }
   };
 
@@ -257,25 +266,22 @@ const PaymentCondition = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await api().delete(`/subadmin/deletepaymentterm/${id}`);
-      setAllConditions(
-        allConditions.filter((condition) => condition._id !== id)
-      );
-      toast({
-        title: "Payment condition deleted",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Error deleting payment condition",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
+    if (window.confirm("Are you sure you want to delete this condition?")) {
+      try {
+        await api().delete(`/subadmin/deletepaymentterm/${id}`);
+        setAllConditions(
+          allConditions.filter((condition) => condition._id !== id)
+        );
+        toast({
+          title: "Payment condition deleted",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } catch (error) {
+        console.error(error);
+        showError("Error deleting payment condition");
+      }
     }
   };
 
@@ -298,13 +304,14 @@ const PaymentCondition = () => {
           <Button
             size="md"
             onClick={() => {
-              setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
-              onOpen();
+              if (lotteryCategories.length > 0) {
+                setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
+                onOpen();
+              }
             }}
+            isDisabled={lotteryCategories.length === 0}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
-            _hover={{
-              bg: colorMode === "light" ? "blue.600" : "blue.200",
-            }}
+            _hover={{ bg: colorMode === "light" ? "blue.600" : "blue.200" }}
           >
             <FaPlus size={24} color="white" />
           </Button>
@@ -742,7 +749,7 @@ const PaymentCondition = () => {
                       flexBasis={{ base: "100%", md: "50%" }}
                       color="black"
                     >
-                      <Box>
+                      {/* <Box>
                         <FormLabel fontSize={14} mb="0" mx="2px">
                           L4C
                         </FormLabel>
@@ -772,7 +779,7 @@ const PaymentCondition = () => {
                           }}
                           type="number"
                         />
-                      </Box>
+                      </Box> */}
 
                       <Box>
                         <FormLabel fontSize={14} mb="0" mx="2px">
@@ -885,7 +892,7 @@ const PaymentCondition = () => {
                       </Box> */}
                     </VStack>
 
-                    {/* <VStack
+                    <VStack
                       mx="3px"
                       flexBasis={{ base: "100%", md: "30%" }}
                       color="black"
@@ -955,7 +962,20 @@ const PaymentCondition = () => {
                           type="number"
                         />
                       </Box>
-                    </VStack> */}
+                      <Box>
+                        <FormLabel fontSize={14} mb="0" mx="2px">
+                          L5C3
+                        </FormLabel>
+                        <Input
+                          placeholder="L5C2"
+                          value={conditions[9].condition}
+                          onChange={(event) =>
+                            handleNumberChange(9, event.target.value)
+                          }
+                          type="number"
+                        />
+                      </Box>
+                    </VStack>
                   </Flex>
                 </Stack>
               </FormControl>

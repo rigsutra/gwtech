@@ -10,7 +10,7 @@ module.exports = function (app) {
   // Read all
   app.post(
     "/api/superVisor/getwiningnumber",
-    [authJwt.verifyToken, authJwt.isSuperVisor],
+    [authJwt.verifyToken],
     controller.readWinningNumber
   );
 };

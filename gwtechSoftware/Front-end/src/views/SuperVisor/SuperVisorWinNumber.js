@@ -53,7 +53,7 @@ const WinNumber = () => {
         fromDate,
         toDate,
       });
-      console.log(response.data.data);
+      console.log(response);
       setWinningNumbers(response.data.data);
     } catch (error) {
       console.error(error);

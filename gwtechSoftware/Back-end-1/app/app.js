@@ -20,6 +20,9 @@ const reports = require("./routes/subAdmin/reports.routes");
 const sellerRoutes = require("./routes/seller/seller.routes");
 const subadminWinNumberRoutes = require("./routes/subAdmin/winNumber.routes");
 const superVisorsellerRoutes = require("./routes/superVisor/superVisor.seller.routes");
+const superVisorreportRoutes = require("./routes/superVisor/superVisor.report.routes");
+const superVisorWinNumber = require("./routes/superVisor/superVisor.winNumber.routes");
+const SuperVisorSoldTickets = require("./routes/superVisor/superVisor.soldTickets.routes");
 
 const compression = require("compression");
 const zlib = require("zlib");
@@ -180,5 +183,8 @@ reports(app);
 sellerRoutes(app);
 subadminWinNumberRoutes(app);
 superVisorsellerRoutes(app);
+superVisorreportRoutes(app);
+superVisorWinNumber(app);
+SuperVisorSoldTickets(app);
 
 module.exports = app;

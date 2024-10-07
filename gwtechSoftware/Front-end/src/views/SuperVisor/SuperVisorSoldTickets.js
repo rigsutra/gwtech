@@ -72,7 +72,7 @@ const SoldTickets = () => {
 
     const fetchSeller = async () => {
       try {
-        const response = await api().get("/subadmin/getseller");
+        const response = await api().get("/superVisor/getseller");
         const sellersWithCompany = response.data.users.map((seller) => ({
           ...seller,
           companyName: response.data.companyName, // add company name to each seller
@@ -95,7 +95,7 @@ const SoldTickets = () => {
     try {
       setLoading(true);
       const response = await api().get(
-        `/subadmin/gettickets?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
+        `/superVisor/gettickets?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
       setSoldTickets(response.data.data);
     } catch (error) {
@@ -115,7 +115,7 @@ const SoldTickets = () => {
     try {
       const result = confirm("Do you want really delete this ticket?");
       if (result) {
-        const res = await api().delete(`/subadmin/deleteticket/${id}`);
+        const res = await api().delete(`/superVisor/deleteticket/${id}`);
         if (res.data.success) {
           setSoldTickets(soldTickets.filter((ticket) => ticket._id !== id));
           toast({

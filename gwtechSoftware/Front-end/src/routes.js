@@ -20,6 +20,7 @@
 import SubAdminManagement from "views/Admin/SubAdminManagement.js";
 import LotteryCategoryManagement from "views/Admin/LottoCategoryManagement.js";
 import WinningNumberManagement from "views/Admin/WinningNumberManagement.js";
+import subAdminSaleReport from "views/Admin/subAdminSaleReport.js";
 
 import SellerManagement from "views/SubAdmin/SellerManagement.js";
 import SupervisorManagement from "views/SubAdmin/SupervisorManagement.js";
@@ -36,6 +37,8 @@ import SaleReports from "views/SubAdmin/SaleReports.js";
 import SuperVisorSellerManagement from "views/SuperVisor/SuperVisorSellerManagement.js";
 import SuperVisorSaleDetails from "views/SuperVisor/SuperVisorSaleDetails.js";
 import SuperVisorWinNumber from "views/SuperVisor/SuperVisorWinNumber.js";
+import SuperVisorSoldTickets from "views/SuperVisor/SuperVisorSoldTickets.js";
+import SuperVisorSaleReports from "views/SuperVisor/SuperVisorSaleReports.js";
 
 import SignIn from "views/Pages/SignIn.js";
 
@@ -75,6 +78,13 @@ var dashRoutes = [
     name: "Winning Numbers",
     icon: <GiPodium color="inherit" size={22} />,
     component: WinningNumberManagement,
+    layout: "/admin",
+  },
+  {
+    path: "/subAdminSaleReport",
+    name: "Sales Report",
+    icon: <FaInfoCircle color="inherit" size={22} />,
+    component: subAdminSaleReport,
     layout: "/admin",
   },
 
@@ -155,14 +165,6 @@ var dashRoutes = [
     component: SaleReports,
     layout: "/subadmin",
   },
-
-  {
-    path: "/SuperVisorSaleDetails",
-    name: "Sale Details",
-    icon: <BsTicketDetailedFill color="inherit" size={22} />,
-    component: SuperVisorSaleDetails,
-    layout: "/superVisor",
-  },
   {
     path: "/SuperVisorSellerManagement",
     name: "Seller Management",
@@ -171,10 +173,32 @@ var dashRoutes = [
     layout: "/superVisor",
   },
   {
+    path: "/SuperVisorSaleDetails",
+    name: "Sale Details",
+    icon: <BsTicketDetailedFill color="inherit" size={22} />,
+    component: SuperVisorSaleDetails,
+    layout: "/superVisor",
+  },
+
+  {
     path: "/SuperVisorWinNumber",
     name: "Winning Number",
     icon: <FaFortAwesome color="inherit" size={22} />,
     component: SuperVisorWinNumber,
+    layout: "/superVisor",
+  },
+  {
+    path: "/SuperVisorSoldTickets",
+    name: "Sold Tickets",
+    icon: <MdFactCheck color="inherit" size={22} />,
+    component: SuperVisorSoldTickets,
+    layout: "/superVisor",
+  },
+  {
+    path: "/SuperVisorSaleReports",
+    name: "Sale Reports",
+    icon: <FaInfoCircle color="inherit" size={22} />,
+    component: SuperVisorSaleReports,
     layout: "/superVisor",
   },
 

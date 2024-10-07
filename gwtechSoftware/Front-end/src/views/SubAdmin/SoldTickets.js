@@ -43,6 +43,7 @@ const SoldTickets = () => {
   const [lotteryCategoryName, setLotteryCategoryName] = useState("");
   const [lotteryCategories, setLotteryCategories] = useState([]);
   const [sellerInfo, setSellerInfo] = useState([]);
+  const [companyName, setCompanyName] = useState("");
   const [selectedSellerId, setSelectedSellerId] = useState("");
   const [fromDate, setFromDate] = useState(
     new Date().toLocaleDateString("en-CA")
@@ -72,7 +73,11 @@ const SoldTickets = () => {
     const fetchSeller = async () => {
       try {
         const response = await api().get("/subadmin/getseller");
+        console.log(response.data);
+
         setSellerInfo(response.data.users);
+        setCompanyName(response.data.companyName);
+        console.log(response.data.users);
       } catch (error) {
         console.error(error);
         toast({
@@ -308,7 +313,7 @@ const SoldTickets = () => {
                       <Th>Date</Th>
                       <Th>Lottery</Th>
                       <Th>Seller</Th>
-                      <Th>Seller Company</Th>
+                      <Th>Company</Th>
                       <Th>Action</Th>
                     </Tr>
                   </Thead>
@@ -357,13 +362,7 @@ const SoldTickets = () => {
                               </pre>
                             </Td>
                             <Td>
-                              <pre>
-                                {
-                                  sellerInfo.find(
-                                    (sitem) => sitem._id === item.seller
-                                  )?.companyName
-                                }
-                              </pre>
+                              <pre>{companyName}</pre>
                             </Td>
                             <Td>
                               <Button
