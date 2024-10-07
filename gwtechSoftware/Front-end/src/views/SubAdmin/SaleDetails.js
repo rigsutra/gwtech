@@ -64,18 +64,9 @@ const SaleDetails = () => {
   const fetchSellDetails = async () => {
     try {
       setLoading(true);
-
-      // Logging for debugging purposes
-      console.log(`Fetching data for seller: ${selectedSellerId}`);
-      console.log(
-        `Fetching data for lottery category: ${lotteryCategoryName.trim()}`
-      );
-      console.log(`Fetching data for date: ${fromDate}`);
-
       const responseAllNumber = await api().get(
         `/sbuadmin/getselldetails?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
-      console.log("Response for sale details:", responseAllNumber.data);
       setSaleDetails(responseAllNumber.data.data);
 
       const responseByGameCatetory = await api().get(
@@ -86,7 +77,6 @@ const SaleDetails = () => {
       const responseAllLottery = await api().get(
         `/sbuadmin/getselldetailsallloterycategory?seller=${selectedSellerId}&fromDate=${fromDate}`
       );
-      console.log("Response for all lottery details:", responseAllLottery.data);
 
       const responseData = responseAllLottery.data.data;
       setSumAmount(
@@ -124,15 +114,9 @@ const SaleDetails = () => {
     seller
   ) => {
     try {
-      console.log(
-        `Fetching game number details for ${lottoName}, ${gameName}, number: ${number}, date: ${date}`
-      );
-
       const response = await api().get(
         `/sbuadmin/getsellgamenumberinfo?seller=${seller}&lotteryCategoryName=${lottoName}&fromDate=${date}&gameCategory=${gameName}&gameNumber=${number}`
       );
-      console.log("Response for game number details:", response.data);
-
       const res = response.data;
       setGameNumberDetail(res.data);
 
@@ -329,12 +313,12 @@ const SaleDetails = () => {
             </Flex>
           </Flex>
         </CardHeader>
-        <CardBody pb="15px">
+        <CardBody pb="15px" pt="50px">
           {loading ? (
             <Loading />
           ) : (
             <HStack alignItems={"normal"}>
-              <VStack width="45%" margin={"20px"}>
+              <VStack width="55%" paddingRight="5px">
                 <Table variant="striped">
                   <Thead>
                     <Tr>
@@ -391,7 +375,7 @@ const SaleDetails = () => {
                   </Thead>
                 </Table>
               </VStack>
-              <VStack width="55%">
+              <VStack width="60%">
                 <VStack width="100%" border={"1px solid gray"} padding={"10px"}>
                   <h4 style={{ marginBottom: "3px" }}>
                     {gameCategoryDetail[0]?._id?.lotteryCategoryName}
@@ -465,9 +449,9 @@ const SaleDetails = () => {
       </Card>
 
       <Modal isOpen={isOpen} onClose={handleCancel} colorMode={colorMode}>
-        <Stack spacing={2} mt="30px">
+        <Stack spacing={2}>
           <Flex>
-            <Table variant="striped" mr="5px">
+            <Table variant="striped">
               <Tbody>
                 <Tr>
                   <Td>

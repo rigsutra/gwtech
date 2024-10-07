@@ -153,7 +153,6 @@ const PaymentCondition = () => {
       try {
         const response = await api().get("/subadmin/getpaymentterm");
         setAllConditions(response.data);
-        console.log(response.data);
       } catch (error) {
         console.error(error);
         toast({

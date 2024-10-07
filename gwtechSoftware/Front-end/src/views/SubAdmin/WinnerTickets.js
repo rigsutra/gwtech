@@ -94,7 +94,6 @@ const WinnerTickets = () => {
       const response = await api().get(
         `/subadmin/getwintickets?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
-      console.log(response.data.data);
       setWinnerTickets(response.data.data);
     } catch (error) {
       console.error(error);

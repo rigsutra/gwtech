@@ -53,7 +53,6 @@ const WinNumber = () => {
         fromDate,
         toDate,
       });
-      console.log(response.data.data);
       setWinningNumbers(response.data.data);
     } catch (error) {
       console.error(error);
@@ -80,7 +79,12 @@ const WinNumber = () => {
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} p={{ base: "5px", md: "20px"}} width="100%" border={{base: "none", md: "1px solid gray"}}>
+      <Card
+        overflowX={{ sm: "scroll", xl: "hidden" }}
+        p={{ base: "5px", md: "20px" }}
+        width="100%"
+        border={{ base: "none", md: "1px solid gray" }}
+      >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
@@ -158,27 +162,37 @@ const WinNumber = () => {
                   <Th color="black">Third</Th>
                 </Tr>
               </Thead>
-              {
-                loading ?
+              {loading ? (
                 <Tbody>
                   <Tr>
                     <Td colSpan={5}>
                       <Loading />
                     </Td>
                   </Tr>
-                </Tbody> :
+                </Tbody>
+              ) : (
                 <Tbody>
                   {winningNumbers?.map((game, gameIndex) => (
                     <Tr key={gameIndex}>
-                      <Td><pre>{formatDate(game?.date.substr(0, 10))}</pre></Td>
-                      <Td><pre>{game.lotteryName}</pre></Td>
-                      <Td><pre>{game.numbers.l3c}</pre></Td>
-                      <Td><pre>{game.numbers.second}</pre></Td>
-                      <Td><pre>{game.numbers.third}</pre></Td>
+                      <Td>
+                        <pre>{formatDate(game?.date.substr(0, 10))}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{game.lotteryName}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{game.numbers.l3c}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{game.numbers.second}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{game.numbers.third}</pre>
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>
-              }
+              )}
             </Table>
           </Flex>
         </CardBody>

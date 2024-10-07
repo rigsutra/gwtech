@@ -10,14 +10,19 @@ import {
   Th,
   Td,
   Button,
+  Checkbox,
   FormControl,
   FormLabel,
   Input,
+  Stack,
+  useDisclosure,
+  useToast,
+  useColorMode,
+  VStack,
   HStack,
   Select,
   Text,
-  useToast,
-  useColorMode,
+  Box,
 } from "@chakra-ui/react";
 import { CgSearch } from "react-icons/cg";
 
@@ -37,58 +42,45 @@ const SaleReports = () => {
   const [sellerInfo, setSellerInfo] = useState([]);
   const [selectedSellerId, setSelectedSellerId] = useState("");
   const [fromDate, setFromDate] = useState(
-    new Date().toISOString().slice(0, 10)
+    new Date().toLocaleDateString("en-CA")
   );
-  const [toDate, setToDate] = useState(new Date().toISOString().slice(0, 10));
+  const [toDate, setToDate] = useState(new Date().toLocaleDateString("en-CA"));
   const [paidAmount, setPaidAmount] = useState(0);
   const [sumAmount, setSumAmount] = useState(0);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchLotteryCategories = async () => {
       try {
         const response = await api().get("/admin/getlotterycategory");
-        if (response.data && response.data.success) {
-          setLotteryCategories(response.data.data);
-          console.log("Fetched Lottery Categories:", response.data.data);
-        }
+        setLotteryCategories(response.data.data);
       } catch (error) {
-        console.error(
-          "Error fetching lottery categories:",
-          error.response ? error.response.data : error
-        );
+        console.error(error);
         toast({
           title: "Error fetching lottery categories",
-          description: error.response
-            ? error.response.data.message
-            : "Network error. Please try again.",
           status: "error",
           duration: 5000,
           isClosable: true,
         });
       }
     };
+    fetchLotteryCategories();
 
     const fetchSeller = async () => {
       try {
         const response = await api().get("/subadmin/getseller");
-        if (response.data && response.data.users) {
-          setSellerInfo(response.data.users);
-        }
+        setSellerInfo(response.data.users);
       } catch (error) {
+        console.error(error);
         toast({
           title: "Error fetching seller info",
-          description: error.response
-            ? error.response.data.message
-            : "Network error. Please try again.",
           status: "error",
           duration: 5000,
           isClosable: true,
         });
       }
     };
-
-    fetchLotteryCategories();
     fetchSeller();
   }, []);
 
@@ -98,38 +90,25 @@ const SaleReports = () => {
       const response = await api().get(
         `/subadmin/getsalereports?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
-
-      const responseData = response.data.data || [];
-      const saleReportsWithCompany = responseData.map((sellerData) => {
-        const seller = sellerInfo.find(
-          (info) => info.userName === sellerData.name
-        );
-        return {
-          ...sellerData,
-          companyName: seller ? seller.companyName : "N/A", // Add companyName if found, else "N/A"
-        };
-      });
-      setSaleReports(saleReportsWithCompany);
-
+      console.log(response);
+      const responseData = response.data.data;
       setSumAmount(
-        saleReportsWithCompany.reduce(
-          (acc, sellerData) => acc + (sellerData.sum || 0),
+        Object.values(responseData).reduce(
+          (acc, sellerData) => acc + sellerData.sum,
           0
         )
       );
       setPaidAmount(
-        saleReportsWithCompany.reduce(
-          (acc, sellerData) => acc + (sellerData.paid || 0),
+        Object.values(responseData).reduce(
+          (acc, sellerData) => acc + sellerData.paid,
           0
         )
       );
+      setSaleReports(responseData);
     } catch (error) {
-      console.error("Error fetching sale reports:", error);
+      console.error(error);
       toast({
-        title: "Error fetching sale reports",
-        description: error.response
-          ? error.response.data.message
-          : "Network error. Please try again.",
+        title: "Error fetching winner tickets",
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -156,20 +135,26 @@ const SaleReports = () => {
             flexWrap="wrap"
             flexDirection={{ base: "column", sm: "row" }}
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={"center"}
             width="100%"
           >
-            <Text fontSize="lg" fontWeight="bold" mb="10px">
+            <Text fontSize="lg" color="black" font="Weight:bold" mb="10px">
               Sale Reports
             </Text>
             <Flex
+              color="black"
               flexWrap="wrap"
               flexDirection={{ base: "column", sm: "row" }}
               justifyContent="flex-start"
               width="100%"
               alignItems="center"
             >
-              <FormControl id="seller" width="320px" isRequired py="5px">
+              <FormControl
+                id="lotteryCategoryName"
+                width="320px"
+                isRequired
+                py="5px"
+              >
                 <HStack justifyContent="space-between">
                   <FormLabel>Seller</FormLabel>
                   <Select
@@ -177,7 +162,6 @@ const SaleReports = () => {
                       setSelectedSellerId(event.target.value)
                     }
                     width="200px"
-                    value={selectedSellerId}
                   >
                     <option value={""} style={{ backgroundColor: "#e3e2e2" }}>
                       All
@@ -194,7 +178,6 @@ const SaleReports = () => {
                   </Select>
                 </HStack>
               </FormControl>
-
               <FormControl
                 id="lotteryCategoryName"
                 width="320px"
@@ -208,7 +191,6 @@ const SaleReports = () => {
                       setLotteryCategoryName(event.target.value)
                     }
                     width="200px"
-                    value={lotteryCategoryName}
                   >
                     <option value={""} style={{ backgroundColor: "#e3e2e2" }}>
                       All Category
@@ -225,7 +207,6 @@ const SaleReports = () => {
                   </Select>
                 </HStack>
               </FormControl>
-
               <FormControl id="fromDate" width="320px" isRequired py="5px">
                 <HStack justifyContent="space-between">
                   <FormLabel>From</FormLabel>
@@ -237,7 +218,6 @@ const SaleReports = () => {
                   />
                 </HStack>
               </FormControl>
-
               <FormControl id="toDate" width="320px" isRequired py="5px">
                 <HStack justifyContent="space-between">
                   <FormLabel>To</FormLabel>
@@ -257,30 +237,27 @@ const SaleReports = () => {
                 _hover={{
                   bg: colorMode === "light" ? "red.500" : "blue.200",
                 }}
-                mx="10px"
+                mx={"10px"}
               >
                 <CgSearch size={20} color={"white"} />
               </Button>
             </Flex>
           </Flex>
         </CardHeader>
-
         <CardBody pb="15px">
-          <Table variant="striped">
+          <Table variant="striped" color="black">
             <Thead>
               <Tr>
                 <Th>Seller Name</Th>
-                <Th>Company</Th>
                 <Th>Total</Th>
                 <Th>Paid</Th>
                 <Th>Profit</Th>
               </Tr>
             </Thead>
-
             {loading ? (
               <Tbody>
                 <Tr>
-                  <Td colSpan={5}>
+                  <Td colSpan={4}>
                     <Loading />
                   </Td>
                 </Tr>
@@ -290,21 +267,26 @@ const SaleReports = () => {
                 <Tbody>
                   {Object.values(saleReports).map((sellerData) => (
                     <Tr key={sellerData.name}>
-                      <Td>{sellerData.name}</Td>
-                      <Td>{sellerData.companyName}</Td>
-                      <Td>{sellerData.sum || 0}</Td>
-                      <Td>{sellerData.paid || 0}</Td>
-                      <Td>{(sellerData.sum || 0) - (sellerData.paid || 0)}</Td>
+                      <Td>
+                        <pre>{sellerData.name}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{sellerData.sum}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{sellerData.paid}</pre>
+                      </Td>
+                      <Td>
+                        <pre>{sellerData.sum - sellerData.paid}</pre>
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>
-
                 <Thead>
                   <Tr>
-                    <Th>Total ({saleReports.length})</Th>
-                    <Th></Th>
+                    <Th>Total ({Object.values(saleReports).length})</Th>
                     <Th>{sumAmount}</Th>
-                    <Th>{paidAmount}</Th>
+                    <Th> {paidAmount}</Th>
                     <Th>{sumAmount - paidAmount}</Th>
                   </Tr>
                 </Thead>

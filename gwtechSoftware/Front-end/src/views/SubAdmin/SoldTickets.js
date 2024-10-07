@@ -73,11 +73,8 @@ const SoldTickets = () => {
     const fetchSeller = async () => {
       try {
         const response = await api().get("/subadmin/getseller");
-        console.log(response.data);
-
         setSellerInfo(response.data.users);
         setCompanyName(response.data.companyName);
-        console.log(response.data.users);
       } catch (error) {
         console.error(error);
         toast({
@@ -328,6 +325,18 @@ const SoldTickets = () => {
                   ) : (
                     <Tbody>
                       {soldTickets.map((item) => {
+                        const totalAmount = item.numbers.reduce(
+                          (acc, number) => {
+                            // Only add to the total if bonus is false
+                            if (
+                              !(number.gameCategory === "MRG" && number.bonus)
+                            ) {
+                              return acc + number.amount;
+                            }
+                            return acc;
+                          },
+                          0
+                        );
                         return (
                           <Tr key={item._id}>
                             <Td>
@@ -344,7 +353,7 @@ const SoldTickets = () => {
                               </Button>
                             </Td>
                             <Td>
-                              <pre>{item.ticketPrice}</pre>
+                              <pre>{totalAmount}</pre>
                             </Td>
                             <Td>
                               <pre>{formatDate(item.date.substr(0, 10))}</pre>

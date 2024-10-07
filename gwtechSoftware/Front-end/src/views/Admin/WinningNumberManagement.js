@@ -24,7 +24,6 @@ import { FaPlus } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 
-
 // Custom components
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -161,7 +160,6 @@ const WinningNumbersManagement = () => {
         fromDate,
         toDate,
       });
-      console.log(response.data.data);
       setWinningNumbers(response.data.data);
     } catch (error) {
       console.error(error);
@@ -219,14 +217,17 @@ const WinningNumbersManagement = () => {
         setNumbers(initWinNumbers);
         setEditing(false);
         onClose();
-        
-        if ( new Date(response.data.date) >= new Date(fromDate) && new Date(response.data.date) <= new Date(toDate) ) {
+
+        if (
+          new Date(response.data.date) >= new Date(fromDate) &&
+          new Date(response.data.date) <= new Date(toDate)
+        ) {
           try {
             setWinningNumbers([...winningNumbers, response.data]);
           } catch (err) {
             setWinningNumbers([response.data]);
           }
-        } 
+        }
         toast({
           title: "Winning number created",
           status: "success",
@@ -327,7 +328,12 @@ const WinningNumbersManagement = () => {
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} p={{ base: "5px", md: "20px"}} width="100%" border={{base: "none", md: "1px solid gray"}}>
+      <Card
+        overflowX={{ sm: "scroll", xl: "hidden" }}
+        p={{ base: "5px", md: "20px" }}
+        width="100%"
+        border={{ base: "none", md: "1px solid gray" }}
+      >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
@@ -339,7 +345,7 @@ const WinningNumbersManagement = () => {
             justifyContent="flex-start"
             width="100%"
           >
-            <Text fontSize="lg"  font="Weight:bold">
+            <Text fontSize="lg" font="Weight:bold">
               Winning Numbers
             </Text>
             <Flex
@@ -369,7 +375,7 @@ const WinningNumbersManagement = () => {
                   />
                 </HStack>
               </FormControl>
-              <HStack ml="10px" pt={{md: "0px", sm: "10px"}}>
+              <HStack ml="10px" pt={{ md: "0px", sm: "10px" }}>
                 <Button
                   size="sm"
                   onClick={fetchWinningNumbers}
@@ -378,7 +384,7 @@ const WinningNumbersManagement = () => {
                     bg: colorMode === "light" ? "red.500" : "blue.200",
                   }}
                 >
-                  <CgSearch size={20} color={"white"}/>
+                  <CgSearch size={20} color={"white"} />
                 </Button>
                 <Button
                   size="sm"
@@ -420,13 +426,11 @@ const WinningNumbersManagement = () => {
                     <HStack justifyContent="space-between">
                       <Box>
                         <FormLabel>Lottery Category Name</FormLabel>
-                        <FormLabel >
-                          {number?.lotteryCategoryName}
-                        </FormLabel>
+                        <FormLabel>{number?.lotteryCategoryName}</FormLabel>
                       </Box>
                       <Box>
                         <FormLabel>Date</FormLabel>
-                        <FormLabel >
+                        <FormLabel>
                           {formatDate(number?.date.substr(0, 10))}
                         </FormLabel>
                       </Box>
@@ -444,7 +448,7 @@ const WinningNumbersManagement = () => {
                             colorMode === "light" ? "yellow.600" : "yellow.200",
                         }}
                       >
-                        <FaEdit size={20} color="white"/>
+                        <FaEdit size={20} color="white" />
                       </Button>
                       {/* <Button
                         size="sm"
@@ -461,9 +465,7 @@ const WinningNumbersManagement = () => {
                   <FormControl id="winNumbers" isRequired>
                     <FormLabel>Win Numbers</FormLabel>
                     <Stack p="5px">
-                      <Flex
-                        justifyContent="space-between"
-                      >
+                      <Flex justifyContent="space-between">
                         <VStack
                           flexBasis={{ base: "100%", md: "30%" }}
                           color="black"

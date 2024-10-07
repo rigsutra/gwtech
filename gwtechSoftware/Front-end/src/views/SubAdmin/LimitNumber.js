@@ -121,7 +121,7 @@ function LimitNumber() {
     event.preventDefault();
     let limits = null;
     if (generalPageActive) {
-      if(blt != "" && l3c != "" && mrg != "" && l4c != "" && l5c != "") {
+      if (blt != "" && l3c != "" && mrg != "" && l4c != "" && l5c != "") {
         limits = [
           {
             gameCategory: "BLT",
@@ -150,15 +150,14 @@ function LimitNumber() {
       }
     } else {
       let emptyFlag = false;
-      specificGameNumberLimits.forEach(item => {
-        console.log(item);
-        if(item.gameNumber.trim() == "" || item.limitsButs == "") {
+      specificGameNumberLimits.forEach((item) => {
+        if (item.gameNumber.trim() == "" || item.limitsButs == "") {
           emptyFlag = true;
           return false;
         }
-      })
+      });
 
-      if(!emptyFlag) {
+      if (!emptyFlag) {
         limits = specificGameNumberLimits;
       } else {
         alert("An unentered limit number exists!");
@@ -180,7 +179,7 @@ function LimitNumber() {
           lotteryCategoryName: lotteryCategoryName.trim(),
           seller: selectedSellerId,
           limits: limits,
-          general: generalPageActive
+          general: generalPageActive,
         })
         .then((res) => {
           setLimitNumbers([...limitNumbers, res.data]);
@@ -224,7 +223,7 @@ function LimitNumber() {
 
   const deleteLimitNumbers = (id) => {
     api()
-      .delete(`/subadmin/deletelimitbut/${id}`, {general: generalPageActive})
+      .delete(`/subadmin/deletelimitbut/${id}`, { general: generalPageActive })
       .then(() => {
         setLimitNumbers(limitNumbers.filter((number) => number._id !== id));
         toast({
@@ -243,7 +242,7 @@ function LimitNumber() {
           lotteryCategoryName: lotteryCategoryName.trim(),
           seller: selectedSellerId,
           limits: limits,
-          general: generalPageActive
+          general: generalPageActive,
         })
         .then((res) => {
           setLimitNumbers(

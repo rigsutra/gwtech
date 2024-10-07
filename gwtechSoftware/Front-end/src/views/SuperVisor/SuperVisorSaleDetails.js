@@ -65,20 +65,11 @@ const SaleDetails = () => {
   const fetchSellDetails = async () => {
     try {
       setLoading(true);
-
-      // Logging for debugging purposes
-      console.log(selectedSellerId);
-      console.log(
-        `Fetching data for lottery category: ${lotteryCategoryName.trim()}`
-      );
-      console.log(`Fetching data for date: ${fromDate}`);
-
       const sellerParam = selectedSellerId ? `seller=${selectedSellerId}` : "";
       const responseAllNumber = await api().get(
         `/superVisor/getselldetails?${sellerParam}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
 
-      console.log("Response for sale details:", responseAllNumber);
       setSaleDetails(responseAllNumber);
 
       const responseByGameCatetory = await api().get(
@@ -89,8 +80,6 @@ const SaleDetails = () => {
       const responseAllLottery = await api().get(
         `/superVisor/getselldetailsallloterycategory?seller=${selectedSellerId}&fromDate=${fromDate}`
       );
-      console.log("Response for all lottery details:", responseAllLottery.data);
-
       const responseData = responseAllLottery.data.data;
       setSumAmount(
         Object.values(responseData).reduce(
@@ -127,14 +116,9 @@ const SaleDetails = () => {
     seller
   ) => {
     try {
-      console.log(
-        `Fetching game number details for ${lottoName}, ${gameName}, number: ${number}, date: ${date}`
-      );
-
       const response = await api().get(
         `/superVisor/getsellgamenumberinfo?seller=${seller}&lotteryCategoryName=${lottoName}&fromDate=${date}&gameCategory=${gameName}&gameNumber=${number}`
       );
-      console.log("Response for game number details:", response.data);
 
       const res = response.data;
       setGameNumberDetail(res.data);

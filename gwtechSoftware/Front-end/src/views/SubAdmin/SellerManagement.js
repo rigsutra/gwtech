@@ -63,13 +63,10 @@ function SellerManagement() {
     fetchSupervisors();
   }, []);
 
-  console.log(superVisors);
-
   useEffect(() => {
     const fetchSellers = async () => {
       try {
         const response = await api().get(`/subadmin/getseller`);
-        console.log(response.data);
         setUsers(response.data.users);
         setCompanyName(response.data.companyName);
         setBonusFlag(response.data.bonusFlag);

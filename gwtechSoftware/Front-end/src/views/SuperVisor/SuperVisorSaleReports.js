@@ -50,7 +50,6 @@ const SaleReports = () => {
         const response = await api().get("/admin/getlotterycategory");
         if (response.data && response.data.success) {
           setLotteryCategories(response.data.data);
-          console.log("Fetched Lottery Categories:", response.data.data);
         }
       } catch (error) {
         console.error(
@@ -72,7 +71,6 @@ const SaleReports = () => {
     const fetchSeller = async () => {
       try {
         const response = await api().get("/superVisor/getseller");
-        console.log(response);
         if (response.data && response.data.users) {
           setSellerInfo(response.data.users);
         }
@@ -101,7 +99,6 @@ const SaleReports = () => {
       );
 
       const responseData = response.data.data || [];
-      console.log(responseData);
       const saleReportsWithCompany = responseData.map((sellerData) => {
         const seller = sellerInfo.find(
           (info) => info.userName === sellerData.name
