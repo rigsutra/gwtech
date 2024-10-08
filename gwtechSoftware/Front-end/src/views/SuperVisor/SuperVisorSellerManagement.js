@@ -81,7 +81,6 @@ function SellerManagement() {
     const fetchSellers = async () => {
       try {
         const response = await api().get(`/superVisor/getseller`);
-        console.log(response);
         setUsers(response.data.users);
         setCompanyName(response.data.companyName);
         setBonusFlag(response.data.bonusFlag);
