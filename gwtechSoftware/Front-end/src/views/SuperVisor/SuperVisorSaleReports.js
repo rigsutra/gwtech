@@ -95,7 +95,7 @@ const SaleReports = () => {
     try {
       setLoading(true);
       const response = await api().get(
-        `/superVisor/getsalereports?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
+        `/superVisor/getSalereports?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
 
       const responseData = response.data.data || [];
