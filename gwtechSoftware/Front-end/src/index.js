@@ -22,6 +22,8 @@ import { HashRouter, Route, Switch, Redirect } from "react-router-dom";
 
 import AuthLayout from "layouts/Auth.js";
 import AdminLayout from "layouts/Admin.js";
+import MainMenu from "layouts/MainMenu.js";
+
 // import SubAdminLayout from "layouts/SubAdmin.js";
 import "./index.css";
 
@@ -32,6 +34,7 @@ ReactDOM.render(
       <Route path={`/admin`} component={AdminLayout} />
       <Route path={`/subadmin`} component={AdminLayout} />
       <Route path={`/superVisor`} component={AdminLayout} />
+      <Route path={`/main-menu`} component={MainMenu}/>
       <Redirect from={`/`} to="/auth/signin" />
     </Switch>
   </HashRouter>,
