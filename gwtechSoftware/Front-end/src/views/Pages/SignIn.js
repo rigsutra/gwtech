@@ -17,12 +17,9 @@
 */
 
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link as RouterLink } from "react-router-dom"; // Import Link for routing
 import api from "../../utils/customFetch.js";
-
-// Chakra imports
 import {
-  Box,
   Flex,
   Button,
   FormControl,
@@ -31,22 +28,26 @@ import {
   Input,
   Text,
   useToast,
+  Drawer,
+  DrawerBody,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  IconButton,
 } from "@chakra-ui/react";
-
-// Assets
-import signInImage from "assets/img/signInImage.png";
-
-// Custom Components
+import { HamburgerIcon } from "@chakra-ui/icons"; // Hamburger icon for the menu
 import GradientBorder from "components/GradientBorder/GradientBorder";
 
 function SignIn() {
-  const titleColor = "white";
-  const textColor = "gray.400";
+  const titleColor = "white"; // Color for title text
+  const textColor = "white"; // Color for all text in forms and buttons
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
   const toast = useToast();
+
+  const [isOpen, setIsOpen] = useState(false); // State for drawer
 
   const handleShowToast = (description, status) => {
     toast({
@@ -67,20 +68,12 @@ function SignIn() {
         password: password,
       });
       if (response?.data?.success) {
-        // Redirect to dashboard or home page
         await sessionStorage.setItem("token", response?.data?.token);
         handleShowToast(
           `Welcome Mr.${response?.data?.user.userName}`,
           `success`
         );
-
-        if (response?.data?.user.role == "admin") {
-          history.push("/admin/SubAdminManagement"); // redirect to dashboard on successful login
-        } else if (response?.data?.user.role == "subAdmin") {
-          history.push("/subadmin/SellerManagement"); // redirect to dashboard on successful login
-        } else if (response?.data?.user.role == "superVisor") {
-          history.push("/superVisor/SuperVisorSellerManagement"); // redirect to dashboard on successful login
-        }
+        history.push("/main-menu");
       } else {
         handleShowToast(`${response?.data?.message}`, `error`);
       }
@@ -91,170 +84,205 @@ function SignIn() {
   };
 
   return (
-    <Flex position="relative">
+    <>
+      {/* Header */}
       <Flex
-        minH="100vh"
-        h={{ base: "120vh", lg: "fit-content" }}
-        w="100%"
-        maxW="1044px"
-        mx="auto"
-        pt={{ sm: "100px", md: "0px" }}
-        flexDirection="column"
-        me={{ base: "auto", lg: "50px", xl: "auto" }}
+        as="header"
+        alignItems="center"
+        justifyContent="space-between"
+        p={4}
+        bg="#3F3534" // Top banner color
+        color="white"
       >
+        <Text fontSize="xl" fontWeight="bold">
+          LotterySoft
+        </Text>
+
+        <Flex alignItems="center">
+          <IconButton
+            icon={<HamburgerIcon />}
+            variant="outline"
+            colorScheme="white"
+            onClick={() => setIsOpen(true)}
+            display={{ base: "flex", md: "none" }} // Show only on small screens
+          />
+          <RouterLink to="/about">
+            <Button
+              variant="link"
+              color="white"
+              mx={4}
+              display={{ base: "none", md: "inline-flex" }}
+            >
+              A propos
+            </Button>
+          </RouterLink>
+          <RouterLink to="/services">
+            <Button
+              variant="link"
+              color="white"
+              mx={4}
+              display={{ base: "none", md: "inline-flex" }}
+            >
+              Services
+            </Button>
+          </RouterLink>
+          <RouterLink to="/contacts">
+            <Button
+              variant="link"
+              color="white"
+              mx={4}
+              display={{ base: "none", md: "inline-flex" }}
+            >
+              Contacts
+            </Button>
+          </RouterLink>
+          <RouterLink to="/signin">
+            <Button colorScheme="orange" mx={4}>
+              Login
+            </Button>
+          </RouterLink>
+        </Flex>
+      </Flex>
+
+      {/* Drawer Menu */}
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={() => setIsOpen(false)}
+      >
+        <DrawerOverlay />
+        <DrawerContent bg="#3F3534">
+          <DrawerCloseButton color="white" />
+          <DrawerBody>
+            <Flex direction="column" alignItems="flex-start">
+              <RouterLink to="/about">
+                <Button variant="link" color="white" my={2}>
+                  A propos
+                </Button>
+              </RouterLink>
+              <RouterLink to="/services">
+                <Button variant="link" color="white" my={2}>
+                  Services
+                </Button>
+              </RouterLink>
+              <RouterLink to="/contacts">
+                <Button variant="link" color="white" my={2}>
+                  Contacts
+                </Button>
+              </RouterLink>
+            </Flex>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Login Form */}
+      <Flex
+        alignItems="center"
+        justifyContent="center"
+        minH="100vh"
+        bg="#514D4C"
+      >
+        {" "}
+        {/* Background color */}
         <Flex
-          alignItems="center"
-          justifyContent="start"
-          style={{ userSelect: "none" }}
-          mx={{ base: "auto", lg: "unset" }}
-          ms={{ base: "auto", lg: "auto" }}
-          w={{ base: "100%", md: "50%", lg: "450px" }}
-          px="50px"
+          h={{ base: "100%", lg: "fit-content" }}
+          w="100%"
+          maxW={{ base: "90%", sm: "450px" }}
+          mx="auto"
+          p={5}
         >
+          {/* First Form with Title */}
           <Flex
             direction="column"
             w="100%"
-            background="transparent"
-            mt={{ base: "50px", md: "150px", lg: "160px", xl: "245px" }}
-            mb={{ base: "60px", lg: "95px" }}
+            background="#3F3534"
+            borderRadius="10px"
           >
-            <Heading color={titleColor} fontSize="32px" mb="10px">
-              Nice to see you!
+            <Heading
+              color={titleColor}
+              fontSize={{ base: "24px", md: "32px" }}
+              mb="5px"
+              textAlign="center"
+            >
+              Login
             </Heading>
-            <Text
-              mb="36px"
-              ms="4px"
-              color={textColor}
-              fontWeight="bold"
-              fontSize="14px"
-            >
-              Enter your Name and password to sign in
-            </Text>
-            <FormControl>
-              <FormLabel
-                ms="4px"
-                fontSize="sm"
-                fontWeight="normal"
-                color="white"
-              >
-                Name
-              </FormLabel>
-              <GradientBorder
-                mb="24px"
-                w={{ base: "100%", lg: "fit-content" }}
-                borderRadius="20px"
-              >
-                <Input
-                  color="white"
-                  bg="rgb(19,21,54)"
-                  border="transparent"
-                  borderRadius="20px"
-                  fontSize="sm"
-                  size="lg"
-                  w={{ base: "100%", md: "346px" }}
-                  maxW="100%"
-                  h="46px"
-                  placeholder="Your Name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-              </GradientBorder>
-            </FormControl>
-            <FormControl>
-              <FormLabel
-                ms="4px"
-                fontSize="sm"
-                fontWeight="normal"
-                color="white"
-              >
-                Password
-              </FormLabel>
-              <GradientBorder
-                mb="24px"
-                w={{ base: "100%", lg: "fit-content" }}
-                borderRadius="20px"
-              >
-                <Input
-                  color="white"
-                  bg="rgb(19,21,54)"
-                  border="transparent"
-                  borderRadius="20px"
-                  fontSize="sm"
-                  size="lg"
-                  w={{ base: "100%", md: "346px" }}
-                  maxW="100%"
-                  type="password"
-                  placeholder="Your password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </GradientBorder>
-            </FormControl>
-            <Button
-              variant="brand"
-              fontSize="10px"
-              type="submit"
+
+            {/* Second Form with Input Fields */}
+            <Flex
+              direction="column"
               w="100%"
-              maxW="350px"
-              h="45"
-              mb="20px"
-              mt="20px"
-              onClick={handleSubmit}
+              alignItems="center"
+              bg="#5F5F5F"
+              borderRadius={10}
+              p={10}
             >
-              SIGN IN
-            </Button>
+              {" "}
+              {/* Centering inputs */}
+              <FormControl mb={4} w={{ base: "80%", md: "60%" }}>
+                {" "}
+                {/* Set width for centering */}
+                <FormLabel
+                  ms="4px"
+                  fontSize="sm"
+                  fontWeight="normal"
+                  color={textColor}
+                >
+                  UserName
+                </FormLabel>
+                <GradientBorder mb="24px">
+                  <Input
+                    color={textColor}
+                    bg="white"
+                    borderRadius="5px"
+                    fontSize="sm"
+                    placeholder="UserName"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                </GradientBorder>
+              </FormControl>
+              <FormControl mb={4} w={{ base: "80%", md: "60%" }}>
+                {" "}
+                {/* Set width for centering */}
+                <FormLabel
+                  ms="4px"
+                  fontSize="sm"
+                  fontWeight="normal"
+                  color={textColor}
+                >
+                  Password
+                </FormLabel>
+                <GradientBorder mb="24px">
+                  <Input
+                    color={textColor}
+                    bg="white"
+                    borderRadius="5px"
+                    fontSize="sm"
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                </GradientBorder>
+              </FormControl>
+              <Button
+                bg={"#3F3534"}
+                type="submit"
+                w={{ base: "80%", md: "60%" }} // Set width for centering
+                borderRadius={0}
+                maxW="200px"
+                h="35"
+                mb="50px"
+                mt="20px"
+                onClick={handleSubmit}
+              >
+                <Text color="white">Login</Text>
+              </Button>
+            </Flex>
           </Flex>
         </Flex>
-        <Box
-          w={{ base: "335px", md: "450px" }}
-          mx={{ base: "auto", lg: "unset" }}
-          ms={{ base: "auto", lg: "auto" }}
-          mb="80px"
-        >
-          {/* <AuthFooter /> */}
-        </Box>
-        <Box
-          display={{ base: "none", lg: "block" }}
-          overflowX="hidden"
-          h="100%"
-          maxW={{ md: "50vw", lg: "50vw" }}
-          minH="100vh"
-          w="960px"
-          position="absolute"
-          left="0px"
-        >
-          <Box
-            bgImage={signInImage}
-            w="100%"
-            h="100%"
-            bgSize="cover"
-            bgPosition="50%"
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            position="absolute"
-          >
-            <Text
-              textAlign="center"
-              color="black"
-              letterSpacing="8px"
-              fontSize="20px"
-              fontWeight="500"
-            ></Text>
-            <Text
-              textAlign="center"
-              color="transparent"
-              letterSpacing="8px"
-              fontSize="36px"
-              fontWeight="bold"
-              bgClip="text !important"
-              bg="linear-gradient(94.56deg, #FFFFFF 79.99%, #21242F 102.65%)"
-            ></Text>
-          </Box>
-        </Box>
       </Flex>
-    </Flex>
+    </>
   );
 }
 
