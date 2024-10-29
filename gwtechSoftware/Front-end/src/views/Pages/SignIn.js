@@ -234,7 +234,7 @@ function SignIn() {
                 </FormLabel>
                 <GradientBorder mb="24px">
                   <Input
-                    color={textColor}
+                    
                     bg="white"
                     borderRadius="5px"
                     fontSize="sm"
@@ -257,7 +257,7 @@ function SignIn() {
                 </FormLabel>
                 <GradientBorder mb="24px">
                   <Input
-                    color={textColor}
+                   
                     bg="white"
                     borderRadius="5px"
                     fontSize="sm"
