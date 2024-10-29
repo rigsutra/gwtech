@@ -33,6 +33,7 @@ import DeletedTickets from "views/SubAdmin/DeletedTickets";
 import WinnerTickets from "views/SubAdmin/WinnerTickets.js";
 import SaleDetails from "views/SubAdmin/SaleDetails.js";
 import SaleReports from "views/SubAdmin/SaleReports.js";
+import PercentageLimit from "views/SubAdmin/PercentageLimit";
 
 import SuperVisorSellerManagement from "views/SuperVisor/SuperVisorSellerManagement.js";
 import SuperVisorSaleDetails from "views/SuperVisor/SuperVisorSaleDetails.js";
@@ -163,6 +164,13 @@ var dashRoutes = [
     name: "Sale Reports",
     icon: <FaInfoCircle color="inherit" size={22} />,
     component: SaleReports,
+    layout: "/subadmin",
+  },
+   {
+    path: "/PercentageLimit",
+    name: "Percentage  Limit",
+    icon: <FaInfoCircle color="inherit" size={22} />,
+    component: PercentageLimit,
     layout: "/subadmin",
   },
   {
