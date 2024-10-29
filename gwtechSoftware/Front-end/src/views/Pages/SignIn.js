@@ -69,6 +69,9 @@ function SignIn() {
       });
       if (response?.data?.success) {
         await sessionStorage.setItem("token", response?.data?.token);
+        sessionStorage.setItem("userRole", response?.data?.user.role);
+        sessionStorage.setItem("userName", response?.data?.user.userName);
+        
         handleShowToast(
           `Welcome Mr.${response?.data?.user.userName}`,
           `success`
