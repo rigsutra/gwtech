@@ -96,45 +96,62 @@ const MainMenu = () => {
         icon: <RiNumbersFill color="inherit" size={22} />,
       },
       {
+        path: "/subadmin/PercentageLimit",
+        name: "Percentage  Limit",
+        icon: <FaInfoCircle color="inherit" size={22} />,
+      },
+      {
         path: "/subadmin/soldtickets",
         name: "Sold Tickets",
         icon: <MdFactCheck color="inherit" size={22} />,
-
-        layout: "/subadmin",
       },
       {
         path: "/subadmin/deleteticket",
         name: "Deleted Ticket",
         icon: <RiDeleteBin5Fill color="inherit" size={22} />,
-
-        layout: "/subadmin",
       },
       {
         path: "/subadmin/winningtickets",
         name: "Win Tickets",
         icon: <FaFortAwesome color="inherit" size={22} />,
-
-        layout: "/subadmin",
       },
       {
         path: "/subadmin/saledetails",
         name: "Sale Details",
         icon: <BsTicketDetailedFill color="inherit" size={22} />,
-        layout: "/subadmin",
       },
       {
         path: "/subadmin/salereports",
         name: "Sale Reports",
         icon: <FaInfoCircle color="inherit" size={22} />,
-
-        layout: "/subadmin",
       },
     ],
-    supervisor: [
+    superVisor: [
       {
-        path: "/SuperVisorSellerManagement",
-        name: "Seller Management",
-        imgSrc: "/path/to/supervisor-icon.png",
+        path: "/superVisor/SuperVisorSellerManagement",
+        name: "Seller",
+        icon: <FaUserTie color="inherit" size={22} />,
+      },
+      {
+        path: "/superVisor/SuperVisorSaleDetails",
+        name: "Sale Details",
+        icon: <BsTicketDetailedFill color="inherit" size={22} />,
+      },
+
+      {
+        path: "/superVisor/SuperVisorWinNumber",
+        name: "Win Number",
+        icon: <FaFortAwesome color="inherit" size={22} />,
+      },
+      {
+        path: "/superVisor/SuperVisorSoldTickets",
+        name: "Sold Tickets",
+        icon: <MdFactCheck color="inherit" size={22} />,
+      },
+      {
+        path: "/superVisor/SuperVisorSaleReports",
+        name: "Sale Reports",
+        icon: <FaInfoCircle color="inherit" size={10} />,
       },
     ],
   };
@@ -159,7 +176,7 @@ const MainMenu = () => {
         </Button>
       </Flex>
 
-      <Flex direction="column" alignItems="center" bg="#514D4C">
+      <Flex direction="column" alignItems="center">
         <Flex direction="row" wrap="wrap" justifyContent="center" mt={80}>
           {functions.length > 0 ? (
             functions.map((func) => (
@@ -168,16 +185,26 @@ const MainMenu = () => {
                 onClick={() => handleNavigation(func.path)}
                 mb={30}
                 mx={80}
-                variant="outline"
-                borderRadius="50%" // Make buttons circular
+                borderRadius="20%" // Make buttons circular
                 width="100px"
                 height="100px"
                 display="flex"
                 flexDirection="column"
                 alignItems="center"
+                justifyContent="center" // Center content vertically
               >
-                {func.icon}
-                <Text fontSize="sm">{func.name}</Text>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {func.icon}
+                </div>
+                <Text fontSize="sm" mt={2}>
+                  {func.name}
+                </Text>
               </Button>
             ))
           ) : (
