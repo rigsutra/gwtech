@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/customFetch.js";
-// Chakra imports
 import {
   Flex,
   Text,
-  Box,
   Button,
   FormControl,
   FormLabel,
@@ -13,745 +11,480 @@ import {
   useDisclosure,
   useToast,
   HStack,
-  useColorMode,
   Select,
   VStack,
+  Box,
 } from "@chakra-ui/react";
-import { FaPlus } from "react-icons/fa";
-
-import { FaEdit } from "react-icons/fa";
-import { RiDeleteBinLine } from "react-icons/ri";
+import { FaPlus, FaEdit, FaMinus } from "react-icons/fa";
 import { CgSearch } from "react-icons/cg";
-import { FaMinus } from "react-icons/fa";
+import { RiDeleteBinLine } from "react-icons/ri";
 
-// Custom components
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Modal from "components/Modal/Modal.js";
 
-const init = { gameCategory: "BLT", gameNumber: "", limitsButs: "" };
-
-function LimitNumber() {
+const LimitNumber = () => {
   const [editing, setEditing] = useState(false);
-  const [currentLimitNumbers, setCurrentLimitNumbers] = useState(null);
-  const [lotteryCategories, setLotteryCategories] = useState([]);
-  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
-  // const [gameCategories, setGameCategories] = useState([]);
+  const [currentLimit, setCurrentLimit] = useState(null);
   const [limitNumbers, setLimitNumbers] = useState([]);
-  const [sellerInfo, setSellerInfo] = useState([]);
-  const [selectedSellerId, setSelectedSellerId] = useState("");
-  const [generalPageActive, setGeneralPageActive] = useState(true);
-
-  const [specificGameNumberLimits, setSpecificGameNumberLimits] = useState([
-    init,
-  ]);
-
+  const [lotteryCategories, setLotteryCategories] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
+  const [sellers, setSellers] = useState([]);
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [selectedSeller, setSelectedSeller] = useState("");
+  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
   const [blt, setBlt] = useState("");
   const [l3c, setL3c] = useState("");
   const [mrg, setMrg] = useState("");
-  const [l4c, setL4c] = useState("");
-  const [l5c, setL5c] = useState("");
+  const [l4c1, setL4c1] = useState("");
+  const [l4c2, setL4c2] = useState("");
+  const [l4c3, setL4c3] = useState("");
+  const [l5c1, setL5c1] = useState("");
+  const [l5c2, setL5c2] = useState("");
+  const [l5c3, setL5c3] = useState("");
+  const [activeView, setActiveView] = useState("all");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-  const { colorMode } = useColorMode();
 
-  const handleGetLimit = async (general) => {
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const categoryResponse = await api().get("/admin/getlotterycategory");
+        setLotteryCategories(categoryResponse?.data?.data);
+
+        const supervisorResponse = await api().get("/subadmin/getsuperVisor");
+
+        setSupervisors(supervisorResponse?.data);
+
+        const sellerResponse = await api().get(
+          "/subadmin/getsellerWhoNotHaveSupervisor"
+        );
+        console.log(sellerResponse);
+        setSellers(sellerResponse?.data?.users);
+      } catch (error) {
+        toast({
+          title: "Error fetching initial data",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    };
+    fetchInitialData();
+  }, [toast]);
+
+  const handleGetLimit = async (viewType) => {
+    setActiveView(viewType);
+    console.log(viewType);
     try {
-      await api()
-        .get(`/subadmin/getlimitbut?general=${general}`)
-        .then((response) => {
-          setLimitNumbers(response.data);
-          setGeneralPageActive(general);
-        });
-    } catch (err) {}
-  };
+      let endpoint;
+      if (viewType === "all") endpoint = "/subadmin/getLimitButAll";
+      else if (viewType === "supervisor")
+        endpoint = "/subadmin/getLimitButSuperVisor";
+      else if (viewType === "seller") endpoint = "/subadmin/getLimitButSeller";
 
-  useEffect(async () => {
-    const fetchLotteryCategories = async () => {
-      try {
-        const response = await api().get("/admin/getlotterycategory");
-        setLotteryCategoryName(response.data.data[0]?.lotteryName);
-        setLotteryCategories(response.data.data);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error fetching lottery categories",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-
-      // try {
-      //   const response = await api().get("/admin/getgamecategory");
-      //   setGameCategories(response.data);
-      // } catch (error) {
-      //   console.error(error);
-      //   toast({
-      //     title: "Error fetching game categories",
-      //     status: "error",
-      //     duration: 5000,
-      //     isClosable: true,
-      //   });
-      // }
-    };
-
-    const fetchSeller = async () => {
-      try {
-        const response = await api().get("/subadmin/getseller");
-        setSellerInfo(response.data.users);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error fetching seller info",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
-    fetchSeller();
-
-    fetchLotteryCategories();
-  }, []);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    let limits = null;
-    if (generalPageActive) {
-      if (blt != "" && l3c != "" && mrg != "" && l4c != "" && l5c != "") {
-        limits = [
-          {
-            gameCategory: "BLT",
-            limitsButs: blt,
-          },
-          {
-            gameCategory: "L3C",
-            limitsButs: l3c,
-          },
-          {
-            gameCategory: "MRG",
-            limitsButs: mrg,
-          },
-          {
-            gameCategory: "L4C",
-            limitsButs: l4c,
-          },
-          {
-            gameCategory: "L5C",
-            limitsButs: l5c,
-          },
-        ];
-      } else {
-        alert("An unentered limit number exists!");
-        return;
-      }
-    } else {
-      let emptyFlag = false;
-      specificGameNumberLimits.forEach((item) => {
-        if (item.gameNumber.trim() == "" || item.limitsButs == "") {
-          emptyFlag = true;
-          return false;
-        }
+      const response = await api().get(endpoint);
+      console.log(response);
+      setLimitNumbers(response?.data);
+    } catch (error) {
+      toast({
+        title: `Error fetching limits for ${viewType}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
       });
-
-      if (!emptyFlag) {
-        limits = specificGameNumberLimits;
-      } else {
-        alert("An unentered limit number exists!");
-        return;
-      }
     }
-    if (editing) {
-      updateLimitNumbers(currentLimitNumbers._id, limits);
-    } else {
-      createLimitNumbers(limits);
-    }
-    setSelectedSellerId("");
   };
 
-  const createLimitNumbers = (limits) => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const limits = [
+      { gameCategory: "BLT", limitsButs: blt },
+      { gameCategory: "L3C", limitsButs: l3c },
+      { gameCategory: "MRG", limitsButs: mrg },
+      { gameCategory: "L4C1", limitsButs: l4c1 },
+      { gameCategory: "L4C2", limitsButs: l4c2 },
+      { gameCategory: "L4C3", limitsButs: l4c3 },
+      { gameCategory: "L5C1", limitsButs: l5c1 },
+      { gameCategory: "L5C2", limitsButs: l5c2 },
+      { gameCategory: "L5C3", limitsButs: l5c3 },
+    ];
+    const data = {
+      lotteryCategoryName,
+      limits,
+      seller: activeView === "seller" ? selectedSeller : undefined,
+      superVisor: activeView === "supervisor" ? selectedSupervisor : undefined,
+    };
+
     try {
-      api()
-        .post(`/subadmin/addlimitbut`, {
-          lotteryCategoryName: lotteryCategoryName.trim(),
-          seller: selectedSellerId,
-          limits: limits,
-          general: generalPageActive,
-        })
-        .then((res) => {
-          setLimitNumbers([...limitNumbers, res.data]);
-          setLotteryCategoryName("");
-          onClose();
-          toast({
-            title: "Limit Numbers created.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        })
-        .catch((err) => {
-          toast({
-            title: "Error creating Limit Numbers.",
-            description: err.message,
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        });
-    } catch (err) {}
+      const response = editing
+        ? await api().patch(
+            `/subadmin/updatelimitbut/${currentLimit?._id}`,
+            data
+          )
+        : await api().post("/subadmin/addlimitbut", data);
+
+      if (editing) {
+        setLimitNumbers((prev) =>
+          prev.map((limit) =>
+            limit._id === currentLimit?._id ? response?.data : limit
+          )
+        );
+      } else {
+        setLimitNumbers((prev) => [...prev, response?.data]);
+      }
+
+      onClose();
+      toast({
+        title: `Limit ${editing ? "updated" : "created"} successfully`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: `Error ${editing ? "updating" : "creating"} limit`,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleEdit = (limit) => {
     setEditing(true);
-    setCurrentLimitNumbers(limit);
+    setCurrentLimit(limit);
     setLotteryCategoryName(limit.lotteryCategoryName);
-    setSelectedSellerId(limit.seller);
-    if (generalPageActive) {
-      setBlt(limit.limits[0].limitsButs);
-      setL3c(limit.limits[1].limitsButs);
-      setMrg(limit.limits[2].limitsButs);
-      setL4c(limit.limits[3].limitsButs);
-      setL5c(limit.limits[4].limitsButs);
-    } else {
-      setSpecificGameNumberLimits(limit.limits);
-    }
+    setSelectedSeller(limit.seller?._id || "");
+    setSelectedSupervisor(limit.superVisor?._id || "");
+    setBlt(limit.limits[0]?.limitsButs || "");
+    setL3c(limit.limits[1]?.limitsButs || "");
+    setMrg(limit.limits[2]?.limitsButs || "");
+    setL4c1(limit.limits[3]?.limitsButs || "");
+    setL4c2(limit.limits[4]?.limitsButs || "");
+    setL4c3(limit.limits[5]?.limitsButs || "");
+    setL5c1(limit.limits[6]?.limitsButs || "");
+    setL5c2(limit.limits[7]?.limitsButs || "");
+    setL5c3(limit.limits[8]?.limitsButs || "");
     onOpen();
   };
 
-  const deleteLimitNumbers = (id) => {
-    api()
-      .delete(`/subadmin/deletelimitbut/${id}`, { general: generalPageActive })
-      .then(() => {
-        setLimitNumbers(limitNumbers.filter((number) => number._id !== id));
-        toast({
-          title: "Limit Numbers deleted.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      });
-  };
-
-  const updateLimitNumbers = (id, limits) => {
+  const handleDelete = async (id) => {
     try {
-      api()
-        .patch(`/subadmin/updatelimitbut/${id}`, {
-          lotteryCategoryName: lotteryCategoryName.trim(),
-          seller: selectedSellerId,
-          limits: limits,
-          general: generalPageActive,
-        })
-        .then((res) => {
-          setLimitNumbers(
-            limitNumbers.map((limit) => (limit._id === id ? res.data : limit))
-          );
-          setLotteryCategoryName("");
-          onClose();
-          toast({
-            title: "Limit Numbers updated.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        })
-        .catch((err) => {
-          toast({
-            title: "Error updating Limit Numbers.",
-            description: err.message,
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
-        });
-    } catch (err) {
-      console.log(err);
+      await api().delete(`/subadmin/deletelimitbut/${id}`);
+      setLimitNumbers((prev) => prev.filter((limit) => limit?._id !== id));
+      toast({
+        title: "Limit deleted successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting limit",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
-  };
-
-  const handleCancel = () => {
-    setEditing(false);
-    onClose();
   };
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      {/* Authors Table */}
-      <Card
-        overflowX={{ sm: "scroll", xl: "hidden" }}
-        p={{ base: "5px", md: "20px" }}
-        width="100%"
-        border={{ base: "none", md: "1px solid gray" }}
-      >
-        <CardHeader
-          p="6px 0px 22px 0px"
-          display="flex"
-          flexWrap="wrap"
-          justifyContent="space-between"
-        >
-          <Text fontSize="lg" color="black" font="Weight:bold">
+      <Card>
+        <CardHeader>
+          <Text fontSize="lg" fontWeight="bold">
             Limit Numbers
           </Text>
-          <HStack>
+          <HStack marginX={40} paddingX={20}>
             <Button
               size="sm"
-              onClick={() => {
-                handleGetLimit(true);
-              }}
-              bg={colorMode === "light" ? "blue.500" : "blue.300"}
-              _hover={{
-                bg: colorMode === "light" ? "blue.600" : "blue.200",
-              }}
+              bg="blue.100"
+              onClick={() => handleGetLimit("all")}
             >
-              <CgSearch size={"20px"} color="white" />
-              General
+              <CgSearch size="20px" color="white" /> All
             </Button>
             <Button
               size="sm"
-              onClick={() => {
-                handleGetLimit(false);
-              }}
-              bg={colorMode === "light" ? "cyan.500" : "blue.300"}
-              _hover={{
-                bg: colorMode === "light" ? "cyan.600" : "blue.200",
-              }}
+              bg="blue.400"
+              onClick={() => handleGetLimit("supervisor")}
+              marginX={5}
             >
-              <CgSearch size={"20px"} color="white" />
-              Specific
+              <CgSearch size="20px" color="white" /> Supervisor
+            </Button>
+            <Button
+              size="sm"
+              bg="blue.800"
+              onClick={() => handleGetLimit("seller")}
+            >
+              <CgSearch size="20px" color="white" /> Seller
             </Button>
           </HStack>
           <Button
             size="sm"
             onClick={() => {
-              setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
               setEditing(false);
-              setSpecificGameNumberLimits([init]);
               onOpen();
             }}
-            bg={colorMode === "light" ? "blue.500" : "blue.300"}
-            _hover={{
-              bg: colorMode === "light" ? "blue.600" : "blue.200",
-            }}
+            marginX={30}
+            bg="green.800"
           >
             <FaPlus size={24} color="white" />
           </Button>
         </CardHeader>
+
         <CardBody>
-          <Flex
-            flexWrap="wrap"
-            flexDirection={{ base: "column", sm: "row" }}
-            justifyContent="flex-start"
-            width="100%"
-          >
-            {limitNumbers.map((limit) => (
+          <Flex flexWrap="wrap">
+            {limitNumbers?.map((limit) => (
               <Stack
                 key={limit._id}
-                spacing={1}
                 width="350px"
-                borderRadius="3px"
                 p="10px"
                 m="10px"
-                border={"1px solid gray"}
-                boxShadow="0px 0px 2px white"
+                border="1px solid gray"
               >
                 <VStack spacing={2} align="stretch">
-                  <FormControl id="lotteryCategoryName" isRequired>
-                    <HStack justifyContent={"space-between"}>
-                      <HStack>
-                        <FormLabel m="0">Seller</FormLabel>
-                        <FormLabel>
-                          {limit.seller?.userName
-                            ? limit.seller.userName
-                            : "All"}
-                        </FormLabel>
-                      </HStack>
-                      <Box>
-                        <Button
-                          size="sm"
-                          mr={2}
-                          onClick={() => handleEdit(limit)}
-                          bg={
-                            colorMode === "light" ? "yellow.500" : "yellow.300"
-                          }
-                          _hover={{
-                            bg:
-                              colorMode === "light"
-                                ? "yellow.600"
-                                : "yellow.200",
-                          }}
-                        >
-                          <FaEdit size={16} color="white" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => deleteLimitNumbers(limit?._id)}
-                          bg={colorMode === "light" ? "red.500" : "red.300"}
-                          _hover={{
-                            bg: colorMode === "light" ? "red.600" : "red.200",
-                          }}
-                        >
-                          <RiDeleteBinLine size={16} color="white" />
-                        </Button>
-                      </Box>
+                  <HStack justify="space-between">
+                    <FormLabel>
+                      {limit.seller?.userName ||
+                        limit.superVisor?.userName ||
+                        "All"}
+                    </FormLabel>
+                    <HStack>
+                      <Button
+                        size="sm"
+                        onClick={() => handleEdit(limit)}
+                        bg="yellow.800"
+                      >
+                        <FaEdit color="white" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        bg="red.800"
+                        onClick={() => handleDelete(limit._id)}
+                      >
+                        <RiDeleteBinLine color="white" />
+                      </Button>
                     </HStack>
-                  </FormControl>
-                  <FormControl id="lotteryCategoryName" isRequired>
-                    <HStack alignItems={"center"}>
-                      <FormLabel>Lottery Category</FormLabel>
-                      <FormLabel>{limit.lotteryCategoryName}</FormLabel>
-                    </HStack>
-                  </FormControl>
-                  {generalPageActive ? (
-                    <>
-                      <FormControl id="blt" isRequired>
-                        <HStack>
-                          <FormLabel width="100px">
-                            {limit.limits[0]?.gameCategory}
+                  </HStack>
+                  <FormLabel>{limit.lotteryCategoryName}</FormLabel>
+
+                  {/* Display left (4) and right (5) columns for limit values */}
+                  <Flex justify="space-between" width="100%">
+                    {/* Left column with first 4 items */}
+                    <VStack spacing={1} align="start" flex="1">
+                      {limit.limits.slice(0, 4).map((limitItem, index) => (
+                        <Box key={index} display="flex" alignItems="center">
+                          <FormLabel fontSize="sm" width="50px" m={0}>
+                            {limitItem.gameCategory}
                           </FormLabel>
                           <Input
-                            isReadOnly={true}
-                            value={limit.limits[0]?.limitsButs}
+                            type="number"
+                            value={limitItem.limitsButs}
+                            isReadOnly
+                            size="sm"
+                            width="100px"
                           />
-                        </HStack>
-                      </FormControl>
-                      <FormControl id="l3c" isRequired>
-                        <HStack>
-                          <FormLabel width="100px">
-                            {limit.limits[1]?.gameCategory}
-                          </FormLabel>
-                          <Input
-                            isReadOnly={true}
-                            value={limit.limits[1]?.limitsButs}
-                          />
-                        </HStack>
-                      </FormControl>
-                      <FormControl id="mrg" isRequired>
-                        <HStack>
-                          <FormLabel width="100px">
-                            {limit.limits[2]?.gameCategory}
-                          </FormLabel>
-                          <Input
-                            isReadOnly={true}
-                            value={limit.limits[2]?.limitsButs}
-                          />
-                        </HStack>
-                      </FormControl>
-                      <FormControl id="l4c" isRequired>
-                        <HStack>
-                          <FormLabel width="100px">
-                            {limit.limits[3]?.gameCategory}
-                          </FormLabel>
-                          <Input
-                            isReadOnly={true}
-                            value={limit.limits[3]?.limitsButs}
-                          />
-                        </HStack>
-                      </FormControl>
-                      <FormControl id="l5c" isRequired>
-                        <HStack>
-                          <FormLabel width="100px">
-                            {limit.limits[4]?.gameCategory}
-                          </FormLabel>
-                          <Input
-                            isReadOnly={true}
-                            value={limit.limits[4]?.limitsButs}
-                          />
-                        </HStack>
-                      </FormControl>
-                    </>
-                  ) : (
-                    <FormControl id="specific-limit-layout">
-                      {limit.limits.map((item, index) => (
-                        <LimitAddCompoment
-                          key={index}
-                          gameCategory={item.gameCategory}
-                          gameNumber={item.gameNumber}
-                          limitsButs={item.limitsButs}
-                          lock={true}
-                        />
+                        </Box>
                       ))}
-                    </FormControl>
-                  )}
+                    </VStack>
+
+                    {/* Right column with remaining 5 items */}
+                    <VStack spacing={1} align="start" flex="1">
+                      {limit.limits.slice(4).map((limitItem, index) => (
+                        <Box key={index} display="flex" alignItems="center">
+                          <FormLabel fontSize="sm" width="50px" m={0}>
+                            {limitItem.gameCategory}
+                          </FormLabel>
+                          <Input
+                            type="number"
+                            value={limitItem.limitsButs}
+                            isReadOnly
+                            size="sm"
+                            width="100px"
+                          />
+                        </Box>
+                      ))}
+                    </VStack>
+                  </Flex>
                 </VStack>
               </Stack>
             ))}
           </Flex>
         </CardBody>
       </Card>
-      {/* Create/Edit User Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={handleCancel}
-        title={editing ? "Edit LimitNumber" : "Create LimitNumber"}
-        submitButtonText={editing ? "Update" : "Add"}
-        onSubmit={handleSubmit}
-        cancelButtonText="Cancel"
-        onCancel={handleCancel}
-        colorMode={colorMode}
-      >
-        <Stack spacing={4}>
-          <FormControl id="lotteryCategoryName" isRequired>
-            <FormLabel m="0">Seller</FormLabel>
-            <Select
-              onChange={(event) => setSelectedSellerId(event.target.value)}
-              defaultValue={selectedSellerId}
-            >
-              <option value={""}>All</option>
-              {sellerInfo.map((info) => (
-                <option key={info._id} value={info._id}>
-                  {info.userName}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl id="lotteryCategoryName" isRequired>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <form onSubmit={handleSubmit}>
+          <FormControl>
             <FormLabel>Lottery Category Name</FormLabel>
             <Select
-              onChange={(event) => setLotteryCategoryName(event.target.value)}
-              defaultValue={lotteryCategoryName}
+              value={lotteryCategoryName}
+              onChange={(e) => setLotteryCategoryName(e.target.value)}
             >
-              {lotteryCategories.map((category) => (
+              {lotteryCategories?.map((category) => (
                 <option key={category._id} value={category.lotteryName}>
                   {category.lotteryName}
                 </option>
               ))}
             </Select>
           </FormControl>
-          {generalPageActive ? (
-            <>
-              <FormControl id="blt" isRequired>
-                <HStack>
-                  <FormLabel width="100px">BLT</FormLabel>
-                  <Input
-                    placeholder="Enter Limit"
-                    type="number"
-                    value={blt}
-                    onChange={(e) => setBlt(e.target.value)}
-                    bg={colorMode === "light" ? "white" : "gray.700"}
-                    color={colorMode === "light" ? "gray.800" : "white"}
-                  />
-                </HStack>
-              </FormControl>
-              <FormControl id="l3c" isRequired>
-                <HStack>
-                  <FormLabel width="100px">L3C</FormLabel>
-                  <Input
-                    placeholder="Enter Limit"
-                    type="number"
-                    value={l3c}
-                    onChange={(e) => setL3c(e.target.value)}
-                    bg={colorMode === "light" ? "white" : "gray.700"}
-                    color={colorMode === "light" ? "gray.800" : "white"}
-                  />
-                </HStack>
-              </FormControl>
-              <FormControl id="mrg" isRequired>
-                <HStack>
-                  <FormLabel width="100px">MRG</FormLabel>
-                  <Input
-                    type="number"
-                    placeholder="Enter Limit"
-                    value={mrg}
-                    onChange={(e) => setMrg(e.target.value)}
-                    bg={colorMode === "light" ? "white" : "gray.700"}
-                    color={colorMode === "light" ? "gray.800" : "white"}
-                  />
-                </HStack>
-              </FormControl>
-              <FormControl id="l4c" isRequired>
-                <HStack>
-                  <FormLabel width="100px">L4C</FormLabel>
-                  <Input
-                    type="number"
-                    placeholder="Enter Limit"
-                    value={l4c}
-                    onChange={(e) => setL4c(e.target.value)}
-                    bg={colorMode === "light" ? "white" : "gray.700"}
-                    color={colorMode === "light" ? "gray.800" : "white"}
-                  />
-                </HStack>
-              </FormControl>
-              <FormControl id="l5c" isRequired>
-                <HStack>
-                  <FormLabel width="100px">L5C</FormLabel>
-                  <Input
-                    type="number"
-                    placeholder="Enter Limit"
-                    value={l5c}
-                    onChange={(e) => setL5c(e.target.value)}
-                    bg={colorMode === "light" ? "white" : "gray.700"}
-                    color={colorMode === "light" ? "gray.800" : "white"}
-                  />
-                </HStack>
-              </FormControl>
-            </>
-          ) : (
-            <FormControl id="specific-limit-layout">
-              {specificGameNumberLimits.map((item, index) => (
-                <LimitAddCompoment
-                  key={index}
-                  gameCategory={item.gameCategory}
-                  gameNumber={item.gameNumber}
-                  limitsButs={item.limitsButs}
-                  setData={setSpecificGameNumberLimits}
-                  data={specificGameNumberLimits}
-                  index={index}
-                  lastItemFlag={
-                    specificGameNumberLimits.length - 1 == index ? true : false
-                  }
-                  lock={false}
-                />
-              ))}
+
+          {activeView === "supervisor" && (
+            <FormControl>
+              <FormLabel>Supervisor</FormLabel>
+              <Select
+                value={selectedSupervisor}
+                onChange={(e) => setSelectedSupervisor(e.target.value)}
+              >
+                <option value="">Select Supervisor</option>
+                {supervisors?.map((supervisor) => (
+                  <option key={supervisor._id} value={supervisor._id}>
+                    {supervisor.userName}
+                  </option>
+                ))}
+              </Select>
             </FormControl>
           )}
-        </Stack>
+
+          {activeView === "seller" && (
+            <FormControl>
+              <FormLabel>Seller</FormLabel>
+              <Select
+                value={selectedSeller}
+                onChange={(e) => setSelectedSeller(e.target.value)}
+              >
+                <option value="">Select Seller</option>
+                {sellers?.map((seller) => (
+                  <option key={seller._id} value={seller._id}>
+                    {seller.userName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          <FormControl>
+            <FormLabel> Set Limit </FormLabel>
+            <Stack p="5px">
+              <Flex justifyContent="space-between">
+                <VStack
+                  mx="3px"
+                  flexBasis={{ base: "100%", md: "50%" }}
+                  color="black"
+                >
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      BLT
+                    </FormLabel>
+                    <Input
+                      type="number"
+                      value={blt}
+                      onChange={(e) => setBlt(e.target.value)}
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L3C
+                    </FormLabel>
+                    <Input
+                      placeholder="L3C"
+                      value={l3c}
+                      onChange={(event) => setL3c(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      MRG
+                    </FormLabel>
+                    <Input
+                      placeholder="MRG"
+                      value={mrg}
+                      onChange={(event) => setMrg(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L4C1
+                    </FormLabel>
+                    <Input
+                      placeholder="L4C1"
+                      value={l4c1}
+                      onChange={(event) => setL4c1(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                </VStack>
+                <VStack>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L4C2
+                    </FormLabel>
+                    <Input
+                      placeholder="L4C2"
+                      value={l4c2}
+                      onChange={(event) => setL4c2(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L4C3
+                    </FormLabel>
+                    <Input
+                      placeholder="L4C3"
+                      value={l4c3}
+                      onChange={(event) => setL4c3(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L5C1
+                    </FormLabel>
+                    <Input
+                      placeholder="L5C1"
+                      value={l5c1}
+                      onChange={(event) => setL5c1(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L5C2
+                    </FormLabel>
+                    <Input
+                      placeholder="L5C2"
+                      value={l5c2}
+                      onChange={(event) => setL5c2(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                  <Box>
+                    <FormLabel fontSize={14} mb="0" mx="2px">
+                      L5C3
+                    </FormLabel>
+                    <Input
+                      placeholder="L5C3"
+                      value={l5c3}
+                      onChange={(event) => setL5c3(event.target.value)}
+                      type="number"
+                    />
+                  </Box>
+                </VStack>
+              </Flex>
+            </Stack>
+          </FormControl>
+          {/* Add similar form fields for L3C, MRG, L4C1, etc. */}
+          <Button type="submit">{editing ? "Update" : "Add"} Limit</Button>
+        </form>
       </Modal>
     </Flex>
   );
-}
-
-function LimitAddCompoment({
-  gameCategory,
-  gameNumber,
-  limitsButs,
-  setData,
-  data,
-  index,
-  lastItemFlag,
-  lock,
-}) {
-  const { colorMode } = useColorMode();
-  const [gameCt, setGameCt] = useState("");
-  const [length, setLength] = useState(2);
-
-  function updateSpecificGameNumberLimits(index, updatedData) {
-    setData((prevState) => {
-      const update = [...prevState];
-      update[index] = updatedData;
-      return update;
-    });
-  }
-
-  const removeItem = (index) => {
-    setData((prevState) => {
-      const updatedArray = [...prevState];
-      updatedArray.splice(index, 1);
-      return updatedArray;
-    });
-  };
-
-  return (
-    <HStack my="3px">
-      {lock ? (
-        <Input isReadOnly={true} value={gameCategory} />
-      ) : (
-        <Select
-          onChange={(event) => {
-            const value = event.target.value.trim();
-            setGameCt(value);
-
-            if (value == "BLT") {
-              setLength(2);
-            } else if (value == "L3C") {
-              setLength(3);
-            } else if (value == "L4C") {
-              setLength(4);
-            } else if (value == "L5C" || value == "MRG") {
-              setLength(5);
-            }
-
-            const updatedData = {
-              ...data[index],
-              gameCategory: value,
-              gameNumber: "",
-            };
-            updateSpecificGameNumberLimits(index, updatedData);
-          }}
-          defaultValue={gameCategory}
-          minWidth={"80px"}
-        >
-          <option value="BLT">BLT</option>
-          <option value="L3C">L3C</option>
-          <option value="MRG">MRG</option>
-          <option value="L4C">L4C</option>
-          <option value="L5C">L5C</option>
-        </Select>
-      )}
-      <Input
-        placeholder="Enter Game Number"
-        type="text"
-        value={gameNumber}
-        maxLength={length}
-        onChange={(event) => {
-          const number = event.target.value.trim();
-          let gNumber = null;
-          if (gameCt == "MRG") {
-            if (number.length == 2) {
-              gNumber = `${number}×`;
-            } else {
-              gNumber = number;
-            }
-          } else {
-            gNumber = number;
-          }
-
-          const updatedData = { ...data[index], gameNumber: gNumber };
-          updateSpecificGameNumberLimits(index, updatedData);
-        }}
-        isReadOnly={lock}
-      />
-      <Input
-        placeholder="Enter Limit"
-        type="number"
-        value={limitsButs}
-        onChange={(event) => {
-          const updatedData = {
-            ...data[index],
-            limitsButs: event.target.value,
-          };
-          updateSpecificGameNumberLimits(index, updatedData);
-        }}
-        isReadOnly={lock}
-      />
-      {lock ? (
-        <></>
-      ) : (
-        <>
-          {lastItemFlag ? (
-            <Button
-              p="10px"
-              size="sm"
-              onClick={() => {
-                setData((prev) => [...prev, init]);
-              }}
-              bg={colorMode === "light" ? "cyan.500" : "blue.300"}
-              _hover={{
-                bg: colorMode === "light" ? "cyan.600" : "blue.200",
-              }}
-            >
-              <FaPlus size="30px" color="white" />
-            </Button>
-          ) : (
-            <Button
-              p="10px"
-              size="sm"
-              onClick={() => {
-                removeItem(index);
-              }}
-              bg={colorMode === "light" ? "cyan.500" : "blue.300"}
-              _hover={{
-                bg: colorMode === "light" ? "cyan.600" : "blue.200",
-              }}
-            >
-              <FaMinus size="30px" color="white" />
-            </Button>
-          )}
-        </>
-      )}
-    </HStack>
-  );
-}
+};
 
 export default LimitNumber;
