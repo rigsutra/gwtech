@@ -104,12 +104,12 @@ const LimitNumber = () => {
       { gameCategory: "BLT", limitsButs: blt },
       { gameCategory: "L3C", limitsButs: l3c },
       { gameCategory: "MRG", limitsButs: mrg },
-      { gameCategory: "L4C1", limitsButs: l4c1 },
-      { gameCategory: "L4C2", limitsButs: l4c2 },
-      { gameCategory: "L4C3", limitsButs: l4c3 },
-      { gameCategory: "L5C1", limitsButs: l5c1 },
-      { gameCategory: "L5C2", limitsButs: l5c2 },
-      { gameCategory: "L5C3", limitsButs: l5c3 },
+      { gameCategory: "L4C 1", limitsButs: l4c1 },
+      { gameCategory: "L4C 2", limitsButs: l4c2 },
+      { gameCategory: "L4C 3", limitsButs: l4c3 },
+      { gameCategory: "L5C 1", limitsButs: l5c1 },
+      { gameCategory: "L5C 2", limitsButs: l5c2 },
+      { gameCategory: "L5C 3", limitsButs: l5c3 },
     ];
     const data = {
       lotteryCategoryName,
