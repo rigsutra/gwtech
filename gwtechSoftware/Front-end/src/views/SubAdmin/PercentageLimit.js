@@ -128,7 +128,7 @@ const PercentageLimit = () => {
   const handleCreate = async () => {
     try {
       const response = await api().post("/subadmin/addpercentagelimit", {
-        lotteryCategoryName: lotteryCategoryName.trim(),
+        lotteryCategoryName: lotteryCategoryName,
         limits: conditions,
       });
       resetForm();
@@ -150,7 +150,7 @@ const PercentageLimit = () => {
       const response = await api().patch(
         `/subadmin/updatepercentagelimit/${id}`,
         {
-          lotteryCategoryName: lotteryCategoryName.trim(),
+          lotteryCategoryName: lotteryCategoryName,
           limits: conditions,
         }
       );
