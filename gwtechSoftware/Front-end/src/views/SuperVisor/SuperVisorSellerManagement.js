@@ -37,7 +37,6 @@ function SellerManagement() {
   const [users, setUsers] = useState([]);
   const [userName, setUserName] = useState("");
   const [imei, setImei] = useState("");
-  const [password, setPassword] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -46,43 +45,18 @@ function SellerManagement() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const { colorMode } = useColorMode();
+  const [superVisorId, setSupervisorId] = useState("");
 
   const [bonusFlag, setBonusFlag] = useState(false);
-
-  //   useEffect(() => {
-  //     const fetchSupervisors = async () => {
-  //       try {
-  //         const response = await api().get(`/subadmin/getsuperVisor`);
-  //         console.log(response);
-  //         setSuperVisors(response.data); // Set the fetched supervisors
-  //       } catch (err) {
-  //         console.error(err);
-  //       }
-  //     };
-  //     fetchSupervisors();
-  //   }, []);
-
-  //   console.log(superVisors);
-
-  // useEffect(() => {
-  //   const fetchSupervisors = async () => {
-  //     try {
-  //       const response = await api().get(`/subadmin/getsuperVisor`);
-  //       setUsers(response.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-
-  //   fetchSupervisors();
-  // }, []);
 
   useEffect(() => {
     const fetchSellers = async () => {
       try {
         const response = await api().get(`/superVisor/getseller`);
+        console.log(response.data);
         setUsers(response.data.users);
         setCompanyName(response.data.companyName);
+        setSupervisorId(response.data.superVisorId);
         setBonusFlag(response.data.bonusFlag);
       } catch (err) {
         console.error(err);
@@ -91,47 +65,11 @@ function SellerManagement() {
     fetchSellers();
   }, []);
 
-  //   const createUser = () => {
-  //     api()
-  //       .post(`/subadmin/addseller`, {
-  //         userName: userName.trim(),
-  //         password,
-  //         isActive,
-  //         imei: imei.trim(),
-  //         superVisorId: selectedSuperVisor, // Use selected supervisor ID
-  //       })
-  //       .then((response) => {
-  //         setUsers([...users, response.data]);
-  //         resetForm();
-  //         onClose();
-  //         toast({
-  //           title: "Seller created.",
-  //           status: "success",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         toast({
-  //           title: "Error creating Seller.",
-  //           description: error.message,
-  //           status: "error",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       });
-  //   };
-
   const updateUser = (id) => {
     const requestBody = {
       isActive,
-      userName: userName.trim(),
-      imei: imei.trim(),
-      superVisorId: selectedSuperVisor, // Include selected supervisor ID in update
+      superVisorId: superVisorId, // Include selected supervisor ID in update
     };
-    if (password !== "") {
-      requestBody.password = password;
-    }
     api()
       .patch(`/superVisor/updateseller/${id}`, requestBody)
       .then((response) => {
@@ -157,29 +95,6 @@ function SellerManagement() {
         });
       });
   };
-
-  //   const deleteUser = (id) => {
-  //     api()
-  //       .delete(`/superVisor/deleteseller/${id}`)
-  //       .then(() => {
-  //         setUsers(users.filter((user) => user._id !== id));
-  //         toast({
-  //           title: "User deleted.",
-  //           status: "success",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       })
-  //       .catch((error) => {
-  //         toast({
-  //           title: "Error deleting user.",
-  //           description: error.message,
-  //           status: "error",
-  //           duration: 3000,
-  //           isClosable: true,
-  //         });
-  //       });
-  //   };
 
   const resetForm = () => {
     setUserName("");
@@ -216,18 +131,9 @@ function SellerManagement() {
     onClose();
   };
 
-  // Handlers for input changes
-  //   const handleUserNameChange = (event) => {
-  //     setUserName(event.target.value);
-  //   };
-
   const handleImeiChange = (event) => {
     setImei(event.target.value);
   };
-
-  //   const handlePasswordChange = (event) => {
-  //     setPassword(event.target.value);
-  //   };
 
   const handleIsActiveChange = (event) => {
     setIsActive(event.target.checked);
@@ -299,16 +205,6 @@ function SellerManagement() {
                     >
                       <FaEdit size={20} color="white" />
                     </Button>
-                    {/* <Button
-                      size="sm"
-                      onClick={() => deleteUser(user._id)}
-                      bg={colorMode === "light" ? "red.500" : "red.300"}
-                      _hover={{
-                        bg: colorMode === "light" ? "red.600" : "red.200",
-                      }}
-                    >
-                      <RiDeleteBinLine size={20} color="white" />
-                    </Button> */}
                   </Td>
                 </Tr>
               ))}
