@@ -19,11 +19,15 @@ import {
   useToast,
   useColorMode,
   Select,
+  RadioGroup,
+  Radio,
+  HStack,
+  VStack,
+  Box,
 } from "@chakra-ui/react";
-import { FaPlus } from "react-icons/fa";
-
-import { FaEdit } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
+import { CgSearch } from "react-icons/cg";
 
 // Custom components
 import Card from "components/Card/Card.js";
@@ -40,41 +44,51 @@ function BlockNumber() {
   const [gameCategory, setGameCategory] = useState("");
   const [newBlockNumber, setNewBlockNumber] = useState("");
   const [blockNumbers, setBlockNumbers] = useState([]);
+  const [sellerInfo, setSellerInfo] = useState([]);
+  const [supervisorInfo, setSupervisorInfo] = useState([]);
+  const [activeView, setActiveView] = useState("all");
+  const [showSearchForm, setShowSearchForm] = useState(false);
+  const [selectedSellerId, setSelectedSellerId] = useState("");
+  const [selectedSupervisorId, setSelectedSupervisorId] = useState("");
+  const [selectedSeller, setSelectedSeller] = useState("");
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const { colorMode } = useColorMode();
 
   const handleChangeBlockNumber = (event) => {
-    if (gameCategory == "MRG" && event.target.value.trim().length == 2) {
+    if (gameCategory === "MRG" && event.target.value.trim().length === 2) {
       setNewBlockNumber(`${event.target.value}×`);
     } else {
       setNewBlockNumber(event.target.value);
     }
   };
 
-  useEffect(async () => {
-    const fetchLotteryCategories = async () => {
+  useEffect(() => {
+    const fetchInitialData = async () => {
       try {
-        const response = await api().get("/admin/getlotterycategory");
-        setLotteryCategories(response.data.data);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error fetching lottery categories",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
+        const [
+          lotteryResponse,
+          gameResponse,
+          sellerResponse,
+          supervisorResponse,
+        ] = await Promise.all([
+          api().get("/admin/getlotterycategory"),
+          api().get("/admin/getgamecategory"),
+          api().get("/subadmin/getseller"),
+          api().get("/subadmin/getsuperVisor"),
+        ]);
 
-      try {
-        const response = await api().get("/admin/getgamecategory");
-        setGameCategories(response.data);
+        setLotteryCategories(lotteryResponse.data.data);
+        setGameCategories(gameResponse.data);
+        setSellerInfo(sellerResponse.data.users);
+        setSupervisorInfo(supervisorResponse.data);
       } catch (error) {
         console.error(error);
         toast({
-          title: "Error fetching game categories",
+          title: "Error fetching initial data",
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -82,16 +96,107 @@ function BlockNumber() {
       }
     };
 
-    try {
-      await api()
-        .get(`/subadmin/getblocknumber`)
-        .then((response) => {
-          setBlockNumbers(response.data);
-        });
-    } catch (err) {}
+    fetchInitialData();
+  }, [toast]);
 
-    fetchLotteryCategories();
-  }, []);
+  useEffect(() => {
+    if (activeView === "all") {
+      setShowSearchForm(false);
+      fetchBlockNumbers();
+    } else {
+      setShowSearchForm(true);
+      setBlockNumbers([]);
+    }
+  }, [activeView]);
+
+  const fetchBlockNumbers = async () => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (activeView === "all") {
+        response = await api().get("/subadmin/getblocknumberButAll");
+      } else if (activeView === "supervisor") {
+        response = await api().get("/subadmin/getblocknumberButSuperVisor", {
+          params: {
+            superVisor: selectedSupervisorId,
+            lotteryCategoryName,
+            gameCategory,
+          },
+        });
+      } else if (activeView === "seller") {
+        response = await api().get("/subadmin/getblocknumberButSeller", {
+          params: {
+            seller: selectedSellerId,
+            lotteryCategoryName,
+            gameCategory,
+          },
+        });
+      }
+      setBlockNumbers(response.data);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error fetching block numbers",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setBlockNumbers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGetBlockNumbers = (viewType) => {
+    setActiveView(viewType);
+    setSelectedSellerId("");
+    setSelectedSupervisorId("");
+    setLotteryCategoryName("");
+    setGameCategory("");
+  };
+
+  const handleSearch = async () => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (activeView === "supervisor") {
+        response = await api().get("/subadmin/getblocknumberButSuperVisor", {
+          params: {
+            superVisor: selectedSupervisorId,
+            lotteryCategoryName,
+            gameCategory,
+          },
+        });
+      } else if (activeView === "seller") {
+        response = await api().get("/subadmin/getblocknumberButSeller", {
+          params: {
+            seller: selectedSellerId,
+            lotteryCategoryName,
+            gameCategory,
+          },
+        });
+      }
+      setBlockNumbers(response.data);
+      toast({
+        title: "Block numbers fetched successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error fetching block numbers",
+        description: error.message || "Please try again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setBlockNumbers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -103,36 +208,37 @@ function BlockNumber() {
   };
 
   const createBlockNumbers = () => {
-    try {
-      api()
-        .post(`/subadmin/addblocknumber`, {
-          lotteryCategoryName: lotteryCategoryName.trim(),
-          gameCategory: gameCategory.trim(),
-          number: newBlockNumber.trim(),
-        })
-        .then((res) => {
-          setBlockNumbers([...blockNumbers, res.data]);
-          setNewBlockNumber("");
-          setLotteryCategoryName("");
-          setGameCategory("");
-          onClose();
-          toast({
-            title: "Block Numbers created.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        })
-        .catch((err) => {
-          toast({
-            title: "Error creating Block Numbers.",
-            description: err.message,
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+    const data = {
+      lotteryCategoryName: lotteryCategoryName.trim(),
+      gameCategory: gameCategory.trim(),
+      number: newBlockNumber.trim(),
+    };
+    if (activeView === "supervisor") {
+      data.superVisor = selectedSupervisor;
+    } else if (activeView === "seller") {
+      data.seller = selectedSeller;
+    }
+    api()
+      .post(`/subadmin/addblocknumber`, data)
+      .then((res) => {
+        setBlockNumbers([...blockNumbers, res.data]);
+        resetForm();
+        toast({
+          title: "Block Number created.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
         });
-    } catch (err) {}
+      })
+      .catch((err) => {
+        toast({
+          title: "Error creating Block Number.",
+          description: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
   };
 
   const handleEdit = (numbers) => {
@@ -141,6 +247,15 @@ function BlockNumber() {
     setLotteryCategoryName(numbers.lotteryCategoryName);
     setGameCategory(numbers.gameCategory);
     setNewBlockNumber(numbers.number);
+    if (numbers.seller) {
+      setSelectedSeller(numbers.seller._id);
+      setActiveView("seller");
+    } else if (numbers.superVisor) {
+      setSelectedSupervisor(numbers.superVisor._id);
+      setActiveView("supervisor");
+    } else {
+      setActiveView("all");
+    }
     onOpen();
   };
 
@@ -150,7 +265,7 @@ function BlockNumber() {
       .then(() => {
         setBlockNumbers(blockNumbers.filter((number) => number._id !== id));
         toast({
-          title: "Block Numbers deleted.",
+          title: "Block Number deleted.",
           status: "success",
           duration: 3000,
           isClosable: true,
@@ -159,64 +274,94 @@ function BlockNumber() {
   };
 
   const updateBlockNumbers = (id) => {
-    try {
-      api()
-        .patch(`/subadmin/updateblocknumber/${id}`, {
-          lotteryCategoryName: lotteryCategoryName.trim(),
-          gameCategory: gameCategory.trim(),
-          number: newBlockNumber.trim(),
-        })
-        .then((res) => {
-          setBlockNumbers(
-            blockNumbers.map((number) =>
-              number._id === id ? res.data : number
-            )
-          );
-          setNewBlockNumber("");
-          setLotteryCategoryName("");
-          setGameCategory("");
-          onClose();
-          toast({
-            title: "Block Numbers updated.",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
-        })
-        .catch((err) => {
-          toast({
-            title: "Error updating Block Numbers.",
-            description: err.message,
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+    const data = {
+      lotteryCategoryName: lotteryCategoryName.trim(),
+      gameCategory: gameCategory.trim(),
+      number: newBlockNumber.trim(),
+    };
+    if (activeView === "supervisor") {
+      data.superVisor = selectedSupervisor;
+    } else if (activeView === "seller") {
+      data.seller = selectedSeller;
+    }
+    api()
+      .patch(`/subadmin/updateblocknumber/${id}`, data)
+      .then((res) => {
+        setBlockNumbers(
+          blockNumbers.map((number) => (number._id === id ? res.data : number))
+        );
+        resetForm();
+        toast({
+          title: "Block Number updated.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
         });
-    } catch (err) {}
+      })
+      .catch((err) => {
+        toast({
+          title: "Error updating Block Number.",
+          description: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
   };
 
-  const handleCancel = () => {
+  const resetForm = () => {
+    setNewBlockNumber("");
+    setLotteryCategoryName("");
+    setGameCategory("");
+    setSelectedSeller("");
+    setSelectedSupervisor("");
     setEditing(false);
     onClose();
   };
 
+  const handleCancel = () => {
+    resetForm();
+  };
+
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      {/* Authors Table */}
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} p={{ base: "5px", md: "20px"}} width="100%" border={{base: "none", md: "1px solid gray"}}>
+      <Card
+        overflowX={{ sm: "scroll", xl: "hidden" }}
+        p={{ base: "5px", md: "20px" }}
+        width="100%"
+        border={{ base: "none", md: "1px solid gray" }}
+      >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
           justifyContent="space-between"
+          alignItems="center"
         >
-          <Text fontSize="lg" font="Weight:bold">
+          <Text fontSize="lg" fontWeight="bold">
             Block Numbers Table
           </Text>
+          <RadioGroup
+            onChange={handleGetBlockNumbers}
+            value={activeView}
+            display="flex"
+            gap={4}
+          >
+            <Radio value="all" colorScheme="blue" size="lg">
+              All
+            </Radio>
+            <Radio value="supervisor" colorScheme="blue" size="lg">
+              Supervisor
+            </Radio>
+            <Radio value="seller" colorScheme="blue" size="lg">
+              Seller
+            </Radio>
+          </RadioGroup>
           <Button
             size="sm"
             onClick={() => {
-              setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
-              setGameCategory(gameCategories[0]?.gameName);
+              setEditing(false);
+              setLotteryCategoryName(lotteryCategories[0]?.lotteryName || "");
+              setGameCategory(gameCategories[0]?.gameName || "");
               onOpen();
             }}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
@@ -227,10 +372,88 @@ function BlockNumber() {
             <FaPlus size={24} color="white" />
           </Button>
         </CardHeader>
+        {showSearchForm && (
+          <CardHeader
+            display="flex"
+            flexDirection={{ base: "column", md: "row" }}
+            gap={5}
+            marginY="20px"
+            justifyContent="center"
+          >
+            <HStack>
+              <FormControl flex={1}>
+                <FormLabel>
+                  {activeView === "seller" ? "Seller" : "Supervisor"}
+                </FormLabel>
+                <Select
+                  value={
+                    activeView === "seller"
+                      ? selectedSellerId
+                      : selectedSupervisorId
+                  }
+                  onChange={(e) =>
+                    activeView === "seller"
+                      ? setSelectedSellerId(e.target.value)
+                      : setSelectedSupervisorId(e.target.value)
+                  }
+                >
+                  <option value="">All</option>
+                  {(activeView === "seller" ? sellerInfo : supervisorInfo).map(
+                    (person) => (
+                      <option key={person._id} value={person._id}>
+                        {person.userName}
+                      </option>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+              <FormControl flex={1}>
+                <FormLabel>Lottery Category</FormLabel>
+                <Select
+                  value={lotteryCategoryName}
+                  onChange={(e) => setLotteryCategoryName(e.target.value)}
+                >
+                  <option value="">All</option>
+                  {lotteryCategories.map((category) => (
+                    <option key={category._id} value={category.lotteryName}>
+                      {category.lotteryName}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl flex={1}>
+                <FormLabel>Game Category</FormLabel>
+                <Select
+                  value={gameCategory}
+                  onChange={(e) => setGameCategory(e.target.value)}
+                >
+                  <option value="">All</option>
+                  {gameCategories.map((name) => (
+                    <option key={name._id} value={name.gameName}>
+                      {name.gameName}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              <VStack>
+                <Text marginBottom="20px"></Text>
+                <Button
+                  onClick={handleSearch}
+                  bg="blue.600"
+                  color="white"
+                  isLoading={isLoading}
+                >
+                  <CgSearch />
+                </Button>
+              </VStack>
+            </HStack>
+          </CardHeader>
+        )}
         <CardBody>
           <Table variant="striped" color="black">
             <Thead>
               <Tr>
+                <Th color="black">User</Th>
                 <Th color="black">Lottery Name</Th>
                 <Th color="black">Game Name</Th>
                 <Th color="black">Block Number</Th>
@@ -240,9 +463,20 @@ function BlockNumber() {
             <Tbody>
               {blockNumbers.map((number) => (
                 <Tr key={number._id}>
-                  <Td><pre>{number.lotteryCategoryName}</pre></Td>
-                  <Td><pre>{number.gameCategory}</pre></Td>
-                  <Td><pre>{number.number}</pre></Td>
+                  <Td>
+                    {number.seller?.userName ||
+                      number.superVisor?.userName ||
+                      "All"}
+                  </Td>
+                  <Td>
+                    <pre>{number.lotteryCategoryName}</pre>
+                  </Td>
+                  <Td>
+                    <pre>{number.gameCategory}</pre>
+                  </Td>
+                  <Td>
+                    <pre>{number.number}</pre>
+                  </Td>
                   <Td>
                     <Button
                       size="sm"
@@ -272,11 +506,11 @@ function BlockNumber() {
           </Table>
         </CardBody>
       </Card>
-      {/* Create/Edit User Modal */}
+      {/* Create/Edit Block Number Modal */}
       <Modal
         isOpen={isOpen}
         onClose={handleCancel}
-        title={editing ? "Edit BlockNumber" : "Create BlockNumber"}
+        title={editing ? "Edit Block Number" : "Create Block Number"}
         submitButtonText={editing ? "Update" : "Create"}
         onSubmit={handleSubmit}
         cancelButtonText="Cancel"
@@ -288,7 +522,7 @@ function BlockNumber() {
             <FormLabel>Lottery Category Name</FormLabel>
             <Select
               onChange={(event) => setLotteryCategoryName(event.target.value)}
-              defaultValue={lotteryCategoryName}
+              value={lotteryCategoryName}
             >
               {lotteryCategories.map((category) => (
                 <option key={category._id} value={category.lotteryName}>
@@ -301,7 +535,7 @@ function BlockNumber() {
             <FormLabel>Game Name</FormLabel>
             <Select
               onChange={(event) => setGameCategory(event.target.value)}
-              defaultValue={gameCategory}
+              value={gameCategory}
             >
               {gameCategories.map((name) => (
                 <option key={name._id} value={name.gameName}>
@@ -310,7 +544,39 @@ function BlockNumber() {
               ))}
             </Select>
           </FormControl>
-          <FormControl id="newLimitNumbers" isRequired>
+          {activeView === "supervisor" && (
+            <FormControl>
+              <FormLabel>Supervisor</FormLabel>
+              <Select
+                value={selectedSupervisor}
+                onChange={(e) => setSelectedSupervisor(e.target.value)}
+              >
+                <option value="">Select Supervisor</option>
+                {supervisorInfo.map((supervisor) => (
+                  <option key={supervisor._id} value={supervisor._id}>
+                    {supervisor.userName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {activeView === "seller" && (
+            <FormControl>
+              <FormLabel>Seller</FormLabel>
+              <Select
+                value={selectedSeller}
+                onChange={(e) => setSelectedSeller(e.target.value)}
+              >
+                <option value="">Select Seller</option>
+                {sellerInfo.map((seller) => (
+                  <option key={seller._id} value={seller._id}>
+                    {seller.userName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          <FormControl id="newBlockNumber" isRequired>
             <FormLabel>Block Number</FormLabel>
             <Input
               type="text"
