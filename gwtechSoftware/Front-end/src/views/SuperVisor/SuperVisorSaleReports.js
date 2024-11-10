@@ -97,15 +97,17 @@ const SaleReports = () => {
       const response = await api().get(
         `/superVisor/getSalereports?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
+      console.log(response);
+      const responseData = response.data.data || {};
+      const saleReportsArray = Object.values(responseData);
 
-      const responseData = response.data.data || [];
-      const saleReportsWithCompany = responseData.map((sellerData) => {
+      const saleReportsWithCompany = saleReportsArray.map((sellerData) => {
         const seller = sellerInfo.find(
           (info) => info.userName === sellerData.name
         );
         return {
           ...sellerData,
-          companyName: seller ? seller.companyName : "N/A", // Add companyName if found, else "N/A"
+          companyName: seller ? seller.companyName : "N/A",
         };
       });
       setSaleReports(saleReportsWithCompany);
