@@ -235,7 +235,7 @@ const LimitNumber = () => {
     <Flex
       direction="column"
       pt={{ base: "120px", md: "75px" }}
-      width={{ base: "100%", lg: "80%", xl: "50%" }}
+      width={{ base: "100%", lg: "80%", xl: "70%" }}
       mx="auto"
     >
       <Card>
@@ -316,7 +316,11 @@ const LimitNumber = () => {
                   }
                   width="200px"
                 >
-                  <option value="">All</option>
+                  <option value="">
+                    {activeView === "seller"
+                      ? "Select seller"
+                      : "Select Supervisor"}
+                  </option>
                   {(activeView === "seller" ? sellers : supervisors).map(
                     (person) => (
                       <option key={person._id} value={person._id}>
