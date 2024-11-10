@@ -1,6 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../utils/customFetch.js";
-
 import {
   Flex,
   Button,
@@ -16,11 +15,12 @@ import {
   Select,
   Text,
   Box,
+  RadioGroup,
+  Radio,
 } from "@chakra-ui/react";
-import { FaPlus } from "react-icons/fa";
-
-import { FaEdit } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
+import { CgSearch } from "react-icons/cg";
 
 // Custom components
 import Card from "components/Card/Card.js";
@@ -29,142 +29,156 @@ import CardBody from "components/Card/CardBody.js";
 import Modal from "components/Modal/Modal.js";
 
 const initConditions = [
-  {
-    gameCategory: "BLT",
-    position: 1,
-    condition: "",
-  },
-  {
-    gameCategory: "BLT",
-    position: 2,
-    condition: "",
-  },
-  {
-    gameCategory: "BLT",
-    position: 3,
-    condition: "",
-  },
-  {
-    gameCategory: "L3C",
-    position: 1,
-    condition: "",
-  },
-  {
-    gameCategory: "L4C 1",
-    position: 1,
-    condition: "",
-  },
-  {
-    gameCategory: "L4C 2",
-    position: 2,
-    condition: "",
-  },
-  {
-    gameCategory: "L4C 3",
-    position: 3,
-    condition: "",
-  },
-  {
-    gameCategory: "L5C 1",
-    position: 1,
-    condition: "",
-  },
-  {
-    gameCategory: "L5C 2",
-    position: 2,
-    condition: "",
-  },
-  {
-    gameCategory: "L5C 3",
-    position: 3,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 1,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 2,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 3,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 4,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 5,
-    condition: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 6,
-    condition: "",
-  },
+  { gameCategory: "BLT", position: 1, condition: "" },
+  { gameCategory: "BLT", position: 2, condition: "" },
+  { gameCategory: "BLT", position: 3, condition: "" },
+  { gameCategory: "L3C", position: 1, condition: "" },
+  { gameCategory: "L4C 1", position: 1, condition: "" },
+  { gameCategory: "L4C 2", position: 2, condition: "" },
+  { gameCategory: "L4C 3", position: 3, condition: "" },
+  { gameCategory: "L5C 1", position: 1, condition: "" },
+  { gameCategory: "L5C 2", position: 2, condition: "" },
+  { gameCategory: "L5C 3", position: 3, condition: "" },
+  { gameCategory: "MRG", position: 1, condition: "" },
+  { gameCategory: "MRG", position: 2, condition: "" },
+  { gameCategory: "MRG", position: 3, condition: "" },
+  { gameCategory: "MRG", position: 4, condition: "" },
+  { gameCategory: "MRG", position: 5, condition: "" },
+  { gameCategory: "MRG", position: 6, condition: "" },
 ];
 
 const PaymentCondition = () => {
   const [editing, setEditing] = useState(false);
+  const [currentCondition, setCurrentCondition] = useState(null);
+  const [paymentConditions, setPaymentConditions] = useState([]);
+  const [lotteryCategories, setLotteryCategories] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
+  const [sellers, setSellers] = useState([]);
+  const [selectedSellerId, setSelectedSellerId] = useState("");
+  const [selectedSupervisorId, setSelectedSupervisorId] = useState("");
+  const [selectedSeller, setSelectedSeller] = useState("");
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
+  const [activeView, setActiveView] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [conditions, setConditions] = useState(initConditions);
+  const [allConditions, setAllConditions] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const { colorMode } = useColorMode();
 
-  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
-  const [conditions, setConditions] = useState(initConditions);
-  const [lotteryCategories, setLotteryCategories] = useState([]);
-  const [allConditions, setAllConditions] = useState([]);
-  const [currentCondition, setCurrentCondition] = useState();
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [
+          lotteryResponse,
+          sellersResponse,
+          supervisorsResponse,
+        ] = await Promise.all([
+          api().get("/admin/getlotterycategory"),
+          api().get("/subadmin/getsellerWhoNotHaveSupervisor"),
+          api().get("/subadmin/getsuperVisor"),
+        ]);
+        setLotteryCategories(lotteryResponse?.data?.data || []);
+        setSupervisors(supervisorsResponse?.data || []);
+        setSellers(sellersResponse?.data?.users || []);
+      } catch (error) {
+        toast({
+          title: "Error fetching initial data",
+          description: error.response?.data?.message || error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    };
+    fetchInitialData();
+  }, [toast]);
 
   useEffect(() => {
-    if (lotteryCategoryName) {
-      setConditions(initConditions);
+    // Removed automatic fetching
+    // Now, users must click the search button to fetch data
+    setAllConditions([]); // Clear existing conditions when view changes
+  }, [activeView]);
+
+  const fetchPaymentConditions = async () => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (activeView === "all") {
+        response = await api().get("/subadmin/getpaymenttermAll", {
+          params: {
+            fromDate: selectedDate,
+          },
+        });
+      } else if (activeView === "supervisor") {
+        response = await api().get("/subadmin/getpaymenttermSuperVisor", {
+          params: {
+            superVisor: selectedSupervisorId,
+            lotteryCategoryName,
+            fromDate: selectedDate,
+          },
+        });
+      } else if (activeView === "seller") {
+        response = await api().get("/subadmin/getpaymenttermSeller", {
+          params: {
+            seller: selectedSellerId,
+            lotteryCategoryName,
+            fromDate: selectedDate,
+          },
+        });
+      }
+      setAllConditions(response?.data || []);
+      console.log(response?.data);
+    } catch (error) {
+      toast({
+        title: "Error fetching payment conditions",
+        description: error.response?.data?.message || error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      setAllConditions([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [lotteryCategoryName]);
+  };
 
-  useEffect(() => {
-    const fetchLotteryCategories = async () => {
-      try {
-        const response = await api().get("/admin/getlotterycategory");
-        setLotteryCategories(response.data.data);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error fetching lottery categories",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
-    fetchLotteryCategories();
-  }, []);
+  const handleGetPaymentCondition = (viewType) => {
+    setActiveView(viewType);
+    setSelectedSellerId("");
+    setSelectedSupervisorId("");
+    setLotteryCategoryName("");
+    setSelectedDate(new Date().toISOString().split("T")[0]); // Reset to today's date
+  };
 
-  useEffect(() => {
-    const fetchConditions = async () => {
-      try {
-        const response = await api().get("/subadmin/getpaymentterm");
-        setAllConditions(response.data);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Error fetching Payment Condition",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
-    fetchConditions();
-  }, []);
+  const handleSearch = async () => {
+    // Validate required fields based on activeView
+    if (activeView === "supervisor" && !selectedSupervisorId) {
+      toast({
+        title: "Please select a supervisor.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (activeView === "seller" && !selectedSellerId) {
+      toast({
+        title: "Please select a seller.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    fetchPaymentConditions();
+  };
 
   const handleNumberChange = (index, value) => {
     const updatedConditions = conditions.map((condition, idx) =>
@@ -176,16 +190,19 @@ const PaymentCondition = () => {
   const handleCancel = () => {
     setEditing(false);
     onClose();
+    resetForm();
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    editing ? handleUpdate(currentCondition._id) : handleCreate();
+    editing ? await handleUpdate(currentCondition?._id) : await handleCreate();
   };
 
   const resetForm = () => {
     setLotteryCategoryName("");
     setConditions(initConditions);
+    setSelectedSeller("");
+    setSelectedSupervisor("");
     setEditing(false);
     onClose();
   };
@@ -201,10 +218,16 @@ const PaymentCondition = () => {
 
   const handleCreate = async () => {
     try {
-      const response = await api().post("/subadmin/addpaymentterm", {
+      const data = {
         lotteryCategoryName: lotteryCategoryName.trim(),
         conditions,
-      });
+      };
+      if (activeView === "supervisor") {
+        data.superVisor = selectedSupervisor;
+      } else if (activeView === "seller") {
+        data.seller = selectedSeller;
+      }
+      const response = await api().post("/subadmin/addpaymentterm", data);
       resetForm();
       setAllConditions([...allConditions, response.data]);
       toast({
@@ -214,29 +237,32 @@ const PaymentCondition = () => {
         isClosable: true,
       });
     } catch (error) {
-      console.error(error);
-      showError("Error creating payment condition");
+      showError(
+        error.response?.data?.message || "Error creating payment condition"
+      );
     }
   };
 
   const handleUpdate = async (id) => {
     try {
-      await api().patch(`/subadmin/updatepaymentterm/${id}`, {
+      const data = {
         lotteryCategoryName: lotteryCategoryName.trim(),
-        conditions: conditions,
-      });
-      setLotteryCategoryName("");
-      setConditions(initConditions);
-      setEditing(false);
-      onClose();
+        conditions,
+      };
+      if (activeView === "supervisor") {
+        data.superVisor = selectedSupervisor;
+      } else if (activeView === "seller") {
+        data.seller = selectedSeller;
+      }
+      await api().patch(`/subadmin/updatepaymentterm/${id}`, data);
+      resetForm();
       const index = allConditions.findIndex(
         (condition) => condition._id === id
       );
       const newConditions = [...allConditions];
       newConditions[index] = {
-        _id: id,
-        lotteryCategoryName,
-        conditions: conditions,
+        ...currentCondition,
+        ...data,
       };
       setAllConditions([...newConditions]);
       toast({
@@ -246,9 +272,9 @@ const PaymentCondition = () => {
         isClosable: true,
       });
     } catch (error) {
-      console.error(error);
       toast({
         title: "Error updating payment condition",
+        description: error.response?.data?.message || error.message,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -257,11 +283,22 @@ const PaymentCondition = () => {
   };
 
   const handleEdit = (condition) => {
-    setEditing(true);
-    setLotteryCategoryName(condition?.lotteryCategoryName);
-    setConditions(condition?.conditions);
-    setCurrentCondition(condition);
-    onOpen();
+    if (condition) {
+      setEditing(true);
+      setLotteryCategoryName(condition.lotteryCategoryName);
+      setConditions(condition.conditions);
+      setCurrentCondition(condition);
+      if (condition.seller) {
+        setSelectedSeller(condition.seller._id);
+        setActiveView("seller");
+      } else if (condition.superVisor) {
+        setSelectedSupervisor(condition.superVisor._id);
+        setActiveView("supervisor");
+      } else {
+        setActiveView("all");
+      }
+      onOpen();
+    }
   };
 
   const handleDelete = async (id) => {
@@ -278,709 +315,423 @@ const PaymentCondition = () => {
           isClosable: true,
         });
       } catch (error) {
-        console.error(error);
-        showError("Error deleting payment condition");
+        showError(
+          error.response?.data?.message || "Error deleting payment condition"
+        );
       }
     }
   };
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <Card
-        overflowX={{ md: "scroll", xl: "hidden" }}
-        p={{ base: "5px", md: "20px" }}
-        width="100%"
-        border={{ base: "none", md: "1px solid gray" }}
-      >
+      <Card>
         <CardHeader
-          p="6px 0px 22px 0px"
           display="flex"
           justifyContent="space-between"
+          alignItems="center"
+          flexWrap="wrap"
+          gap={4}
         >
-          <Text fontSize="lg" color="black" font="Weight:bold">
-            Payment Condition
+          <Text fontSize="lg" fontWeight="bold">
+            Payment Conditions
           </Text>
-          <Button
-            size="md"
-            onClick={() => {
-              if (lotteryCategories.length > 0) {
-                setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
-                onOpen();
-              }
-            }}
-            isDisabled={lotteryCategories.length === 0}
-            bg={colorMode === "light" ? "blue.500" : "blue.300"}
-            _hover={{ bg: colorMode === "light" ? "blue.600" : "blue.200" }}
+          <RadioGroup
+            onChange={handleGetPaymentCondition}
+            value={activeView}
+            display="flex"
+            gap={4}
           >
-            <FaPlus size={24} color="white" />
+            <Radio value="all" colorScheme="blue" size="lg">
+              All
+            </Radio>
+            <Radio value="supervisor" colorScheme="blue" size="lg">
+              Supervisor
+            </Radio>
+            <Radio value="seller" colorScheme="blue" size="lg">
+              Seller
+            </Radio>
+          </RadioGroup>
+          <Button
+            onClick={() => {
+              setEditing(false);
+              onOpen();
+            }}
+            bg="green.800"
+            color="white"
+          >
+            <FaPlus />
           </Button>
         </CardHeader>
-        <CardBody pb="15px">
-          <Flex
-            flexWrap="wrap"
-            flexDirection={{ base: "column", sm: "row" }}
-            justifyContent="flex-start"
-            width="100%"
-          >
-            {allConditions?.map((condition, index) => (
-              <Stack
-                key={index}
-                spacing={1}
-                width="350px"
-                borderRadius="3px"
-                p="5px"
-                m="10px"
-                border={"1px solid gray"}
-                boxShadow="0px 0px 2px white"
+        <CardHeader
+          display="flex"
+          flexDirection={{ base: "column", md: "row" }}
+          gap={5}
+          marginY="20px"
+          justifyContent="center"
+        >
+          <HStack flexWrap="wrap" width="60%" spacing={4}>
+            {/* Conditional Supervisor/Seller Select */}
+            {activeView !== "all" && (
+              <FormControl flex="1">
+                <FormLabel>
+                  {activeView === "seller" ? "Seller" : "Supervisor"}
+                </FormLabel>
+                <Select
+                  value={
+                    activeView === "seller"
+                      ? selectedSellerId
+                      : selectedSupervisorId
+                  }
+                  onChange={(e) =>
+                    activeView === "seller"
+                      ? setSelectedSellerId(e.target.value)
+                      : setSelectedSupervisorId(e.target.value)
+                  }
+                >
+                  <option value="">
+                    {activeView === "seller"
+                      ? "Select Seller"
+                      : "Select SuperVisor"}
+                  </option>
+                  {(activeView === "seller" ? sellers : supervisors).map(
+                    (person) => (
+                      <option key={person._id} value={person._id}>
+                        {person.userName}
+                      </option>
+                    )
+                  )}
+                </Select>
+              </FormControl>
+            )}
+
+            {/* Lottery Category Select */}
+            <FormControl flex="1">
+              <FormLabel>Category Name</FormLabel>
+              <Select
+                value={lotteryCategoryName}
+                onChange={(e) => setLotteryCategoryName(e.target.value)}
               >
-                <VStack spacing={3} align="stretch" color="black">
-                  <FormControl id="lotteryCategoryName" isRequired>
-                    <HStack justifyContent="space-between">
-                      <Box>
-                        <FormLabel>Lottery Category Name</FormLabel>
-                        <FormLabel>{condition.lotteryCategoryName}</FormLabel>
-                      </Box>
-                      <Box>
-                        <Button
-                          size="sm"
-                          mr={2}
-                          onClick={() => handleEdit(condition)}
-                          bg={
-                            colorMode === "light" ? "yellow.500" : "yellow.300"
-                          }
-                          _hover={{
-                            bg:
-                              colorMode === "light"
-                                ? "yellow.600"
-                                : "yellow.200",
-                          }}
-                        >
-                          <FaEdit size={20} color="white" />
-                        </Button>
-                        {/* <Button
-                          size="sm"
-                          onClick={() => handleDelete(condition?._id)}
-                          bg={colorMode === "light" ? "red.500" : "red.300"}
-                          _hover={{
-                            bg: colorMode === "light" ? "red.600" : "red.200",
-                          }}
-                        >
-                          <RiDeleteBinLine size={20} color="white" />
-                        </Button> */}
-                      </Box>
-                    </HStack>
-                  </FormControl>
-                  <FormControl id="conditions" isRequired>
-                    <FormLabel>Payment Condition</FormLabel>
-                    <Stack p="5px">
-                      <Flex
-                        // flexWrap="wrap"
-                        // flexDirection={{ base: "column", md: "row" }}
-                        justifyContent="space-between"
-                      >
-                        <VStack
-                          mx="3px"
-                          flexBasis={{ base: "100%", md: "50%" }}
-                          color="black"
-                        >
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              1st (First)
-                            </FormLabel>
-                            <Input
-                              placeholder="First"
-                              maxLength={2}
-                              isReadOnly={true}
-                              value={condition.conditions[0].condition}
-                              onChange={(event) =>
-                                handleNumberChange(0, 0, event.target.value)
-                              }
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              2nd (Second)
-                            </FormLabel>
-                            <Input
-                              placeholder="Second"
-                              maxLength={2}
-                              isReadOnly={true}
-                              value={condition.conditions[1].condition}
-                              onChange={(event) =>
-                                handleNumberChange(0, 1, event.target.value)
-                              }
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              3rd (Third)
-                            </FormLabel>
-                            <Input
-                              placeholder="Third"
-                              maxLength={2}
-                              isReadOnly={true}
-                              value={condition.conditions[2].condition}
-                              onChange={(event) =>
-                                handleNumberChange(0, 2, event.target.value)
-                              }
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L3C
-                            </FormLabel>
-                            <Input
-                              placeholder="L3C"
-                              maxLength={3}
-                              isReadOnly={true}
-                              value={condition.conditions[3].condition}
-                              onChange={(event) =>
-                                handleNumberChange(1, 0, event.target.value)
-                              }
-                            />
-                          </Box>
-                        </VStack>
+                <option value="">All</option>
+                {lotteryCategories.map((category) => (
+                  <option key={category._id} value={category.lotteryName}>
+                    {category.lotteryName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <HStack flexWrap="wrap" width="350px">
+              {/* Date Input */}
+              <FormControl flex="1" width="250px">
+                <FormLabel>Date</FormLabel>
+                <Input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+              </FormControl>
 
-                        <VStack
-                          mx="3px"
-                          flexBasis={{ base: "100%", md: "50%" }}
-                          color="black"
-                        >
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C1
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C1"
-                              isReadOnly={true}
-                              value={condition.conditions[4].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C2
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C2"
-                              isReadOnly={true}
-                              value={condition.conditions[4].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C3
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C3"
-                              isReadOnly={true}
-                              value={condition.conditions[4].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L5C1
-                            </FormLabel>
-                            <Input
-                              placeholder="L5C1"
-                              isReadOnly={true}
-                              value={condition.conditions[7].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L5C2
-                            </FormLabel>
-                            <Input
-                              placeholder="L5C2"
-                              isReadOnly={true}
-                              value={condition.conditions[7].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L5C3
-                            </FormLabel>
-                            <Input
-                              placeholder="L5C3"
-                              isReadOnly={true}
-                              value={condition.conditions[7].condition}
-                            />
-                          </Box>
-
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG"
-                              isReadOnly={true}
-                              value={condition.conditions[10].condition}
-                              type="number"
-                            />
-                          </Box>
-
-                          {/* <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG1
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG1"
-                              isReadOnly={true}
-                              value={condition.conditions[9].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG2
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG2"
-                              isReadOnly={true}
-                              value={condition.conditions[10].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG3
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG3"
-                              isReadOnly={true}
-                              value={condition.conditions[11].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG4
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG4"
-                              isReadOnly={true}
-                              value={condition.conditions[12].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG5
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG5"
-                              isReadOnly={true}
-                              value={condition.conditions[13].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              MRG6
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG5"
-                              isReadOnly={true}
-                              value={condition.conditions[14].condition}
-                            />
-                          </Box> */}
-                        </VStack>
-
-                        {/* <VStack
-                          mx="3px"
-                          flexBasis={{ base: "100%", md: "30%" }}
-                          color="black"
-                        >
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C1
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C1"
-                              isReadOnly={true}
-                              value={condition.conditions[4].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C2
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C2"
-                              isReadOnly={true}
-                              value={condition.conditions[5].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L4C3
-                            </FormLabel>
-                            <Input
-                              placeholder="L4C3"
-                              isReadOnly={true}
-                              value={condition.conditions[6].condition}
-                            />
-                          </Box>
-
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L5C1
-                            </FormLabel>
-                            <Input
-                              placeholder="L5C1"
-                              isReadOnly={true}
-                              value={condition.conditions[7].condition}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0" mx="2px">
-                              L5C2
-                            </FormLabel>
-                            <Input
-                              placeholder="L5C2"
-                              isReadOnly={true}
-                              value={condition.conditions[8].condition}
-                            />
-                          </Box>
-                        </VStack> */}
-                      </Flex>
-                    </Stack>
-                  </FormControl>
-                </VStack>
-              </Stack>
+              {/* Search Button */}
+              <Button
+                onClick={handleSearch}
+                bg="blue.600"
+                color="white"
+                isLoading={isLoading}
+                alignSelf="flex-end"
+                leftIcon={<CgSearch />}
+                mt={{ base: "10px", md: "0" }}
+              >
+                Search
+              </Button>
+            </HStack>
+          </HStack>
+        </CardHeader>
+        <CardBody>
+          <Flex wrap="wrap" justify="center" gap={4}>
+            {allConditions.map((condition) => (
+              <VStack
+                key={condition._id}
+                border="1px solid gray"
+                p={4}
+                w={{ base: "100%", md: "350px" }}
+                borderRadius="md"
+                boxShadow="sm"
+              >
+                <HStack spacing={20} w="100%" justify="space-between">
+                  <VStack align="start">
+                    <FormLabel>
+                      {condition.seller?.userName ||
+                        condition.superVisor?.userName ||
+                        "All"}
+                    </FormLabel>
+                    <FormLabel>{condition.lotteryCategoryName}</FormLabel>
+                  </VStack>
+                  <HStack spacing={2}>
+                    <Button
+                      onClick={() => handleEdit(condition)}
+                      bg="yellow.800"
+                      color="white"
+                      size="sm"
+                    >
+                      <FaEdit />
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(condition._id)}
+                      bg="red.800"
+                      color="white"
+                      size="sm"
+                    >
+                      <RiDeleteBinLine />
+                    </Button>
+                  </HStack>
+                </HStack>
+                <Flex wrap="wrap" gap={2} w="full">
+                  {condition.conditions.map((condItem, index) => (
+                    <Box key={index} w="45%">
+                      <FormLabel fontSize="sm">
+                        {condItem.gameCategory} {condItem.position}
+                      </FormLabel>
+                      <Input
+                        value={condItem.condition}
+                        isReadOnly
+                        size="sm"
+                        bg="gray.100"
+                      />
+                    </Box>
+                  ))}
+                </Flex>
+              </VStack>
             ))}
           </Flex>
         </CardBody>
       </Card>
-      {/* Create/Edit User Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={handleCancel}
-        title={editing ? "Edit Condition" : "Create Condition"}
-        submitButtonText={editing ? "Update" : "Create"}
-        onSubmit={handleSubmit}
-        cancelButtonText="Cancel"
-        onCancel={handleCancel}
-        colorMode={colorMode}
-      >
-        <Stack spacing={4}>
-          <form onSubmit={handleSubmit}>
-            <VStack spacing={4} align="stretch">
-              <FormControl id="lotteryCategoryName" isRequired>
-                <FormLabel>Lottery Category Name</FormLabel>
+      <Modal isOpen={isOpen} onClose={handleCancel}>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} align="stretch">
+            <FormControl id="lotteryCategoryName" isRequired>
+              <FormLabel>Lottery Category Name</FormLabel>
+              <Select
+                onChange={(event) => setLotteryCategoryName(event.target.value)}
+                value={lotteryCategoryName}
+                placeholder="Select Lottery Category"
+              >
+                {lotteryCategories.map((category) => (
+                  <option key={category._id} value={category.lotteryName}>
+                    {category.lotteryName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            {activeView === "supervisor" && (
+              <FormControl isRequired>
+                <FormLabel>Supervisor</FormLabel>
                 <Select
-                  onChange={(event) =>
-                    setLotteryCategoryName(event.target.value)
-                  }
-                  defaultValue={lotteryCategoryName}
+                  value={selectedSupervisor}
+                  onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  placeholder="Select Supervisor"
                 >
-                  {lotteryCategories.map((category) => (
-                    <option key={category._id} value={category.lotteryName}>
-                      {category.lotteryName}
+                  {supervisors.map((supervisor) => (
+                    <option key={supervisor._id} value={supervisor._id}>
+                      {supervisor.userName}
                     </option>
                   ))}
                 </Select>
               </FormControl>
-              <FormControl id="Conditions" isRequired>
-                <FormLabel>Payment Conditions</FormLabel>
-                <Stack p="5px">
-                  <Flex
-                    // flexWrap="wrap"
-                    // flexDirection={{ base: "column", md: "row" }}
-                    justifyContent="space-between"
-                  >
-                    <VStack
-                      mx="3px"
-                      flexBasis={{ base: "100%", md: "50%" }}
-                      color="black"
-                    >
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          1st (First)
-                        </FormLabel>
-                        <Input
-                          placeholder="First"
-                          value={conditions[0].condition}
-                          onChange={(event) =>
-                            handleNumberChange(0, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          2nd (Second)
-                        </FormLabel>
-                        <Input
-                          placeholder="Second"
-                          value={conditions[1].condition}
-                          onChange={(event) =>
-                            handleNumberChange(1, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          3rd (Third)
-                        </FormLabel>
-                        <Input
-                          placeholder="Third"
-                          value={conditions[2].condition}
-                          onChange={(event) =>
-                            handleNumberChange(2, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L3C
-                        </FormLabel>
-                        <Input
-                          placeholder="L3C"
-                          value={conditions[3].condition}
-                          onChange={(event) =>
-                            handleNumberChange(3, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                    </VStack>
-
-                    <VStack
-                      mx="3px"
-                      flexBasis={{ base: "100%", md: "50%" }}
-                      color="black"
-                    >
-                      {/* <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L4C
-                        </FormLabel>
-                        <Input
-                          placeholder="L4C"
-                          value={conditions[4].condition}
-                          onChange={(event) => {
-                            handleNumberChange(4, event.target.value);
-                            handleNumberChange(5, event.target.value);
-                            handleNumberChange(6, event.target.value);
-                          }}
-                          type="number"
-                        />
-                      </Box>
-
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L5C
-                        </FormLabel>
-                        <Input
-                          placeholder="L5C"
-                          value={conditions[7].condition}
-                          onChange={(event) => {
-                            handleNumberChange(7, event.target.value);
-                            handleNumberChange(8, event.target.value);
-                            handleNumberChange(9, event.target.value);
-                          }}
-                          type="number"
-                        />
-                      </Box> */}
-
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG"
-                          value={conditions[10].condition}
-                          onChange={(event) => {
-                            handleNumberChange(10, event.target.value);
-                            handleNumberChange(11, event.target.value);
-                            handleNumberChange(12, event.target.value);
-                            handleNumberChange(13, event.target.value);
-                            handleNumberChange(14, event.target.value);
-                            handleNumberChange(15, event.target.value);
-                          }}
-                          type="number"
-                        />
-                      </Box>
-                      {/* <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG1
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG1"
-                          value={conditions[9].condition}
-                          onChange={(event) =>
-                            handleNumberChange(9, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG1
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG1"
-                          value={conditions[9].condition}
-                          onChange={(event) =>
-                            handleNumberChange(9, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG2
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG2"
-                          value={conditions[10].condition}
-                          onChange={(event) =>
-                            handleNumberChange(10, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG3
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG3"
-                          value={conditions[11].condition}
-                          onChange={(event) =>
-                            handleNumberChange(11, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG4
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG4"
-                          value={conditions[12].condition}
-                          onChange={(event) =>
-                            handleNumberChange(12, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG5
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG5"
-                          value={conditions[13].condition}
-                          onChange={(event) =>
-                            handleNumberChange(13, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          MRG6
-                        </FormLabel>
-                        <Input
-                          placeholder="MRG5"
-                          value={conditions[14].condition}
-                          onChange={(event) =>
-                            handleNumberChange(14, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box> */}
-                    </VStack>
-
-                    <VStack
-                      mx="3px"
-                      flexBasis={{ base: "100%", md: "30%" }}
-                      color="black"
-                    >
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L4C1
-                        </FormLabel>
-                        <Input
-                          placeholder="L4C1"
-                          value={conditions[4].condition}
-                          onChange={(event) =>
-                            handleNumberChange(4, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L4C2
-                        </FormLabel>
-                        <Input
-                          placeholder="L4C2"
-                          value={conditions[5].condition}
-                          onChange={(event) =>
-                            handleNumberChange(5, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L4C3
-                        </FormLabel>
-                        <Input
-                          placeholder="L4C3"
-                          value={conditions[6].condition}
-                          onChange={(event) =>
-                            handleNumberChange(6, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L5C1
-                        </FormLabel>
-                        <Input
-                          placeholder="L5C1"
-                          value={conditions[7].condition}
-                          onChange={(event) =>
-                            handleNumberChange(7, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L5C2
-                        </FormLabel>
-                        <Input
-                          placeholder="L5C2"
-                          value={conditions[8].condition}
-                          onChange={(event) =>
-                            handleNumberChange(8, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                      <Box>
-                        <FormLabel fontSize={14} mb="0" mx="2px">
-                          L5C3
-                        </FormLabel>
-                        <Input
-                          placeholder="L5C2"
-                          value={conditions[9].condition}
-                          onChange={(event) =>
-                            handleNumberChange(9, event.target.value)
-                          }
-                          type="number"
-                        />
-                      </Box>
-                    </VStack>
-                  </Flex>
-                </Stack>
+            )}
+            {activeView === "seller" && (
+              <FormControl isRequired>
+                <FormLabel>Seller</FormLabel>
+                <Select
+                  value={selectedSeller}
+                  onChange={(e) => setSelectedSeller(e.target.value)}
+                  placeholder="Select Seller"
+                >
+                  {sellers.map((seller) => (
+                    <option key={seller._id} value={seller._id}>
+                      {seller.userName}
+                    </option>
+                  ))}
+                </Select>
               </FormControl>
-            </VStack>
-          </form>
-        </Stack>
+            )}
+            <FormControl id="Conditions" isRequired>
+              <FormLabel>Payment Conditions</FormLabel>
+              <Stack p="5px">
+                <Flex justifyContent="space-between">
+                  <VStack
+                    mx="3px"
+                    flexBasis={{ base: "100%", md: "50%" }}
+                    color="black"
+                  >
+                    {/* First Half of Conditions */}
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        1st (First)
+                      </FormLabel>
+                      <Input
+                        placeholder="First"
+                        value={conditions[0].condition}
+                        onChange={(event) =>
+                          handleNumberChange(0, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        2nd (Second)
+                      </FormLabel>
+                      <Input
+                        placeholder="Second"
+                        value={conditions[1].condition}
+                        onChange={(event) =>
+                          handleNumberChange(1, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        3rd (Third)
+                      </FormLabel>
+                      <Input
+                        placeholder="Third"
+                        value={conditions[2].condition}
+                        onChange={(event) =>
+                          handleNumberChange(2, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L3C
+                      </FormLabel>
+                      <Input
+                        placeholder="L3C"
+                        value={conditions[3].condition}
+                        onChange={(event) =>
+                          handleNumberChange(3, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        MRG
+                      </FormLabel>
+                      <Input
+                        placeholder="Enter MRG value"
+                        value={conditions[10].condition} // Display the value from the first MRG position
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          const updatedConditions = conditions.map(
+                            (condition, index) => {
+                              // Update only MRG positions (10 to 15)
+                              if (index >= 10 && index <= 15) {
+                                return { ...condition, condition: value };
+                              }
+                              return condition;
+                            }
+                          );
+                          setConditions(updatedConditions);
+                        }}
+                        type="number"
+                      />
+                    </Box>
+                  </VStack>
+                  <VStack
+                    mx="3px"
+                    flexBasis={{ base: "100%", md: "50%" }}
+                    color="black"
+                  >
+                    {/* Second Half of Conditions */}
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L4C1
+                      </FormLabel>
+                      <Input
+                        placeholder="L4C1"
+                        value={conditions[4].condition}
+                        onChange={(event) =>
+                          handleNumberChange(4, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L4C2
+                      </FormLabel>
+                      <Input
+                        placeholder="L4C2"
+                        value={conditions[5].condition}
+                        onChange={(event) =>
+                          handleNumberChange(5, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L4C3
+                      </FormLabel>
+                      <Input
+                        placeholder="L4C3"
+                        value={conditions[6].condition}
+                        onChange={(event) =>
+                          handleNumberChange(6, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L5C1
+                      </FormLabel>
+                      <Input
+                        placeholder="L5C1"
+                        value={conditions[7].condition}
+                        onChange={(event) =>
+                          handleNumberChange(7, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L5C2
+                      </FormLabel>
+                      <Input
+                        placeholder="L5C2"
+                        value={conditions[8].condition}
+                        onChange={(event) =>
+                          handleNumberChange(8, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                    <Box>
+                      <FormLabel fontSize={14} mb="0" mx="2px">
+                        L5C3
+                      </FormLabel>
+                      <Input
+                        placeholder="L5C3"
+                        value={conditions[9].condition}
+                        onChange={(event) =>
+                          handleNumberChange(9, event.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                  </VStack>
+                </Flex>
+              </Stack>
+            </FormControl>
+          </VStack>
+          <Button type="submit" mt={4} colorScheme="blue">
+            {editing ? "Update" : "Add"} Payment Condition
+          </Button>
+        </form>
       </Modal>
     </Flex>
   );
