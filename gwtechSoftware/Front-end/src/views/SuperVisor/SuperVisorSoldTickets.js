@@ -97,7 +97,8 @@ const SoldTickets = () => {
       const response = await api().get(
         `/superVisor/gettickets?seller=${selectedSellerId}&fromDate=${fromDate}&toDate=${toDate}&lotteryCategoryName=${lotteryCategoryName.trim()}`
       );
-      setSoldTickets(response.data.data);
+      console.log(response.data.data);
+      setSoldTickets(response?.data?.data);
     } catch (error) {
       console.error(error);
       toast({
