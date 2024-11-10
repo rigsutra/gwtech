@@ -66,11 +66,12 @@ const SaleDetails = () => {
     try {
       setLoading(true);
       const sellerParam = selectedSellerId ? `seller=${selectedSellerId}` : "";
-      const responseAllNumber = await api().get(
-        `/superVisor/getselldetails?${sellerParam}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
+      const responseAllNumber = await api()?.get(
+        `/superVisor/getselldetails?${sellerParam}&lotteryCategoryName=${lotteryCategoryName?.trim()}&fromDate=${fromDate}`
       );
+      console.log(responseAllNumber);
 
-      setSaleDetails(responseAllNumber);
+      setSaleDetails(responseAllNumber?.data);
 
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
@@ -95,6 +96,7 @@ const SaleDetails = () => {
       );
 
       setLotteryDetail(responseData);
+      console.log(typeof(responseData?.data));
     } catch (error) {
       console.error("Error fetching sell details:", error);
       toast({
@@ -120,8 +122,9 @@ const SaleDetails = () => {
         `/superVisor/getsellgamenumberinfo?seller=${seller}&lotteryCategoryName=${lottoName}&fromDate=${date}&gameCategory=${gameName}&gameNumber=${number}`
       );
 
-      const res = response.data;
-      setGameNumberDetail(res.data);
+      const res = response?.data;
+      console.log(res.data);
+      setGameNumberDetail(res?.data);
 
       setLimit(res.limitInfo);
       setSelectedDate(new Date().toISOString().split("T")[0]);
@@ -160,9 +163,9 @@ const SaleDetails = () => {
     const fetchLotteryCategories = async () => {
       try {
         const response = await api().get("/admin/getlotterycategory");
-        setLotteryCategories(response.data.data);
-        if (response.data.data.length > 0) {
-          setLotteryCategoryName(response.data.data[0].lotteryName);
+        setLotteryCategories(response?.data?.data);
+        if (response?.data?.data?.length > 0) {
+          setLotteryCategoryName(response?.data?.data[0]?.lotteryName);
         }
       } catch (error) {
         console.error("Error fetching lottery categories:", error);
@@ -178,7 +181,7 @@ const SaleDetails = () => {
     const fetchSeller = async () => {
       try {
         const response = await api().get("/superVisor/getseller");
-        setSellerInfo(response.data.users);
+        setSellerInfo(response?.data?.users);
       } catch (error) {
         console.error("Error fetching seller info:", error);
         toast({
@@ -332,7 +335,7 @@ const SaleDetails = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {saleDatails.map((item, index) => (
+                    {Array.isArray(saleDatails)&& saleDatails.map((item, index) => (
                       <Tr key={index}>
                         <Td>
                           <pre>{item._id.gameCategory}</pre>
@@ -370,11 +373,11 @@ const SaleDetails = () => {
                     <Th>Total</Th>
                     <Th>HTG</Th>
                     <Th>
-                      {saleDatails.reduce(
-                        (total, value) => total + value.totalAmount,
-                        0
-                      )}
-                    </Th>
+                  {Array.isArray(saleDatails) ? saleDatails.reduce(
+                    (total, value) => total + value.totalAmount,
+                    0
+                  ) : 0}
+                </Th>
                   </Thead>
                 </Table>
               </VStack>
@@ -383,7 +386,7 @@ const SaleDetails = () => {
                   <h4 style={{ marginBottom: "3px" }}>
                     {gameCategoryDetail[0]?._id?.lotteryCategoryName}
                   </h4>
-                  {gameCategoryDetail?.map((item, index) => (
+                  {Array.isArray(gameCategoryDetail)&& gameCategoryDetail?.map((item, index) => (
                     <Flex
                       width="70%"
                       justifyContent={"space-between"}
@@ -402,7 +405,7 @@ const SaleDetails = () => {
                   >
                     <h5>Total</h5>
                     <h5>
-                      {gameCategoryDetail?.reduce(
+                      { Array.isArray(gameCategoryDetail)&&  gameCategoryDetail?.reduce(
                         (acc, detail) => acc + detail.totalAmount,
                         0
                       )}
