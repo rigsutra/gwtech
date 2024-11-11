@@ -69,9 +69,8 @@ const SaleDetails = () => {
       const responseAllNumber = await api()?.get(
         `/superVisor/getselldetails?${sellerParam}&lotteryCategoryName=${lotteryCategoryName?.trim()}&fromDate=${fromDate}`
       );
-      console.log(responseAllNumber);
 
-      setSaleDetails(responseAllNumber?.data);
+      setSaleDetails(responseAllNumber?.data?.data);
 
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
@@ -96,7 +95,6 @@ const SaleDetails = () => {
       );
 
       setLotteryDetail(responseData);
-      console.log(typeof(responseData?.data));
     } catch (error) {
       console.error("Error fetching sell details:", error);
       toast({
@@ -123,9 +121,7 @@ const SaleDetails = () => {
       );
 
       const res = response?.data;
-      console.log(res.data);
       setGameNumberDetail(res?.data);
-
       setLimit(res.limitInfo);
       setSelectedDate(new Date().toISOString().split("T")[0]);
       setSelectedNumber(number);
