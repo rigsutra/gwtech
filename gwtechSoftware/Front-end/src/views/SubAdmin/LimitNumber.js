@@ -235,7 +235,7 @@ const LimitNumber = () => {
     <Flex
       direction="column"
       pt={{ base: "120px", md: "75px" }}
-      width={{ base: "100%", lg: "80%", xl: "70%" }}
+      width={{ base: "100%", lg: "80%", xl: "50%" }}
       mx="auto"
     >
       <Card>
