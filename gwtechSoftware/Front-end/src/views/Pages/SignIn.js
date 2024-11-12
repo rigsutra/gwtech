@@ -1,24 +1,5 @@
-/*!
-
-=========================================================
-* LOTTERY Chakra - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-chakra/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 import React, { useState } from "react";
-import { useHistory, Link as RouterLink } from "react-router-dom"; // Import Link for routing
-import api from "../../utils/customFetch.js";
+import { useHistory, Link as RouterLink } from "react-router-dom";
 import {
   Flex,
   Button,
@@ -34,259 +15,238 @@ import {
   DrawerContent,
   DrawerCloseButton,
   IconButton,
+  Box,
 } from "@chakra-ui/react";
-import { HamburgerIcon } from "@chakra-ui/icons"; // Hamburger icon for the menu
+import { HamburgerIcon } from "@chakra-ui/icons";
 import GradientBorder from "components/GradientBorder/GradientBorder";
+import api from "../../utils/customFetch.js";
+
+// Color constants for reuse
+const COLORS = {
+  title: "white",
+  text: "white",
+  headerBg: "linear-gradient(145deg, #556d70, #475c5f)",
+  drawerBg: "#3F3534",
+  bodyBg: "#587a7e",
+  formBg: "linear-gradient(145deg, #5e8387, #4f6e71)",
+  inputBg: "linear-gradient(145deg, #5e8387, #4f6e71)",
+  buttonBg: "#475c5f",
+};
+
+// Header component
+const Header = ({ onDrawerOpen }) => (
+  <Flex
+    as="header"
+    align="center"
+    justify="space-between"
+    p={2}
+    bgGradient="linear-gradient(145deg, #556d70, #475c5f)"
+    color={COLORS.text}
+    position="relative"
+    boxShadow="5px 5px 6px #1b1e1f, -5px -5px 6px #7ea3a8"
+  >
+    <Text fontSize="20px" fontWeight="600" textColor="#fdf9bc" ml="10px">
+      LOTTERY SOFT
+    </Text>
+    <Flex align="center" gap={40}>
+      <IconButton
+        icon={<HamburgerIcon />}
+        variant="outline"
+        onClick={onDrawerOpen}
+        display={{ base: "flex", md: "none" }}
+      />
+      <NavigationLinks />
+      <RouterLink to="/signin">
+        <Button bg="#fdf9bc" mx={4} textColor="black">
+          Login
+        </Button>
+      </RouterLink>
+    </Flex>
+  </Flex>
+);
+
+// Drawer menu component for mobile view
+const DrawerMenu = ({ isOpen, onClose }) => (
+  <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
+    <DrawerOverlay />
+    <DrawerContent bg={COLORS.drawerBg}>
+      <DrawerCloseButton color="white" />
+      <DrawerBody>
+        <NavigationLinks vertical />
+      </DrawerBody>
+    </DrawerContent>
+  </Drawer>
+);
+
+// Links for header and drawer
+const NavigationLinks = ({ vertical }) => (
+  <Flex direction={vertical ? "column" : "row"} alignItems="flex-start">
+    {["Home", "Contacts", "Services"].map((route) => (
+      <RouterLink to={`/${route}`} key={route}>
+        <Button
+          variant="link"
+          my={2}
+          mx={4}
+          textColor="antiquewhite"
+          fontSize="18px"
+          fontWeight="bold"
+          marginRight="25px"
+          cursor="pointer"
+          display={{ base: vertical ? "flex" : "none", md: "inline-flex" }}
+        >
+          {capitalize(route)}
+        </Button>
+      </RouterLink>
+    ))}
+  </Flex>
+);
+
+// Login form component
+const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
+  <Flex direction="column" w="100%" width="350px" height="450px">
+    <Flex
+      direction="column"
+      alignItems="center"
+      bg={COLORS.inputBg}
+      boxShadow="5px 5px 6px #8dc3ca, -5px -5px 6px #8dc3ca"
+      py={10}
+      px={4}
+      borderRadius="10px"
+    >
+      <Heading
+        color={COLORS.title}
+        fontSize="20px"
+        mb="50px"
+        textAlign="center"
+        textColor="aliceblue"
+        font-weight="600"
+      >
+        LOGIN
+      </Heading>
+      {[
+        { label: "Login Name", value: name, onChange: setName },
+        {
+          label: "Password here",
+          value: password,
+          onChange: setPassword,
+          type: "password",
+        },
+      ].map(({ label, value, onChange, type = "text" }) => (
+        <FormControl key={label} mb={5}>
+          <FormLabel fontSize="20px" fontWeight="400" textColor="aliceblue">
+            {label}
+          </FormLabel>
+
+          <Input
+            placeholder={label}
+            _placeholder={{ color: "white" }}
+            type={type}
+            value={value}
+            width="100%"
+            paddingX="10px"
+            onChange={(e) => onChange(e.target.value)}
+            bg="#83a6aa"
+            borderRadius="none"
+            textColor="black"
+          />
+        </FormControl>
+      ))}
+      <Button
+        bg={COLORS.buttonBg}
+        type="submit"
+        width="100%"
+        h="45px"
+        my="40px"
+        borderRadius="10px"
+        cursor="pointer"
+        onClick={handleSubmit}
+        box-shadow="0px 1px 1px #233132, -1px -1px 1px #233132"
+      >
+        <Text color="white" fontSize="20px" textColor="whitesmoke">
+          LOGIN
+        </Text>
+      </Button>
+    </Flex>
+  </Flex>
+);
 
 function SignIn() {
-  const titleColor = "white"; // Color for title text
-  const textColor = "white"; // Color for all text in forms and buttons
-
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const history = useHistory();
   const toast = useToast();
 
-  const [isOpen, setIsOpen] = useState(false); // State for drawer
-
-  const handleShowToast = (description, status) => {
+  const handleShowToast = (description, status) =>
     toast({
       title: "Alert",
-      description: description,
-      status: status,
+      description,
+      status,
       duration: 3000,
       isClosable: true,
       position: "top-right",
     });
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       const response = await api().post(`/auth/signin`, {
         userName: name.trim(),
-        password: password,
+        password,
       });
       if (response?.data?.success) {
-        await sessionStorage.setItem("token", response?.data?.token);
-        sessionStorage.setItem("userRole", response?.data?.user.role);
-        sessionStorage.setItem("userName", response?.data?.user.userName);
-        
-        handleShowToast(
-          `Welcome Mr.${response?.data?.user.userName}`,
-          `success`
-        );
+        const { token, user } = response.data;
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("userRole", user.role);
+        sessionStorage.setItem("userName", user.userName);
+        sessionStorage.setItem("company", user.companyName);
+
+        handleShowToast(`Welcome Mr.${user.userName}`, "success");
         history.push("/main-menu");
       } else {
-        handleShowToast(`${response?.data?.message}`, `error`);
+        handleShowToast(response?.data?.message || "Login failed", "error");
       }
     } catch (error) {
-      console.log(error);
-      handleShowToast(`${error.response?.data?.message}`, `error`);
+      console.error(error);
+      handleShowToast(
+        error.response?.data?.message || "An error occurred",
+        "error"
+      );
     }
   };
 
   return (
     <>
-      {/* Header */}
+      <Header onDrawerOpen={() => setIsOpen(true)} />
+      <DrawerMenu isOpen={isOpen} onClose={() => setIsOpen(false)} />
       <Flex
-        as="header"
-        alignItems="center"
-        justifyContent="space-between"
-        p={4}
-        bg="#3F3534" // Top banner color
-        color="white"
-      >
-        <Text fontSize="xl" fontWeight="bold">
-          LotterySoft
-        </Text>
-
-        <Flex alignItems="center">
-          <IconButton
-            icon={<HamburgerIcon />}
-            variant="outline"
-            colorScheme="white"
-            onClick={() => setIsOpen(true)}
-            display={{ base: "flex", md: "none" }} // Show only on small screens
-          />
-          <RouterLink to="/about">
-            <Button
-              variant="link"
-              color="white"
-              mx={4}
-              display={{ base: "none", md: "inline-flex" }}
-            >
-              A propos
-            </Button>
-          </RouterLink>
-          <RouterLink to="/services">
-            <Button
-              variant="link"
-              color="white"
-              mx={4}
-              display={{ base: "none", md: "inline-flex" }}
-            >
-              Services
-            </Button>
-          </RouterLink>
-          <RouterLink to="/contacts">
-            <Button
-              variant="link"
-              color="white"
-              mx={4}
-              display={{ base: "none", md: "inline-flex" }}
-            >
-              Contacts
-            </Button>
-          </RouterLink>
-          <RouterLink to="/signin">
-            <Button colorScheme="orange" mx={4}>
-              Login
-            </Button>
-          </RouterLink>
-        </Flex>
-      </Flex>
-
-      {/* Drawer Menu */}
-      <Drawer
-        isOpen={isOpen}
-        placement="right"
-        onClose={() => setIsOpen(false)}
-      >
-        <DrawerOverlay />
-        <DrawerContent bg="#3F3534">
-          <DrawerCloseButton color="white" />
-          <DrawerBody>
-            <Flex direction="column" alignItems="flex-start">
-              <RouterLink to="/about">
-                <Button variant="link" color="white" my={2}>
-                  A propos
-                </Button>
-              </RouterLink>
-              <RouterLink to="/services">
-                <Button variant="link" color="white" my={2}>
-                  Services
-                </Button>
-              </RouterLink>
-              <RouterLink to="/contacts">
-                <Button variant="link" color="white" my={2}>
-                  Contacts
-                </Button>
-              </RouterLink>
-            </Flex>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Login Form */}
-      <Flex
-        alignItems="center"
-        justifyContent="center"
+        align="flex-start"
+        justify="center"
         minH="100vh"
-        bg="#514D4C"
+        bg={COLORS.bodyBg}
+        pt={{ base: "20px", md: "30px" }}
       >
-        {" "}
-        {/* Background color */}
         <Flex
-          h={{ base: "100%", lg: "fit-content" }}
+          h="100%"
           w="100%"
           maxW={{ base: "90%", sm: "450px" }}
           mx="auto"
           p={5}
         >
-          {/* First Form with Title */}
-          <Flex
-            direction="column"
-            w="100%"
-            background="#3F3534"
-            borderRadius="10px"
-          >
-            <Heading
-              color={titleColor}
-              fontSize={{ base: "24px", md: "32px" }}
-              mb="5px"
-              textAlign="center"
-            >
-              Login
-            </Heading>
-
-            {/* Second Form with Input Fields */}
-            <Flex
-              direction="column"
-              w="100%"
-              alignItems="center"
-              bg="#5F5F5F"
-              borderRadius={10}
-              p={10}
-            >
-              {" "}
-              {/* Centering inputs */}
-              <FormControl mb={4} w={{ base: "80%", md: "60%" }}>
-                {" "}
-                {/* Set width for centering */}
-                <FormLabel
-                  ms="4px"
-                  fontSize="sm"
-                  fontWeight="normal"
-                  color={textColor}
-                >
-                  UserName
-                </FormLabel>
-                <GradientBorder mb="24px">
-                  <Input
-                    
-                    bg="white"
-                    borderRadius="5px"
-                    fontSize="sm"
-                    placeholder="UserName"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                  />
-                </GradientBorder>
-              </FormControl>
-              <FormControl mb={4} w={{ base: "80%", md: "60%" }}>
-                {" "}
-                {/* Set width for centering */}
-                <FormLabel
-                  ms="4px"
-                  fontSize="sm"
-                  fontWeight="normal"
-                  color={textColor}
-                >
-                  Password
-                </FormLabel>
-                <GradientBorder mb="24px">
-                  <Input
-                   
-                    bg="white"
-                    borderRadius="5px"
-                    fontSize="sm"
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                  />
-                </GradientBorder>
-              </FormControl>
-              <Button
-                bg={"#3F3534"}
-                type="submit"
-                w={{ base: "80%", md: "60%" }} // Set width for centering
-                borderRadius={0}
-                maxW="200px"
-                h="35"
-                mb="50px"
-                mt="20px"
-                onClick={handleSubmit}
-              >
-                <Text color="white">Login</Text>
-              </Button>
-            </Flex>
-          </Flex>
+          <LoginForm
+            name={name}
+            setName={setName}
+            password={password}
+            setPassword={setPassword}
+            handleSubmit={handleSubmit}
+          />
         </Flex>
       </Flex>
     </>
   );
 }
+
+// Helper function to capitalize text
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export default SignIn;
