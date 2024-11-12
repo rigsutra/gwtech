@@ -75,12 +75,12 @@ const SaleDetails = () => {
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
-      setGameCategoryDetail(responseByGameCatetory);
+      setGameCategoryDetail(responseByGameCatetory?.data?.data);
 
       const responseAllLottery = await api().get(
         `/superVisor/getselldetailsallloterycategory?seller=${selectedSellerId}&fromDate=${fromDate}`
       );
-      const responseData = responseAllLottery.data.data;
+      const responseData = responseAllLottery?.data?.data;
       setSumAmount(
         Object.values(responseData).reduce(
           (acc, sellerData) => acc + sellerData.sum,
@@ -95,6 +95,7 @@ const SaleDetails = () => {
       );
 
       setLotteryDetail(responseData);
+      console.log(typeof responseData?.data);
     } catch (error) {
       console.error("Error fetching sell details:", error);
       toast({
@@ -121,7 +122,9 @@ const SaleDetails = () => {
       );
 
       const res = response?.data;
+      console.log(res.data);
       setGameNumberDetail(res?.data);
+
       setLimit(res.limitInfo);
       setSelectedDate(new Date().toISOString().split("T")[0]);
       setSelectedNumber(number);
@@ -331,49 +334,52 @@ const SaleDetails = () => {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {Array.isArray(saleDatails)&& saleDatails.map((item, index) => (
-                      <Tr key={index}>
-                        <Td>
-                          <pre>{item._id.gameCategory}</pre>
-                        </Td>
-                        <Td>
-                          <Button
-                            className="tableInterBtn"
-                            size="sm"
-                            width="100%"
-                            backgroundColor={"#edf2f7"}
-                            onClick={() =>
-                              fetchSellGameNumberDetails(
-                                item._id.lotteryCategoryName,
-                                item._id.gameCategory,
-                                item._id.number,
-                                item._id.date,
-                                selectedSellerId
-                              )
-                            }
-                          >
-                            {item._id.number}
-                          </Button>
-                        </Td>
-                        <Td>
-                          <pre>{item.count}</pre>
-                        </Td>
-                        <Td>
-                          <pre>{item.totalAmount}</pre>
-                        </Td>
-                      </Tr>
-                    ))}
+                    {Array.isArray(saleDatails) &&
+                      saleDatails.map((item, index) => (
+                        <Tr key={index}>
+                          <Td>
+                            <pre>{item._id.gameCategory}</pre>
+                          </Td>
+                          <Td>
+                            <Button
+                              className="tableInterBtn"
+                              size="sm"
+                              width="100%"
+                              backgroundColor={"#edf2f7"}
+                              onClick={() =>
+                                fetchSellGameNumberDetails(
+                                  item._id.lotteryCategoryName,
+                                  item._id.gameCategory,
+                                  item._id.number,
+                                  item._id.date,
+                                  selectedSellerId
+                                )
+                              }
+                            >
+                              {item._id.number}
+                            </Button>
+                          </Td>
+                          <Td>
+                            <pre>{item.count}</pre>
+                          </Td>
+                          <Td>
+                            <pre>{item.totalAmount}</pre>
+                          </Td>
+                        </Tr>
+                      ))}
                   </Tbody>
                   <Thead>
                     <Th></Th>
                     <Th>Total</Th>
                     <Th>HTG</Th>
                     <Th>
-                  {Array.isArray(saleDatails) ? saleDatails.reduce(
-                    (total, value) => total + value.totalAmount,
-                    0
-                  ) : 0}
-                </Th>
+                      {Array.isArray(saleDatails)
+                        ? saleDatails.reduce(
+                            (total, value) => total + value.totalAmount,
+                            0
+                          )
+                        : 0}
+                    </Th>
                   </Thead>
                 </Table>
               </VStack>
@@ -382,17 +388,18 @@ const SaleDetails = () => {
                   <h4 style={{ marginBottom: "3px" }}>
                     {gameCategoryDetail[0]?._id?.lotteryCategoryName}
                   </h4>
-                  {Array.isArray(gameCategoryDetail)&& gameCategoryDetail?.map((item, index) => (
-                    <Flex
-                      width="70%"
-                      justifyContent={"space-between"}
-                      key={index}
-                      mt="0px !important"
-                    >
-                      <h5>{item?._id?.gameCategory}</h5>
-                      <h5>{item?.totalAmount}</h5>
-                    </Flex>
-                  ))}
+                  {Array.isArray(gameCategoryDetail) &&
+                    gameCategoryDetail?.map((item, index) => (
+                      <Flex
+                        width="70%"
+                        justifyContent={"space-between"}
+                        key={index}
+                        mt="0px !important"
+                      >
+                        <h5>{item?._id?.gameCategory}</h5>
+                        <h5>{item?.totalAmount}</h5>
+                      </Flex>
+                    ))}
                   <Flex
                     width="70%"
                     justifyContent={"space-between"}
@@ -401,10 +408,11 @@ const SaleDetails = () => {
                   >
                     <h5>Total</h5>
                     <h5>
-                      { Array.isArray(gameCategoryDetail)&&  gameCategoryDetail?.reduce(
-                        (acc, detail) => acc + detail.totalAmount,
-                        0
-                      )}
+                      {Array.isArray(gameCategoryDetail) &&
+                        gameCategoryDetail?.reduce(
+                          (acc, detail) => acc + detail.totalAmount,
+                          0
+                        )}
                     </h5>
                   </Flex>
                 </VStack>
