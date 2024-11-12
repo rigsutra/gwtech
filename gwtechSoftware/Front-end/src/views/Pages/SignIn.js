@@ -225,7 +225,7 @@ function SignIn() {
       <Header onDrawerOpen={() => setIsOpen(true)} />
       <DrawerMenu isOpen={isOpen} onClose={() => setIsOpen(false)} />
       <Flex align="center" justify="center" minH="100vh" bg={COLORS.bodyBg}>
-        <Flex w="100%" maxW={{ base: "90%", sm: "450px" }} mx="auto" p={5}>
+        <Flex w="100%" maxW={{ base: "90%", sm: "450px" }} mx="auto" p={5} margineTop="-14">
           <LoginForm
             name={name}
             setName={setName}
