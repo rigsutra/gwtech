@@ -8,6 +8,7 @@ import {
   SimpleGrid,
   Box,
   Heading,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { GoSignOut } from "react-icons/go";
 import { ImUsers } from "react-icons/im";
@@ -36,11 +37,21 @@ const MainMenu = () => {
   const [userName, setUserName] = useState("");
   const [companyName, setCompanyName] = useState("");
 
+  // Define responsive icon sizes
+  const iconSize = useBreakpointValue({
+    base: "20px",
+    sm: "24px",
+    md: "28px",
+    lg: "32px",
+  });
+
   useEffect(() => {
     const role = sessionStorage.getItem("userRole");
     const name = sessionStorage.getItem("userName");
+    const company = sessionStorage.getItem("company");
     setUserRole(role);
     setUserName(name);
+    setCompanyName(company);
 
     // Fetch company name from the backend
     axios
@@ -63,111 +74,111 @@ const MainMenu = () => {
       {
         path: "/admin/SubAdminManagement",
         name: "SubAdmin",
-        icon: <ImUsers />,
+        icon: ImUsers,
       },
       {
         path: "/admin/LotteryCategoryManagement",
         name: "Lottery Category",
-        icon: <HiViewGridAdd />,
+        icon: HiViewGridAdd,
       },
       {
         path: "/admin/WinningNumberManagement",
         name: "Win Numbers",
-        icon: <GiPodium />,
+        icon: GiPodium,
       },
       {
         path: "/admin/SubAdminSaleReport",
         name: "Sales Report",
-        icon: <FaInfoCircle />,
+        icon: FaInfoCircle,
       },
     ],
     subAdmin: [
       {
         path: "/subadmin/SellerManagement",
         name: "Seller",
-        icon: <FaUserTie />,
+        icon: FaUserTie,
       },
       {
         path: "/subadmin/SupervisorManagement",
         name: "Supervisor",
-        icon: <FaUserSecret />,
+        icon: FaUserSecret,
       },
       {
         path: "/subadmin/paymentcondition",
         name: "Pay Condition",
-        icon: <MdPayments />,
+        icon: MdPayments,
       },
       {
         path: "/subadmin/blocknumber",
         name: "Block Number",
-        icon: <SiAdblock />,
+        icon: SiAdblock,
       },
       {
         path: "/subadmin/addlimit",
         name: "Add Limit",
-        icon: <MdProductionQuantityLimits />,
+        icon: MdProductionQuantityLimits,
       },
       {
         path: "/subadmin/winningnumberviews",
         name: "Win Number",
-        icon: <RiNumbersFill />,
+        icon: RiNumbersFill,
       },
       {
         path: "/subadmin/PercentageLimit",
         name: "Percentage Limit",
-        icon: <FaInfoCircle />,
+        icon: FaInfoCircle,
       },
       {
         path: "/subadmin/soldtickets",
         name: "Sold Tickets",
-        icon: <MdFactCheck />,
+        icon: MdFactCheck,
       },
       {
         path: "/subadmin/deleteticket",
         name: "Deleted Ticket",
-        icon: <RiDeleteBin5Fill />,
+        icon: RiDeleteBin5Fill,
       },
       {
         path: "/subadmin/winningtickets",
         name: "Win Tickets",
-        icon: <FaFortAwesome />,
+        icon: FaFortAwesome,
       },
       {
         path: "/subadmin/saledetails",
         name: "Sale Details",
-        icon: <BsTicketDetailedFill />,
+        icon: BsTicketDetailedFill,
       },
       {
         path: "/subadmin/salereports",
         name: "Sale Reports",
-        icon: <FaInfoCircle />,
+        icon: FaInfoCircle,
       },
     ],
     superVisor: [
       {
         path: "/superVisor/SuperVisorSellerManagement",
         name: "Seller",
-        icon: <FaUserTie />,
+        icon: FaUserTie,
       },
       {
         path: "/superVisor/SuperVisorSaleDetails",
         name: "Sale Details",
-        icon: <BsTicketDetailedFill />,
+        icon: BsTicketDetailedFill,
       },
       {
         path: "/superVisor/SuperVisorWinNumber",
         name: "Win Number",
-        icon: <FaFortAwesome />,
+        icon: FaFortAwesome,
       },
       {
         path: "/superVisor/SuperVisorSoldTickets",
         name: "Sold Tickets",
-        icon: <MdFactCheck />,
+        icon: MdFactCheck,
       },
       {
         path: "/superVisor/SuperVisorSaleReports",
         name: "Sale Reports",
-        icon: <FaInfoCircle />,
+        icon: FaInfoCircle,
       },
     ],
   };
@@ -181,6 +192,7 @@ const MainMenu = () => {
       flexDirection="column"
       bg="#587a7e"
       align="center"
+      p={4}
     >
       {/* Header */}
       <Flex
@@ -204,9 +216,7 @@ const MainMenu = () => {
           flexGrow={1}
           textAlign={["center", "center"]}
           mb={[2, 0]}
-        >
-          Welcome, {userName}
-        </Text>
+        ></Text>
         <Button
           colorScheme="orange"
           bg="orange"
@@ -216,7 +226,7 @@ const MainMenu = () => {
           p={4}
           fontWeight="bold"
           borderRadius={5}
-          fontSize={15}
+          fontSize={{ base: "14px", md: "16px" }}
           leftIcon={<GoSignOut />}
         >
           LogOut
@@ -228,30 +238,36 @@ const MainMenu = () => {
         borderRadius="md"
         maxWidth="1000px"
         background="linear-gradient(145deg, #5e8387, #4f6e71)"
-        width={["90%", "80%", "60%", "40%"]}
+        width={["100%", "70%", "50%"]}
         mt="2%"
         pb={15}
         boxShadow="6px 6px 8px #6f989c, -6px -6px 8px #6f989c"
+        px={{ base: 4, md: 6 }}
       >
         <Heading
           fontSize={["xl", "2xl"]}
-          mb={30}
+          mb={6}
           textAlign="center"
           color="gray.700"
           bg="#fdf9bc"
-          mt="0%"
+          py={4}
+          borderTopRadius="md"
         >
           Main Menu
         </Heading>
-        <SimpleGrid columns={[1, 2, 3]} spacing={6} px={[4, 6]}>
+        <SimpleGrid columns={[2, 3]} spacing={6}>
           {functions.length > 0 ? (
             functions.map((func) => (
               <VStack key={func.path} spacing={2} align="center">
                 <Button
                   onClick={() => handleNavigation(func.path)}
                   borderRadius="50%"
-                  width={["60px", "70px", "80px"]}
-                  height={["60px", "70px", "80px"]}
+                  width={["40px", "70px"]}
+                  height={["40px", "70px"]}
+                  minWidth="60px"
+                  minHeight="60px"
+                  maxWidth="100px"
+                  maxHeight="100px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -259,9 +275,9 @@ const MainMenu = () => {
                   bg="gray.100"
                   color="gray.600"
                   _hover={{ bg: "gray.200" }}
-                  fontSize={["24px", "28px", "32px"]}
+                  p={0}
                 >
-                  {func.icon}
+                  <func.icon size={["24"]} />
                 </Button>
                 <Text
                   fontSize={["sm", "md"]}
