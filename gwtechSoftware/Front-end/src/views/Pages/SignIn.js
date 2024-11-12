@@ -15,10 +15,8 @@ import {
   DrawerContent,
   DrawerCloseButton,
   IconButton,
-  Box,
 } from "@chakra-ui/react";
 import { HamburgerIcon } from "@chakra-ui/icons";
-import GradientBorder from "components/GradientBorder/GradientBorder";
 import api from "../../utils/customFetch.js";
 
 // Color constants for reuse
@@ -40,7 +38,7 @@ const Header = ({ onDrawerOpen }) => (
     align="center"
     justify="space-between"
     p={2}
-    bgGradient="linear-gradient(145deg, #556d70, #475c5f)"
+    bgGradient={COLORS.headerBg}
     color={COLORS.text}
     position="relative"
     boxShadow="5px 5px 6px #1b1e1f, -5px -5px 6px #7ea3a8"
@@ -48,7 +46,7 @@ const Header = ({ onDrawerOpen }) => (
     <Text fontSize="20px" fontWeight="600" textColor="#fdf9bc" ml="10px">
       LOTTERY SOFT
     </Text>
-    <Flex align="center" gap={40}>
+    <Flex align="center" gap={{ base: 2, md: 6 }}>
       <IconButton
         icon={<HamburgerIcon />}
         variant="outline"
@@ -80,7 +78,11 @@ const DrawerMenu = ({ isOpen, onClose }) => (
 
 // Links for header and drawer
 const NavigationLinks = ({ vertical }) => (
-  <Flex direction={vertical ? "column" : "row"} alignItems="flex-start">
+  <Flex
+    direction={vertical ? "column" : "row"}
+    alignItems={vertical ? "flex-start" : "center"}
+    display={{ base: vertical ? "flex" : "none", md: "flex" }}
+  >
     {["Home", "Contacts", "Services"].map((route) => (
       <RouterLink to={`/${route}`} key={route}>
         <Button
@@ -90,9 +92,7 @@ const NavigationLinks = ({ vertical }) => (
           textColor="antiquewhite"
           fontSize="18px"
           fontWeight="bold"
-          marginRight="25px"
           cursor="pointer"
-          display={{ base: vertical ? "flex" : "none", md: "inline-flex" }}
         >
           {capitalize(route)}
         </Button>
@@ -103,7 +103,7 @@ const NavigationLinks = ({ vertical }) => (
 
 // Login form component
 const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
-  <Flex direction="column" w="100%" width="350px" height="450px">
+  <Flex direction="column" w="100%" maxW="350px" mx="auto">
     <Flex
       direction="column"
       alignItems="center"
@@ -112,14 +112,15 @@ const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
       py={10}
       px={4}
       borderRadius="10px"
+      w="100%"
     >
       <Heading
         color={COLORS.title}
-        fontSize="20px"
-        mb="50px"
+        fontSize={["24px", "28px"]}
+        mb={{ base: "30px", md: "50px" }}
         textAlign="center"
         textColor="aliceblue"
-        font-weight="600"
+        fontWeight="600"
       >
         LOGIN
       </Heading>
@@ -132,8 +133,12 @@ const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
           type: "password",
         },
       ].map(({ label, value, onChange, type = "text" }) => (
-        <FormControl key={label} mb={5}>
-          <FormLabel fontSize="20px" fontWeight="400" textColor="aliceblue">
+        <FormControl key={label} mb={5} w="100%">
+          <FormLabel
+            fontSize={["16px", "20px"]}
+            fontWeight="400"
+            textColor="aliceblue"
+          >
             {label}
           </FormLabel>
 
@@ -156,13 +161,13 @@ const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
         type="submit"
         width="100%"
         h="45px"
-        my="40px"
+        my={{ base: "20px", md: "40px" }}
         borderRadius="10px"
         cursor="pointer"
         onClick={handleSubmit}
-        box-shadow="0px 1px 1px #233132, -1px -1px 1px #233132"
+        boxShadow="0px 1px 1px #233132, -1px -1px 1px #233132"
       >
-        <Text color="white" fontSize="20px" textColor="whitesmoke">
+        <Text color="white" fontSize={["16px", "20px"]} textColor="whitesmoke">
           LOGIN
         </Text>
       </Button>
@@ -219,20 +224,8 @@ function SignIn() {
     <>
       <Header onDrawerOpen={() => setIsOpen(true)} />
       <DrawerMenu isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      <Flex
-        align="flex-start"
-        justify="center"
-        minH="100vh"
-        bg={COLORS.bodyBg}
-        pt={{ base: "20px", md: "30px" }}
-      >
-        <Flex
-          h="100%"
-          w="100%"
-          maxW={{ base: "90%", sm: "450px" }}
-          mx="auto"
-          p={5}
-        >
+      <Flex align="center" justify="center" minH="100vh" bg={COLORS.bodyBg}>
+        <Flex w="100%" maxW={{ base: "90%", sm: "450px" }} mx="auto" p={5}>
           <LoginForm
             name={name}
             setName={setName}
