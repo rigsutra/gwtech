@@ -78,11 +78,17 @@ const WinNumber = () => {
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center"
+    >
       <Card
         overflowX={{ sm: "scroll", xl: "hidden" }}
         p={{ base: "5px", md: "20px" }}
-        width="100%"
+        width="50%"
+        justifyContent="center"
         border={{ base: "none", md: "1px solid gray" }}
       >
         <CardHeader
