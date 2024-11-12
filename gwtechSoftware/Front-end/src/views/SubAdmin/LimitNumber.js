@@ -15,6 +15,9 @@ import {
   HStack,
   Select,
   VStack,
+  ModalContent,
+  ModalBody,
+  ModalHeader,
   Box,
 } from "@chakra-ui/react";
 import { FaPlus, FaEdit } from "react-icons/fa";
@@ -101,7 +104,12 @@ const LimitNumber = () => {
       setLimitNumbers([]);
     }
   };
-
+  const handleCancel = () => {
+    setEditing(false);
+    setCurrentUser(null);
+    resetForm();
+    onClose();
+  };
   const handleSearch = async () => {
     setIsLoading(true);
     try {
@@ -235,10 +243,18 @@ const LimitNumber = () => {
     <Flex
       direction="column"
       pt={{ base: "120px", md: "75px" }}
-      width={{ base: "100%", lg: "80%", xl: "50%" }}
       mx="auto"
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
     >
-      <Card>
+      <Card
+        overflowX={{ sm: "scroll", xl: "hidden" }}
+        p={{ base: "5px", md: "20px" }}
+        width="60%"
+        border={{ base: "none", md: "1px solid gray" }}
+        borderRadius="none"
+      >
         <CardHeader
           display="flex"
           justifyContent="space-between"
@@ -410,84 +426,124 @@ const LimitNumber = () => {
       </Card>
 
       <Modal isOpen={isOpen} onClose={onClose}>
-        <form onSubmit={handleSubmit}>
-          <FormControl>
-            <FormLabel>Lottery Category Name</FormLabel>
-            <Select
-              value={lotteryCategoryName}
-              onChange={(e) => setLotteryCategoryName(e.target.value)}
-            >
-              {lotteryCategories.map((category) => (
-                <option key={category._id} value={category.lotteryName}>
-                  {category.lotteryName}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
+        <ModalContent bg="#A6A6A6" justifyContent="center">
+          <ModalHeader
+            bg="#7F7F7F"
+            textColor="white"
+            mb={4}
+            display="flex"
+            justifyContent="center"
+          >
+            {editing ? "EDIT LIMIT" : "ADD LIMIT"}
+          </ModalHeader>
+          <ModalBody>
+            <form bg="#A6A6A6" justifyContent="center" onSubmit={handleSubmit}>
+              <FormControl>
+                <FormLabel>Lottery Category Name</FormLabel>
+                <Select
+                  bg="#bfbfbf"
+                  color="black"
+                  value={lotteryCategoryName}
+                  onChange={(e) => setLotteryCategoryName(e.target.value)}
+                >
+                  {lotteryCategories.map((category) => (
+                    <option key={category._id} value={category.lotteryName}>
+                      {category.lotteryName}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
 
-          {activeView === "supervisor" && (
-            <FormControl>
-              <FormLabel>Supervisor</FormLabel>
-              <Select
-                value={selectedSupervisor}
-                onChange={(e) => setSelectedSupervisor(e.target.value)}
-              >
-                <option value="">Select Supervisor</option>
-                {supervisors.map((supervisor) => (
-                  <option key={supervisor._id} value={supervisor._id}>
-                    {supervisor.userName}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+              {activeView === "supervisor" && (
+                <FormControl>
+                  <FormLabel>Supervisor</FormLabel>
+                  <Select
+                    bg="#bfbfbf"
+                    color="black"
+                    value={selectedSupervisor}
+                    onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  >
+                    <option value="">Select Supervisor</option>
+                    {supervisors.map((supervisor) => (
+                      <option key={supervisor._id} value={supervisor._id}>
+                        {supervisor.userName}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
 
-          {activeView === "seller" && (
-            <FormControl>
-              <FormLabel>Seller</FormLabel>
-              <Select
-                value={selectedSeller}
-                onChange={(e) => setSelectedSeller(e.target.value)}
-              >
-                <option value="">Select Seller</option>
-                {sellers.map((seller) => (
-                  <option key={seller._id} value={seller._id}>
-                    {seller.userName}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+              {activeView === "seller" && (
+                <FormControl>
+                  <FormLabel>Seller</FormLabel>
+                  <Select
+                    bg="#bfbfbf"
+                    color="black"
+                    value={selectedSeller}
+                    onChange={(e) => setSelectedSeller(e.target.value)}
+                  >
+                    <option value="">Select Seller</option>
+                    {sellers.map((seller) => (
+                      <option key={seller._id} value={seller._id}>
+                        {seller.userName}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
 
-          <FormControl>
-            <FormLabel>Set Limit</FormLabel>
-            <Flex wrap="wrap" gap={2}>
-              {[
-                { label: "BLT", value: blt, setValue: setBlt },
-                { label: "L3C", value: l3c, setValue: setL3c },
-                { label: "MRG", value: mrg, setValue: setMrg },
-                { label: "L4C1", value: l4c1, setValue: setL4c1 },
-                { label: "L4C2", value: l4c2, setValue: setL4c2 },
-                { label: "L4C3", value: l4c3, setValue: setL4c3 },
-                { label: "L5C1", value: l5c1, setValue: setL5c1 },
-                { label: "L5C2", value: l5c2, setValue: setL5c2 },
-                { label: "L5C3", value: l5c3, setValue: setL5c3 },
-              ].map((field) => (
-                <Box key={field.label} w="30%">
-                  <FormLabel fontSize="sm">{field.label}</FormLabel>
-                  <Input
-                    type="number"
-                    value={field.value}
-                    onChange={(e) => field.setValue(e.target.value)}
-                  />
-                </Box>
-              ))}
-            </Flex>
-          </FormControl>
-          <Button type="submit" mt={4}>
-            {editing ? "Update" : "Add"} Limit
-          </Button>
-        </form>
+              <FormControl>
+                <FormLabel>Set Limit</FormLabel>
+                <Flex wrap="wrap" gap={2}>
+                  {[
+                    { label: "BLT", value: blt, setValue: setBlt },
+                    { label: "L3C", value: l3c, setValue: setL3c },
+                    { label: "MRG", value: mrg, setValue: setMrg },
+                    { label: "L4C1", value: l4c1, setValue: setL4c1 },
+                    { label: "L4C2", value: l4c2, setValue: setL4c2 },
+                    { label: "L4C3", value: l4c3, setValue: setL4c3 },
+                    { label: "L5C1", value: l5c1, setValue: setL5c1 },
+                    { label: "L5C2", value: l5c2, setValue: setL5c2 },
+                    { label: "L5C3", value: l5c3, setValue: setL5c3 },
+                  ].map((field) => (
+                    <Box key={field.label} w="30%">
+                      <FormLabel color="#7f7f7f" fontSize="sm">
+                        {field.label}
+                      </FormLabel>
+                      <Input
+                        type="number"
+                        value={field.value}
+                        bg="#bfbfbf"
+                        onChange={(e) => field.setValue(e.target.value)}
+                      />
+                    </Box>
+                  ))}
+                </Flex>
+              </FormControl>
+              <Stack direction="row" spacing={4} justify="center" mt={6} mb={6}>
+                <Button
+                  type="submit"
+                  mt={4}
+                  bg="#c6d98d"
+                  color="black"
+                  _hover={{ bg: "#b2c270" }}
+                  width="120px"
+                >
+                  {editing ? "Update" : "Add"} Limit
+                </Button>
+                <Button
+                  onClick={onClose}
+                  bg="#c6d98d"
+                  color="black"
+                  _hover={{ bg: "#b2c270" }}
+                  width="120px"
+                >
+                  Cancel
+                </Button>
+              </Stack>
+            </form>
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </Flex>
   );
