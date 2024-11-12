@@ -103,7 +103,7 @@ const NavigationLinks = ({ vertical }) => (
 
 // Login form component
 const LoginForm = ({ name, setName, password, setPassword, handleSubmit }) => (
-  <Flex direction="column" w="100%" maxW="350px" mx="auto">
+  <Flex direction="column" w="100%" maxW="350px" mx="auto" marginTop="20px">
     <Flex
       direction="column"
       alignItems="center"
@@ -222,10 +222,16 @@ function SignIn() {
 
   return (
     <>
-      <Header onDrawerOpen={() => setIsOpen(true)} />
+      <Header onDrawerOpen={() => setIsOpen(true)} position="fixed" />
       <DrawerMenu isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      <Flex align="center" justify="center" minH="100vh" bg={COLORS.bodyBg}>
-        <Flex w="100%" maxW={{ base: "90%", sm: "450px" }} mx="auto" p={5} margineTop="-14">
+      <Flex
+        align="center"
+        justify="center"
+        marginTop="-14"
+        minH="100vh"
+        bg={COLORS.bodyBg}
+      >
+        <Flex w="100%" maxW={{ base: "90%", sm: "450px" }} mx="auto" p={5}>
           <LoginForm
             name={name}
             setName={setName}
