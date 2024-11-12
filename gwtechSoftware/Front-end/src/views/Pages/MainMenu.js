@@ -251,19 +251,19 @@ const MainMenu = () => {
           color="gray.700"
           bg="#fdf9bc"
           py={4}
-          borderTopRadius="md"
+          marginTop="-6px"
         >
           Main Menu
         </Heading>
-        <SimpleGrid columns={[2, 3]} spacing={6}>
+        <SimpleGrid columns={[2, 3]} spacing={6} pt={20}>
           {functions.length > 0 ? (
             functions.map((func) => (
               <VStack key={func.path} spacing={2} align="center">
                 <Button
                   onClick={() => handleNavigation(func.path)}
                   borderRadius="50%"
-                  width={["40px", "70px"]}
-                  height={["40px", "70px"]}
+                  width={["30px", "40px"]}
+                  height={["30px", "40px"]}
                   minWidth="60px"
                   minHeight="60px"
                   maxWidth="100px"
@@ -271,18 +271,17 @@ const MainMenu = () => {
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
-                  boxShadow="md"
-                  bg="gray.100"
-                  color="gray.600"
-                  _hover={{ bg: "gray.200" }}
+                  bg="#fdf9bc"
+                  border="none"
                   p={0}
                 >
                   <func.icon size={["24"]} />
                 </Button>
                 <Text
-                  fontSize={["sm", "md"]}
                   textAlign="center"
-                  color="gray.700"
+                  color="#fdf9bc"
+                  fontWeight="Bold"
+                  fontSize="16px"
                 >
                   {func.name}
                 </Text>
