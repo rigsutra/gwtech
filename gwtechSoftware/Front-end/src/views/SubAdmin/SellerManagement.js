@@ -20,7 +20,13 @@ import {
   useToast,
   useColorMode,
   Switch,
-  Select, // Import Select for the dropdown
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
+  Select,
+  Center,
+  VStack, // Import Select for the dropdown
 } from "@chakra-ui/react";
 
 import { RiUserAddLine } from "react-icons/ri";
@@ -54,8 +60,9 @@ function SellerManagement() {
   useEffect(() => {
     const fetchSupervisors = async () => {
       try {
-        const response = await api().get(`/subadmin/getsupervisors`);
-        setSuperVisors(response.data.users); // Set the fetched supervisors
+        const response = await api().get(`/subadmin/getsuperVisor`);
+        console.log(response);
+        setSuperVisors(response.data); // Set the fetched supervisors
       } catch (err) {
         console.error(err);
       }
@@ -67,9 +74,10 @@ function SellerManagement() {
     const fetchSellers = async () => {
       try {
         const response = await api().get(`/subadmin/getseller`);
-        setUsers(response.data.users);
-        setCompanyName(response.data.companyName);
-        setBonusFlag(response.data.bonusFlag);
+        console.log(response.data);
+        setUsers(response?.data?.users);
+        setCompanyName(response?.data?.companyName);
+        setBonusFlag(response?.data?.bonusFlag);
       } catch (err) {
         console.error(err);
       }
@@ -78,13 +86,14 @@ function SellerManagement() {
   }, []);
 
   const createUser = () => {
+    console.log(userName, password, isActive, imei, selectedSuperVisor);
     api()
       .post(`/subadmin/addseller`, {
         userName: userName.trim(),
         password,
         isActive,
         imei: imei.trim(),
-        superVisorId: selectedSuperVisor, // Use selected supervisor ID
+        superVisorId: selectedSuperVisor || "", // Use selected supervisor ID
       })
       .then((response) => {
         setUsers([...users, response.data]);
@@ -224,13 +233,20 @@ function SellerManagement() {
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
+    >
       {/* Sellers Table */}
       <Card
         overflowX={{ sm: "scroll", xl: "hidden" }}
         p={{ base: "5px", md: "20px" }}
-        width="100%"
+        width="60%"
         border={{ base: "none", md: "1px solid gray" }}
+        borderRadius="none"
       >
         <CardHeader
           p="6px 0px 22px 0px"
@@ -272,7 +288,7 @@ function SellerManagement() {
                     <pre>{companyName}</pre>
                   </Td>
                   <Td>
-                    <pre>{user.superVisorName || "N/A"}</pre>
+                    <pre>{user.superVisorName || "None"}</pre>
                   </Td>
                   <Td>
                     <pre>{user.isActive ? "Yes" : "No"}</pre>
@@ -310,71 +326,130 @@ function SellerManagement() {
       <Modal
         isOpen={isOpen}
         onClose={handleCancel}
-        title={editing ? "Edit User" : "Create User"}
-        submitButtonText={editing ? "Update" : "Create"}
+        title="ADD SELLER"
         onSubmit={handleSubmit}
-        cancelButtonText="Cancel"
         onCancel={handleCancel}
         colorMode={colorMode}
       >
-        <Stack spacing={4}>
-          <FormControl>
-            <FormLabel>Seller Name</FormLabel>
-            <Input
-              type="text"
-              value={userName}
-              onChange={handleUserNameChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Device ID</FormLabel>
-            <Input
-              type="text"
-              value={imei}
-              onChange={handleImeiChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Supervisor</FormLabel>
-            <Select
-              placeholder="Select Supervisor"
-              value={selectedSuperVisor}
-              onChange={handleSuperVisorChange} // Handle change for supervisor selection
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            >
-              {superVisors.map((superVisor) => (
-                <option key={superVisor._id} value={superVisor._id}>
-                  {superVisor.users}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel>Active</FormLabel>
-            <Checkbox
-              isChecked={isActive}
-              onChange={handleIsActiveChange}
-              colorScheme={colorMode === "light" ? "blue" : "gray"}
-            >
-              Active
-            </Checkbox>
-          </FormControl>
-        </Stack>
+        <ModalContent bg="#A6A6A6" justifyContent="center">
+          <ModalHeader
+            bg="#7F7F7F"
+            textColor="white"
+            mb={4}
+            display="flex"
+            justifyContent="center"
+          >
+            {editing ? "EDIT SELLER" : "ADD SELLER"}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing={4}>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Name:
+                  </FormLabel>
+                  <Input
+                    type="text"
+                    value={userName}
+                    onChange={handleUserNameChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  />
+                </Flex>
+              </FormControl>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Device ID:
+                  </FormLabel>
+                  <Input
+                    type="text"
+                    value={imei}
+                    onChange={handleImeiChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  />
+                </Flex>
+              </FormControl>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Password:
+                  </FormLabel>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  />
+                </Flex>
+              </FormControl>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Supervisor:
+                  </FormLabel>
+                  <Select
+                    placeholder="Select Supervisor"
+                    value={selectedSuperVisor}
+                    onChange={handleSuperVisorChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  >
+                    {superVisors.map((superVisor) => (
+                      <option key={superVisor._id} value={superVisor._id}>
+                        {superVisor.userName}
+                      </option>
+                    ))}
+                  </Select>
+                </Flex>
+              </FormControl>
+              <FormControl bg="#bfbfbf">
+                <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                  Active:
+                </FormLabel>
+                <Checkbox
+                  isChecked={isActive}
+                  onChange={handleIsActiveChange}
+                  colorScheme="gray"
+                  size="lg"
+                >
+                  Active
+                </Checkbox>
+              </FormControl>
+            </Stack>
+            <Stack direction="row" spacing={4} justify="center" mt={6} mb={6}>
+              <Button
+                onClick={handleSubmit}
+                bg="#C6D98D"
+                color="black"
+                _hover={{ bg: "#b2c270" }}
+                width="120px"
+              >
+                {editing ? "Update" : "Create"}
+              </Button>
+              <Button
+                onClick={handleCancel}
+                bg="#c6d98d"
+                color="black"
+                _hover={{ bg: "#b2c270" }}
+                width="120px"
+              >
+                Cancel
+              </Button>
+            </Stack>
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </Flex>
   );
