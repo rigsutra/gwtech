@@ -258,12 +258,12 @@ const MainMenu = () => {
         <SimpleGrid columns={[2, 3]} spacing={6} pt={20}>
           {functions.length > 0 ? (
             functions.map((func) => (
-              <VStack key={func.path} spacing={2} align="center">
+              <VStack key={func.path} spacing={2} align="center" mb={20}>
                 <Button
                   onClick={() => handleNavigation(func.path)}
                   borderRadius="50%"
-                  width={["30px", "40px"]}
-                  height={["30px", "40px"]}
+                  width={["30px", "30px"]}
+                  height={["30px", "30px"]}
                   minWidth="60px"
                   minHeight="60px"
                   maxWidth="100px"
@@ -275,7 +275,7 @@ const MainMenu = () => {
                   border="none"
                   p={0}
                 >
-                  <func.icon size={["24"]} />
+                  <func.icon size={["20"]} />
                 </Button>
                 <Text
                   textAlign="center"
