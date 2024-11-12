@@ -19,6 +19,10 @@ import {
   useDisclosure,
   useToast,
   useColorMode,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalCloseButton,
 } from "@chakra-ui/react";
 import { RiUserAddLine } from "react-icons/ri";
 import { FaEdit } from "react-icons/fa";
@@ -37,7 +41,6 @@ function SupervisorManagement() {
   const [isActive, setIsActive] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [companyName, setCompanyName] = useState("");
   const [isAddMode, setIsAddMode] = useState(true); // New state to track mode
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -48,6 +51,7 @@ function SupervisorManagement() {
     const fetchSupervisors = async () => {
       try {
         const response = await api().get(`/subadmin/getsuperVisor`);
+        console.log(response.data);
         setUsers(response.data);
       } catch (err) {
         console.error(err);
@@ -63,7 +67,7 @@ function SupervisorManagement() {
         userName,
         password,
         isActive,
-        companyName,
+        // companyName,
       })
       .then((response) => {
         setUsers([...users, response.data]);
@@ -90,7 +94,7 @@ function SupervisorManagement() {
   const updateUser = (id) => {
     const requestBody = {
       userName: userName || currentUser.userName, // Use existing value if not updated
-      companyName: companyName || currentUser.companyName, // Use existing value if not updated
+      // companyName: companyName || currentUser.companyName, // Use existing value if not updated
       isActive: isActive !== undefined ? isActive : currentUser.isActive, // Update only if specified
     };
 
@@ -151,9 +155,9 @@ function SupervisorManagement() {
     setUserName(event.target.value.trim());
   };
 
-  const handleCompanyNameChange = (event) => {
-    setCompanyName(event.target.value.trim());
-  };
+  // const handleCompanyNameChange = (event) => {
+  //   setCompanyName(event.target.value.trim());
+  // };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value.trim());
@@ -166,7 +170,7 @@ function SupervisorManagement() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!userName || !companyName) {
+    if (!userName) {
       toast({
         title: "Error",
         description: "Username and company name are required.",
@@ -190,7 +194,7 @@ function SupervisorManagement() {
     setCurrentUser(user);
     setUserName(user.userName);
     setPassword(""); // Reset password for security
-    setCompanyName(user.companyName);
+    // setCompanyName(user.companyName);
     setIsActive(user.isActive);
     onOpen();
   };
@@ -210,18 +214,25 @@ function SupervisorManagement() {
   const resetForm = () => {
     setUserName("");
     setPassword("");
-    setCompanyName("");
+    // setCompanyName("");
     setIsActive(true);
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
+      pt={{ base: "120px", md: "75px" }}
+    >
       {/* Supervisors Table */}
       <Card
         overflowX={{ sm: "scroll", xl: "hidden" }}
         p={{ base: "5px", md: "20px" }}
-        width="100%"
+        width="60%"
         border={{ base: "none", md: "1px solid gray" }}
+        borderRadius="none"
       >
         <CardHeader
           p="6px 0px 22px 0px"
@@ -259,7 +270,7 @@ function SupervisorManagement() {
                     <pre>{user.userName}</pre>
                   </Td>
                   <Td>
-                    <pre>{user.companyName}</pre>
+                    <pre>{sessionStorage.getItem("company")}</pre>
                   </Td>
                   <Td>
                     <pre>{user.isActive ? "Yes" : "No"}</pre>
@@ -305,48 +316,87 @@ function SupervisorManagement() {
         onCancel={handleCancel}
         colorMode={colorMode}
       >
-        <Stack spacing={4}>
-          <FormControl>
-            <FormLabel>Name</FormLabel>
-            <Input
-              type="text"
-              value={userName}
-              onChange={handleUserNameChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Company Name</FormLabel>
-            <Input
-              type="text"
-              value={companyName}
-              onChange={handleCompanyNameChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              bg={colorMode === "light" ? "white" : "gray.700"}
-              color={colorMode === "light" ? "gray.800" : "white"}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Active</FormLabel>
-            <Checkbox
-              isChecked={isActive}
-              onChange={handleIsActiveChange}
-              colorScheme={colorMode === "light" ? "blue" : "gray"}
-            >
-              Active
-            </Checkbox>
-          </FormControl>
-        </Stack>
+        <ModalContent bg="#A6A6A6" justifyContent="center">
+          <ModalHeader
+            bg="#7F7F7F"
+            textColor="white"
+            mb={4}
+            display="flex"
+            justifyContent="center"
+          >
+            {editing ? "EDIT SUPERVISOR" : "ADD SUPERVISOR"}
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Stack spacing={4}>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Name:
+                  </FormLabel>
+                  <Input
+                    type="text"
+                    value={userName}
+                    onChange={handleUserNameChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  />
+                </Flex>
+              </FormControl>
+              <FormControl>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Password:
+                  </FormLabel>
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    bg="#bfbfbf"
+                    color="black"
+                    height="40px"
+                    width="300px" // Set fixed width
+                  />
+                </Flex>
+              </FormControl>
+              <FormControl bg="#bfbfbf">
+                <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                  Active:
+                </FormLabel>
+                <Checkbox
+                  isChecked={isActive}
+                  onChange={handleIsActiveChange}
+                  colorScheme="gray"
+                  size="lg"
+                >
+                  Active
+                </Checkbox>
+              </FormControl>
+            </Stack>
+            <Stack direction="row" spacing={4} justify="center" mt={6} mb={6}>
+              <Button
+                onClick={handleSubmit}
+                bg="#C6D98D"
+                color="black"
+                _hover={{ bg: "#b2c270" }}
+                width="120px"
+              >
+                {editing ? "Update" : "Create"}
+              </Button>
+              <Button
+                onClick={handleCancel}
+                bg="#c6d98d"
+                color="black"
+                _hover={{ bg: "#b2c270" }}
+                width="120px"
+              >
+                Cancel
+              </Button>
+            </Stack>
+          </ModalBody>
+        </ModalContent>
       </Modal>
     </Flex>
   );
