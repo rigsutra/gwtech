@@ -95,7 +95,6 @@ const SaleDetails = () => {
       );
 
       setLotteryDetail(responseData);
-      console.log(typeof responseData?.data);
     } catch (error) {
       console.error("Error fetching sell details:", error);
       toast({
