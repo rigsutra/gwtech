@@ -512,8 +512,8 @@ const PaymentCondition = () => {
               <Select
                 onChange={(event) => setLotteryCategoryName(event.target.value)}
                 value={lotteryCategoryName}
-                placeholder="Select Lottery Category"
               >
+                  <option>All</option>
                 {lotteryCategories.map((category) => (
                   <option key={category._id} value={category.lotteryName}>
                     {category.lotteryName}
