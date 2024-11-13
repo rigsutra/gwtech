@@ -206,11 +206,18 @@ const PercentageLimit = () => {
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      width="100%"
+      justifyContent={"center"}
+      alignItems={"center"}
+    >
       <Card
         overflowX={{ md: "scroll", xl: "hidden" }}
         p={{ base: "5px", md: "20px" }}
-        width="100%"
+        width="70%"
+        pt="10px"
         border={{ base: "none", md: "1px solid gray" }}
       >
         <CardHeader display="flex" justifyContent="space-between">
@@ -228,11 +235,12 @@ const PercentageLimit = () => {
             isDisabled={lotteryCategories.length === 0}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
             _hover={{ bg: colorMode === "light" ? "blue.600" : "blue.200" }}
+            borderRadius={"none"}
           >
             <FaPlus size={24} color="white" />
           </Button>
         </CardHeader>
-        <CardBody pb="15px">
+        <CardBody pb="15px" mt="15px">
           <Flex
             flexWrap="wrap"
             flexDirection={{ base: "column", sm: "row" }}
@@ -255,15 +263,34 @@ const PercentageLimit = () => {
                         <FormLabel>Lottery Category Name</FormLabel>
                         <FormLabel>{condition.lotteryCategoryName}</FormLabel>
                       </Box>
-                      <Box>
+                      <Box as="div">
                         <Button
                           size="sm"
                           onClick={() => handleEdit(condition)}
                           bg={
                             colorMode === "light" ? "yellow.500" : "yellow.300"
                           }
+                          _hover={{
+                            bg:
+                              colorMode === "light"
+                                ? "yellow.600"
+                                : "yellow.200",
+                          }}
+                          borderRadius={"none"}
                         >
                           <FaEdit size={20} color="white" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDelete(condition)}
+                          bg={colorMode === "light" ? "red.500" : "red.300"}
+                          _hover={{
+                            bg: colorMode === "light" ? "red.600" : "red.200",
+                          }}
+                          borderRadius={"none"}
+                          ml={2}
+                        >
+                          <RiDeleteBinLine size={20} color="white" />
                         </Button>
                       </Box>
                     </HStack>
