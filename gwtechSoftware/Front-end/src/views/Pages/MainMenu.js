@@ -126,7 +126,7 @@ const MainMenu = () => {
       },
       {
         path: "/subadmin/PercentageLimit",
-        name: "Percentage Limit",
+        name: "Percentage",
         icon: FaInfoCircle,
       },
       {
@@ -236,10 +236,9 @@ const MainMenu = () => {
 
       {/* Main Menu */}
       <Box
-        borderRadius="md"
-        maxWidth="1000px"
+        as="div"
         background="linear-gradient(145deg, #5e8387, #4f6e71)"
-        width={["100%", "70%", "50%"]}
+        width={{ sm: "100%", lg: "50%" }}
         mt="2%"
         pb={15}
         boxShadow="6px 6px 8px #6f989c, -6px -6px 8px #6f989c"
@@ -256,33 +255,37 @@ const MainMenu = () => {
         >
           Main Menu
         </Heading>
-        <SimpleGrid columns={[2, 3]} spacing={6} pt={20}>
+        <SimpleGrid
+          columns="4" // Responsive column count
+          spacing={6}
+          pt={20}
+        >
           {functions.length > 0 ? (
             functions.map((func) => (
-              <VStack key={func.path} spacing={2} align="center" mb={20}>
+              <VStack
+                key={func.path}
+                spacing={2}
+                align="center"
+                mb={20}
+                px={10}
+              >
                 <Button
                   onClick={() => handleNavigation(func.path)}
                   borderRadius="50%"
-                  width={["30px", "30px"]}
-                  height={["30px", "30px"]}
-                  minWidth="60px"
-                  minHeight="60px"
-                  maxWidth="100px"
-                  maxHeight="100px"
+                  width="40px"
+                  height="40px"
                   display="flex"
                   alignItems="center"
-                  flexWrap="wrap"
                   justifyContent="center"
                   bg="#fdf9bc"
                   border="none"
-                  p={0}
                 >
-                  <func.icon size={["20"]} />
+                  <func.icon size="20" />
                 </Button>
                 <Text
                   textAlign="center"
                   color="#fdf9bc"
-                  fontWeight="Bold"
+                  fontWeight="bold"
                   fontSize="16px"
                 >
                   {func.name}
