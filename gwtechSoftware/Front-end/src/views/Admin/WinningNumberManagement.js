@@ -19,9 +19,7 @@ import {
 } from "@chakra-ui/react";
 
 import { CgSearch } from "react-icons/cg";
-import { FaPlus } from "react-icons/fa";
-
-import { FaEdit } from "react-icons/fa";
+import { FaPlus, FaEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
 
 // Custom components
@@ -31,86 +29,22 @@ import CardBody from "components/Card/CardBody.js";
 import Modal from "components/Modal/Modal.js";
 
 const initWinNumbers = [
-  {
-    gameCategory: "BLT",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "BLT",
-    position: 2,
-    number: "",
-  },
-  {
-    gameCategory: "BLT",
-    position: 3,
-    number: "",
-  },
-  {
-    gameCategory: "L3C",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L4C 1",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L4C 2",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L4C 3",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L5C 1",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L5C 2",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "L5C 3",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 1,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 2,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 3,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 4,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 5,
-    number: "",
-  },
-  {
-    gameCategory: "MRG",
-    position: 6,
-    number: "",
-  },
+  { gameCategory: "BLT", position: 1, number: "" }, // BLT1 - First
+  { gameCategory: "BLT", position: 2, number: "" }, // BLT2 - Second
+  { gameCategory: "BLT", position: 3, number: "" }, // BLT3 - Third
+  { gameCategory: "L3C", position: 1, number: "" }, // L3C1
+  { gameCategory: "L4C 1", position: 1, number: "" }, // L4C1
+  { gameCategory: "L4C 2", position: 1, number: "" }, // L4C2
+  { gameCategory: "L4C 3", position: 1, number: "" }, // L4C3
+  { gameCategory: "L5C 1", position: 1, number: "" }, // L5C1
+  { gameCategory: "L5C 2", position: 1, number: "" }, // L5C2
+  { gameCategory: "L5C 3", position: 1, number: "" }, // L5C3
+  { gameCategory: "MRG", position: 1, number: "" }, // MRG1
+  { gameCategory: "MRG", position: 2, number: "" }, // MRG2
+  { gameCategory: "MRG", position: 3, number: "" }, // MRG3
+  { gameCategory: "MRG", position: 4, number: "" }, // MRG4
+  { gameCategory: "MRG", position: 5, number: "" }, // MRG5
+  { gameCategory: "MRG", position: 6, number: "" }, // MRG6
 ];
 
 const WinningNumbersManagement = () => {
@@ -121,18 +55,26 @@ const WinningNumbersManagement = () => {
   const { colorMode } = useColorMode();
 
   const [lotteryCategoryName, setLotteryCategoryName] = useState("");
-  const [date, setDate] = useState(new Date().toLocaleDateString("en-CA"));
-  const [numbers, setNumbers] = useState(initWinNumbers);
+  const [date, setDate] = useState(
+    new Date().toISOString().split("T")[0] // "en-CA" format YYYY-MM-DD
+  );
+  const [numbers, setNumbers] = useState(
+    JSON.parse(JSON.stringify(initWinNumbers))
+  );
   const [lotteryCategories, setLotteryCategories] = useState([]);
   const [winningNumbers, setWinningNumbers] = useState([]);
-  const [currentWinNumber, setCurrentWinNumber] = useState();
+  const [currentWinNumber, setCurrentWinNumber] = useState(null);
   const [fromDate, setFromDate] = useState(
-    new Date().toLocaleDateString("en-CA")
+    new Date().toISOString().split("T")[0]
   );
-  const [toDate, setToDate] = useState(new Date().toLocaleDateString("en-CA"));
+  const [toDate, setToDate] = useState(new Date().toISOString().split("T")[0]);
+
+  // Track which fields have been manually overridden
+  const [manualOverrides, setManualOverrides] = useState({});
 
   useEffect(() => {
-    setNumbers(initWinNumbers);
+    setNumbers(JSON.parse(JSON.stringify(initWinNumbers)));
+    setManualOverrides({});
   }, [lotteryCategoryName]);
 
   useEffect(() => {
@@ -151,12 +93,12 @@ const WinningNumbersManagement = () => {
       }
     };
     fetchLotteryCategories();
-  }, []);
+  }, [toast]);
 
   const fetchWinningNumbers = async () => {
     try {
       const response = await api().post("/admin/getwiningnumber", {
-        lotteryCategoryName: "",
+        lotteryCategoryName: "", // Assuming empty to fetch all
         fromDate,
         toDate,
       });
@@ -172,32 +114,65 @@ const WinningNumbersManagement = () => {
     }
   };
 
-  const handleNumberChange = (index1, value) => {
-    const newNumbers = [...numbers];
-    newNumbers[index1].number = value;
-    // L4C
-    newNumbers[4].number = `${numbers[1].number}${numbers[2].number}`;
-    newNumbers[5].number = `${numbers[0].number}${numbers[1].number}`;
-    newNumbers[6].number = `${numbers[0].number}${numbers[2].number}`;
+  const handleNumberChange = (index, value) => {
+    // Optionally, validate input here (e.g., numeric, length)
+    setNumbers((prevNumbers) => {
+      const newNumbers = [...prevNumbers];
+      newNumbers[index].number = value;
 
-    // L5C
-    newNumbers[7].number = `${numbers[3].number}${numbers[2].number}`;
-    newNumbers[8].number = `${numbers[3].number}${numbers[1].number}`;
-    newNumbers[9].number = `${numbers[3].number}${numbers[0].number}`;
+      // Update manual overrides if the field is editable
+      if (
+        ["L4C 1", "L4C 2", "L4C 3", "L5C 1", "L5C 2", "L5C 3"].includes(
+          newNumbers[index].gameCategory
+        )
+      ) {
+        setManualOverrides((prev) => ({
+          ...prev,
+          [index]: true,
+        }));
+      }
 
-    // MRG
-    newNumbers[10].number = `${numbers[0].number}×${numbers[1].number}`;
-    newNumbers[11].number = `${numbers[0].number}×${numbers[2].number}`;
-    newNumbers[12].number = `${numbers[1].number}×${numbers[2].number}`;
-    newNumbers[13].number = `${numbers[1].number}×${numbers[0].number}`;
-    newNumbers[14].number = `${numbers[2].number}×${numbers[0].number}`;
-    newNumbers[15].number = `${numbers[2].number}×${numbers[1].number}`;
+      // If main numbers change, recalculate dependent fields unless manually overridden
+      if ([0, 1, 2, 3].includes(index)) {
+        // Recalculate L4C
+        if (!manualOverrides[4]) {
+          newNumbers[4].number = `${newNumbers[1].number}${newNumbers[2].number}`; // L4C1
+        }
+        if (!manualOverrides[5]) {
+          newNumbers[5].number = `${newNumbers[0].number}${newNumbers[1].number}`; // L4C2
+        }
+        if (!manualOverrides[6]) {
+          newNumbers[6].number = `${newNumbers[0].number}${newNumbers[2].number}`; // L4C3
 
-    setNumbers([...newNumbers]);
+          // Recalculate L5C
+        }
+        if (!manualOverrides[7]) {
+          newNumbers[7].number = `${newNumbers[3].number}${newNumbers[2].number}`; // L5C1
+        }
+        if (!manualOverrides[8]) {
+          newNumbers[8].number = `${newNumbers[3].number}${newNumbers[1].number}`; // L5C2
+        }
+        if (!manualOverrides[9]) {
+          newNumbers[9].number = `${newNumbers[3].number}${newNumbers[0].number}`; // L5C3
+        }
+
+        // Recalculate MRG fields regardless of manual overrides (you can adjust if needed)
+        newNumbers[10].number = `${newNumbers[0].number}×${newNumbers[1].number}`; // MRG1
+        newNumbers[11].number = `${newNumbers[0].number}×${newNumbers[2].number}`; // MRG2
+        newNumbers[12].number = `${newNumbers[1].number}×${newNumbers[2].number}`; // MRG3
+        // newNumbers[13].number = `${newNumbers[1].number}×${newNumbers[0].number}`; // MRG4
+        // newNumbers[14].number = `${newNumbers[2].number}×${newNumbers[0].number}`; // MRG5
+        // newNumbers[15].number = `${newNumbers[2].number}×${newNumbers[1].number}`; // MRG6
+      }
+
+      return newNumbers;
+    });
   };
 
   const handleCancel = () => {
     setEditing(false);
+    setNumbers(JSON.parse(JSON.stringify(initWinNumbers)));
+    setManualOverrides({});
     onClose();
   };
 
@@ -213,20 +188,18 @@ const WinningNumbersManagement = () => {
           numbers: numbers,
         });
         setLotteryCategoryName("");
-        setDate(new Date().toLocaleDateString("en-CA"));
-        setNumbers(initWinNumbers);
+        setDate(new Date().toISOString().split("T")[0]);
+        setNumbers(JSON.parse(JSON.stringify(initWinNumbers)));
+        setManualOverrides({});
         setEditing(false);
         onClose();
 
+        // Check if the new winning number falls within the date range
         if (
           new Date(response.data.date) >= new Date(fromDate) &&
           new Date(response.data.date) <= new Date(toDate)
         ) {
-          try {
-            setWinningNumbers([...winningNumbers, response.data]);
-          } catch (err) {
-            setWinningNumbers([response.data]);
-          }
+          setWinningNumbers((prev) => [...prev, response.data]);
         }
         toast({
           title: "Winning number created",
@@ -254,19 +227,22 @@ const WinningNumbersManagement = () => {
         numbers: numbers,
       });
       setLotteryCategoryName("");
-      setDate(new Date().toLocaleDateString("en-CA"));
-      setNumbers(initWinNumbers);
+      setDate(new Date().toISOString().split("T")[0]);
+      setNumbers(JSON.parse(JSON.stringify(initWinNumbers)));
+      setManualOverrides({});
       setEditing(false);
       onClose();
       const index = winningNumbers.findIndex((number) => number._id === id);
-      const newWinningNumbers = [...winningNumbers];
-      newWinningNumbers[index] = {
-        _id: id,
-        lotteryCategoryName,
-        date,
-        numbers: numbers,
-      };
-      setWinningNumbers([...newWinningNumbers]);
+      if (index !== -1) {
+        const newWinningNumbers = [...winningNumbers];
+        newWinningNumbers[index] = {
+          _id: id,
+          lotteryCategoryName,
+          date,
+          numbers: numbers,
+        };
+        setWinningNumbers(newWinningNumbers);
+      }
       toast({
         title: "Winning number updated",
         status: "success",
@@ -290,6 +266,7 @@ const WinningNumbersManagement = () => {
     setDate(number?.date.substr(0, 10));
     setNumbers(number?.numbers);
     setCurrentWinNumber(number);
+    setManualOverrides({});
     onOpen();
   };
 
@@ -326,6 +303,45 @@ const WinningNumbersManagement = () => {
     return dateString;
   };
 
+  // Recalculate dependent numbers manually
+  const recalculateDependentNumbers = () => {
+    setNumbers((prevNumbers) => {
+      const newNumbers = [...prevNumbers];
+
+      // Recalculate L4C
+      if (!manualOverrides[4]) {
+        newNumbers[4].number = `${newNumbers[1].number}${newNumbers[2].number}`; // L4C1
+      }
+      if (!manualOverrides[5]) {
+        newNumbers[5].number = `${newNumbers[0].number}${newNumbers[1].number}`; // L4C2
+      }
+      if (!manualOverrides[6]) {
+        newNumbers[6].number = `${newNumbers[0].number}${newNumbers[2].number}`; // L4C3
+      }
+
+      // Recalculate L5C
+      if (!manualOverrides[7]) {
+        newNumbers[7].number = `${newNumbers[3].number}${newNumbers[2].number}`; // L5C1
+      }
+      if (!manualOverrides[8]) {
+        newNumbers[8].number = `${newNumbers[3].number}${newNumbers[1].number}`; // L5C2
+      }
+      if (!manualOverrides[9]) {
+        newNumbers[9].number = `${newNumbers[3].number}${newNumbers[0].number}`; // L5C3
+      }
+
+      // Recalculate MRG fields regardless
+      newNumbers[10].number = `${newNumbers[0].number}×${newNumbers[1].number}`; // MRG1
+      newNumbers[11].number = `${newNumbers[0].number}×${newNumbers[2].number}`; // MRG2
+      newNumbers[12].number = `${newNumbers[1].number}×${newNumbers[2].number}`; // MRG3
+      newNumbers[13].number = `${newNumbers[1].number}×${newNumbers[0].number}`; // MRG4
+      newNumbers[14].number = `${newNumbers[2].number}×${newNumbers[0].number}`; // MRG5
+      newNumbers[15].number = `${newNumbers[2].number}×${newNumbers[1].number}`; // MRG6
+
+      return newNumbers;
+    });
+  };
+
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
       <Card
@@ -345,7 +361,7 @@ const WinningNumbersManagement = () => {
             justifyContent="flex-start"
             width="100%"
           >
-            <Text fontSize="lg" font="Weight:bold">
+            <Text fontSize="lg" fontWeight="bold">
               Winning Numbers
             </Text>
             <Flex
@@ -389,7 +405,9 @@ const WinningNumbersManagement = () => {
                 <Button
                   size="sm"
                   onClick={() => {
-                    setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
+                    setLotteryCategoryName(
+                      lotteryCategories[0]?.lotteryName || ""
+                    );
                     onOpen();
                   }}
                   bg={colorMode === "light" ? "blue.500" : "blue.300"}
@@ -426,13 +444,11 @@ const WinningNumbersManagement = () => {
                     <HStack justifyContent="space-between">
                       <Box>
                         <FormLabel>Lottery Category Name</FormLabel>
-                        <FormLabel>{number?.lotteryCategoryName}</FormLabel>
+                        <Text>{number?.lotteryCategoryName}</Text>
                       </Box>
                       <Box>
                         <FormLabel>Date</FormLabel>
-                        <FormLabel>
-                          {formatDate(number?.date.substr(0, 10))}
-                        </FormLabel>
+                        <Text>{formatDate(number?.date.substr(0, 10))}</Text>
                       </Box>
                     </HStack>
                   </FormControl>
@@ -450,6 +466,7 @@ const WinningNumbersManagement = () => {
                       >
                         <FaEdit size={20} color="white" />
                       </Button>
+                      {/* Uncomment the delete button if you want to enable deletion */}
                       {/* <Button
                         size="sm"
                         onClick={() => handleDelete(number?._id)}
@@ -458,7 +475,7 @@ const WinningNumbersManagement = () => {
                           bg: colorMode === "light" ? "red.600" : "red.200",
                         }}
                       >
-                        <RiDeleteBinLine size={20} color="white"/>
+                        <RiDeleteBinLine size={20} color="white" />
                       </Button> */}
                     </Box>
                   </Flex>
@@ -466,11 +483,13 @@ const WinningNumbersManagement = () => {
                     <FormLabel>Win Numbers</FormLabel>
                     <Stack p="5px">
                       <Flex justifyContent="space-between">
+                        {/* BLT and L3C */}
                         <VStack
                           flexBasis={{ base: "100%", md: "30%" }}
                           color="black"
                           mx="3px"
                         >
+                          {/* BLT1 - First */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               1st (First)
@@ -478,10 +497,11 @@ const WinningNumbersManagement = () => {
                             <Input
                               placeholder="First"
                               maxLength={2}
-                              isReadOnly={true}
+                              isReadOnly={true} // Assuming BLT fields are still read-only in display
                               value={number?.numbers[0]?.number}
                             />
                           </Box>
+                          {/* BLT2 - Second */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               2nd (Second)
@@ -493,6 +513,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[1]?.number}
                             />
                           </Box>
+                          {/* BLT3 - Third */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               3rd (Third)
@@ -504,6 +525,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[2]?.number}
                             />
                           </Box>
+                          {/* L3C */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L3C
@@ -517,21 +539,24 @@ const WinningNumbersManagement = () => {
                           </Box>
                         </VStack>
 
+                        {/* MRG Fields */}
                         <VStack
                           flexBasis={{ base: "100%", md: "30%" }}
                           color="black"
                           mx="3px"
                         >
+                          {/* MRG1 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               MRG1
                             </FormLabel>
                             <Input
                               placeholder="MRG1"
-                              isReadOnly={true}
+                              isReadOnly={true} // Display is read-only
                               value={number?.numbers[10]?.number}
                             />
                           </Box>
+                          {/* MRG2 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               MRG2
@@ -542,6 +567,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[11]?.number}
                             />
                           </Box>
+                          {/* MRG3 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               MRG3
@@ -552,43 +578,48 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[12]?.number}
                             />
                           </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0">
-                              MRG4
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG4"
-                              isReadOnly={true}
-                              value={number?.numbers[13]?.number}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0">
-                              MRG5
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG5"
-                              isReadOnly={true}
-                              value={number?.numbers[14]?.number}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14} mb="0">
-                              MRG6
-                            </FormLabel>
-                            <Input
-                              placeholder="MRG5"
-                              isReadOnly={true}
-                              value={number?.numbers[15]?.number}
-                            />
-                          </Box>
+                          {/*MRG4 */}
                         </VStack>
+                        <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG4
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG4"
+                            isReadOnly={true}
+                            value={number?.numbers[13]?.number}
+                          />
+                        </Box>
+                        {/* MRG5 */}
+                        <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG5
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG5"
+                            isReadOnly={true}
+                            value={number?.numbers[14]?.number}
+                          />
+                        </Box>
+                        {/* MRG6 */}
+                        <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG6
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG6"
+                            isReadOnly={true}
+                            value={number?.numbers[15]?.number}
+                          />
+                        </Box>
 
+                        {/* L4C and L5C Fields */}
                         <VStack
                           flexBasis={{ base: "100%", md: "30%" }}
                           color="black"
                           mx="3px"
                         >
+                          {/* L4C1 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L4C1
@@ -599,6 +630,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[4]?.number}
                             />
                           </Box>
+                          {/* L4C2 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L4C2
@@ -609,6 +641,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[5]?.number}
                             />
                           </Box>
+                          {/* L4C3 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L4C3
@@ -620,6 +653,7 @@ const WinningNumbersManagement = () => {
                             />
                           </Box>
 
+                          {/* L5C1 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L5C1
@@ -630,6 +664,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[7]?.number}
                             />
                           </Box>
+                          {/* L5C2 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L5C2
@@ -640,6 +675,7 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[8]?.number}
                             />
                           </Box>
+                          {/* L5C3 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
                               L5C3
@@ -647,7 +683,7 @@ const WinningNumbersManagement = () => {
                             <Input
                               placeholder="L5C3"
                               isReadOnly={true}
-                              value={number?.numbers[9].number}
+                              value={number?.numbers[9]?.number}
                             />
                           </Box>
                         </VStack>
@@ -660,21 +696,22 @@ const WinningNumbersManagement = () => {
           </Flex>
         </CardBody>
       </Card>
-      {/* Create/Edit User Modal */}
+      {/* Create/Edit Number Modal */}
       <Modal
         isOpen={isOpen}
         onClose={handleCancel}
-        title={editing ? "Edit Number" : "Create Number"}
+        title={editing ? "Edit Winning Number" : "Create Winning Number"}
         submitButtonText={editing ? "Update" : "Create"}
         onSubmit={handleSubmit}
         cancelButtonText="Cancel"
         onCancel={handleCancel}
         colorMode={colorMode}
-        size="md"
+        size="lg" // Increased size for better form layout
       >
         <Stack spacing={4}>
           <form onSubmit={handleSubmit}>
             <VStack spacing={4} align="stretch">
+              {/* Date Input */}
               <FormControl id="date" isRequired>
                 <FormLabel>Date</FormLabel>
                 <Input
@@ -683,13 +720,14 @@ const WinningNumbersManagement = () => {
                   onChange={(event) => setDate(event.target.value)}
                 />
               </FormControl>
+              {/* Lottery Category Select */}
               <FormControl id="lotteryCategoryName" isRequired>
                 <FormLabel>Lottery Category Name</FormLabel>
                 <Select
                   onChange={(event) =>
                     setLotteryCategoryName(event.target.value)
                   }
-                  defaultValue={lotteryCategories[0]?.lotteryName}
+                  value={lotteryCategoryName}
                 >
                   {lotteryCategories.map((category) => (
                     <option key={category._id} value={category.lotteryName}>
@@ -698,6 +736,7 @@ const WinningNumbersManagement = () => {
                   ))}
                 </Select>
               </FormControl>
+              {/* Winning Numbers Inputs */}
               <FormControl id="winNumbers" isRequired>
                 <FormLabel>Win Numbers</FormLabel>
                 <Stack bg={"white"} p="5px">
@@ -706,10 +745,12 @@ const WinningNumbersManagement = () => {
                     flexDirection={{ base: "column", md: "row" }}
                     justifyContent="space-between"
                   >
+                    {/* BLT and L3C Fields */}
                     <VStack
                       flexBasis={{ base: "100%", md: "32%" }}
                       color="black"
                     >
+                      {/* BLT1 - First */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           1st (First)
@@ -723,6 +764,7 @@ const WinningNumbersManagement = () => {
                           }
                         />
                       </Box>
+                      {/* BLT2 - Second */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           2nd (Second)
@@ -736,6 +778,7 @@ const WinningNumbersManagement = () => {
                           }
                         />
                       </Box>
+                      {/* BLT3 - Third */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           3rd (Third)
@@ -749,6 +792,7 @@ const WinningNumbersManagement = () => {
                           }
                         />
                       </Box>
+                      {/* L3C */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L3C
@@ -764,82 +808,83 @@ const WinningNumbersManagement = () => {
                       </Box>
                     </VStack>
 
+                    {/* MRG Fields */}
                     <VStack
                       flexBasis={{ base: "100%", md: "32%" }}
                       color="black"
                     >
+                      {/* MRG1 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG1
                         </FormLabel>
                         <Input
                           placeholder="MRG1"
-                          /*isReadOnly={true}*/
                           value={numbers[10].number}
                           onChange={(event) =>
                             handleNumberChange(10, event.target.value)
                           }
                         />
                       </Box>
+                      {/* MRG2 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG2
                         </FormLabel>
                         <Input
                           placeholder="MRG2"
-                          /*isReadOnly={true}*/
                           value={numbers[11].number}
                           onChange={(event) =>
                             handleNumberChange(11, event.target.value)
                           }
                         />
                       </Box>
+                      {/* MRG3 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG3
                         </FormLabel>
                         <Input
                           placeholder="MRG3"
-                          /*isReadOnly={true}*/
                           value={numbers[12].number}
                           onChange={(event) =>
                             handleNumberChange(12, event.target.value)
                           }
                         />
                       </Box>
+                      {/* MRG4 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG4
                         </FormLabel>
                         <Input
                           placeholder="MRG4"
-                          /*isReadOnly={true}*/
                           value={numbers[13].number}
                           onChange={(event) =>
                             handleNumberChange(13, event.target.value)
                           }
                         />
                       </Box>
+                      {/* MRG5 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG5
                         </FormLabel>
                         <Input
                           placeholder="MRG5"
-                          /*isReadOnly={true}*/
                           value={numbers[14].number}
                           onChange={(event) =>
                             handleNumberChange(14, event.target.value)
                           }
                         />
                       </Box>
+                      {/* MRG6 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           MRG6
                         </FormLabel>
                         <Input
-                          placeholder="MRG5"
-                          /*isReadOnly={true}*/
+                          placeholder="MRG6"
                           value={numbers[15].number}
                           onChange={(event) =>
                             handleNumberChange(15, event.target.value)
@@ -848,71 +893,102 @@ const WinningNumbersManagement = () => {
                       </Box>
                     </VStack>
 
+                    {/* L4C and L5C Fields */}
                     <VStack
                       flexBasis={{ base: "100%", md: "32%" }}
                       color="black"
                     >
+                      {/* L4C1 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L4C1
                         </FormLabel>
                         <Input
                           placeholder="L4C1"
-                          isReadOnly={true}
                           value={numbers[4].number}
+                          onChange={(event) =>
+                            handleNumberChange(4, event.target.value)
+                          }
                         />
                       </Box>
+                      {/* L4C2 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L4C2
                         </FormLabel>
                         <Input
                           placeholder="L4C2"
-                          isReadOnly={true}
                           value={numbers[5].number}
+                          onChange={(event) =>
+                            handleNumberChange(5, event.target.value)
+                          }
                         />
                       </Box>
+                      {/* L4C3 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L4C3
                         </FormLabel>
                         <Input
                           placeholder="L4C3"
-                          isReadOnly={true}
                           value={numbers[6].number}
+                          onChange={(event) =>
+                            handleNumberChange(6, event.target.value)
+                          }
                         />
                       </Box>
+
+                      {/* L5C1 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L5C1
                         </FormLabel>
                         <Input
                           placeholder="L5C1"
-                          isReadOnly={true}
                           value={numbers[7].number}
+                          onChange={(event) =>
+                            handleNumberChange(7, event.target.value)
+                          }
                         />
                       </Box>
+                      {/* L5C2 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L5C2
                         </FormLabel>
                         <Input
                           placeholder="L5C2"
-                          isReadOnly={true}
                           value={numbers[8].number}
+                          onChange={(event) =>
+                            handleNumberChange(8, event.target.value)
+                          }
                         />
                       </Box>
+                      {/* L5C3 */}
                       <Box>
                         <FormLabel fontSize={14} mb="0">
                           L5C3
                         </FormLabel>
                         <Input
                           placeholder="L5C3"
-                          isReadOnly={true}
                           value={numbers[9].number}
+                          onChange={(event) =>
+                            handleNumberChange(9, event.target.value)
+                          }
                         />
                       </Box>
                     </VStack>
+                  </Flex>
+                  {/* Recalculate Button */}
+                  <Flex justifyContent={"center"} alignItems={"center"}>
+                    <Button
+                      mt={4}
+                      onClick={recalculateDependentNumbers}
+                      colorScheme="teal"
+                      width={"50%"}
+                    >
+                      Reverse all
+                    </Button>
                   </Flex>
                 </Stack>
               </FormControl>
