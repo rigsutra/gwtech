@@ -9,6 +9,7 @@ import {
   Box,
   Heading,
   useBreakpointValue,
+  Container,
 } from "@chakra-ui/react";
 import { GoSignOut } from "react-icons/go";
 import { ImUsers } from "react-icons/im";
@@ -192,7 +193,6 @@ const MainMenu = () => {
       flexDirection="column"
       bg="#587a7e"
       align="center"
-      p={4}
     >
       {/* Header */}
       <Flex
@@ -203,11 +203,12 @@ const MainMenu = () => {
         alignItems="center"
         justifyContent="space-between"
         width="100%"
-        p={5}
-        flexDirection={["column", "row"]}
+        flexDirection="row"
+        p="10px"
+        px="30px"
         textAlign={["center", "left"]}
       >
-        <Text fontSize={["lg", "xl"]} fontWeight="bold" mb={[2, 0]}>
+        <Text fontSize="20px" fontWeight="bold" mb={[2, 0]} color="#fdf9bc">
           {companyName || "Company Name"}
         </Text>
         <Text
@@ -219,7 +220,7 @@ const MainMenu = () => {
         ></Text>
         <Button
           colorScheme="orange"
-          bg="orange"
+          bg="#fdf9bc"
           onClick={handleSignOut}
           mx={[0, 10]}
           mt={[2, 0]}
@@ -270,6 +271,7 @@ const MainMenu = () => {
                   maxHeight="100px"
                   display="flex"
                   alignItems="center"
+                  flexWrap="wrap"
                   justifyContent="center"
                   bg="#fdf9bc"
                   border="none"
