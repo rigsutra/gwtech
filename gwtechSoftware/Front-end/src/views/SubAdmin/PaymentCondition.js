@@ -219,7 +219,7 @@ const PaymentCondition = () => {
   const handleCreate = async () => {
     try {
       const data = {
-        lotteryCategoryName: lotteryCategoryName.trim(),
+        lotteryCategoryName: lotteryCategoryName,
         conditions,
       };
       if (activeView === "supervisor") {
@@ -246,7 +246,7 @@ const PaymentCondition = () => {
   const handleUpdate = async (id) => {
     try {
       const data = {
-        lotteryCategoryName: lotteryCategoryName.trim(),
+        lotteryCategoryName: lotteryCategoryName,
         conditions,
       };
       if (activeView === "supervisor") {
