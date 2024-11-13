@@ -122,7 +122,7 @@ function SellerManagement() {
       isActive,
       userName: userName.trim(),
       imei: imei.trim(),
-      superVisorId: selectedSuperVisor, // Include selected supervisor ID in update
+      superVisorId: {selectedSuperVisor || "None"}, // Include selected supervisor ID in update
     };
     if (password !== "") {
       requestBody.password = password;
@@ -288,7 +288,7 @@ function SellerManagement() {
                     <pre>{companyName}</pre>
                   </Td>
                   <Td>
-                    <pre>{user.superVisorName || "None"}</pre>
+                    <pre>{user?.superVisorId!=null? user?.superVisorName: "None"}</pre>
                   </Td>
                   <Td>
                     <pre>{user.isActive ? "Yes" : "No"}</pre>
