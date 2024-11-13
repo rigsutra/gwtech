@@ -49,7 +49,7 @@ const LimitNumber = () => {
   const [l5c1, setL5c1] = useState("");
   const [l5c2, setL5c2] = useState("");
   const [l5c3, setL5c3] = useState("");
-  const [activeView, setActiveView] = useState("all");
+  const [activeView, setActiveView] = useState("");
   const [showSearchForm, setShowSearchForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -84,9 +84,9 @@ const LimitNumber = () => {
     fetchInitialData();
   }, [toast]);
 
-  const handleGetLimit = async (viewType) => {
-    setActiveView(viewType);
-    if (viewType === "all") {
+  const handleGetLimit = async (value) => {
+    setActiveView(value);
+    if (value === "all") {
       setShowSearchForm(false);
       try {
         const response = await api().get("/subadmin/getLimitButAll");
@@ -110,7 +110,7 @@ const LimitNumber = () => {
     resetForm();
     onClose();
   };
-  const handleSearch = async () => {
+  const FetchhandleSearch = async () => {
     setIsLoading(true);
     try {
       if (
@@ -147,6 +147,30 @@ const LimitNumber = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    // Validate required fields based on activeView
+    if (activeView === "supervisor" && !selectedSupervisorId) {
+      toast({
+        title: "Please select a supervisor.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (activeView === "seller" && !selectedSellerId) {
+      toast({
+        title: "Please select a seller.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    FetchhandleSearch();
   };
 
   const handleSubmit = async (event) => {
@@ -256,9 +280,10 @@ const LimitNumber = () => {
         borderRadius="none"
       >
         <CardHeader
+          as="div"
           display="flex"
-          justifyContent="space-between"
           alignItems="center"
+          justifyContent="space-between"
         >
           <Text fontSize="lg" fontWeight="bold">
             Limit Numbers
@@ -455,7 +480,7 @@ const LimitNumber = () => {
               </FormControl>
 
               {activeView === "supervisor" && (
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel>Supervisor</FormLabel>
                   <Select
                     bg="#bfbfbf"
@@ -474,7 +499,7 @@ const LimitNumber = () => {
               )}
 
               {activeView === "seller" && (
-                <FormControl>
+                <FormControl isRequired>
                   <FormLabel>Seller</FormLabel>
                   <Select
                     bg="#bfbfbf"
@@ -492,7 +517,7 @@ const LimitNumber = () => {
                 </FormControl>
               )}
 
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Set Limit</FormLabel>
                 <Flex wrap="wrap" gap={2}>
                   {[
