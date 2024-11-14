@@ -97,6 +97,10 @@ function SellerManagement() {
       })
       .then((response) => {
         setUsers([...users, response.data]);
+        setUserName("");
+        setPassword("");
+        setImei("");
+        setIsActive(true);
         resetForm();
         onClose();
         toast({
@@ -122,7 +126,7 @@ function SellerManagement() {
       isActive,
       userName: userName.trim(),
       imei: imei.trim(),
-      superVisorId: {selectedSuperVisor || "None"}, // Include selected supervisor ID in update
+      superVisorId: selectedSuperVisor, // Include selected supervisor ID in update
     };
     if (password !== "") {
       requestBody.password = password;
@@ -200,7 +204,7 @@ function SellerManagement() {
     setPassword(""); // Reset password for security
     setImei(user.imei);
     setIsActive(user.isActive);
-    setSelectedSuperVisor(user.superVisorId || ""); // Set selected supervisor for editing
+    setSelectedSuperVisor(user.superVisorId || "None"); // Set selected supervisor for editing
     onOpen();
   };
 
@@ -232,6 +236,29 @@ function SellerManagement() {
     setSelectedSuperVisor(event.target.value); // Update selected supervisor ID
   };
 
+  const handleBonusFlag = () => {
+    api()
+      .patch(`/subadmin/updateBonusFlag`, { bonusFlag: !bonusFlag })
+      .then((response) => {
+        setBonusFlag(response.data.bonusFlag);
+        toast({
+          title: "Bonus updated!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "Bonus update failed!",
+          description: error.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      });
+  };
+
   return (
     <Flex
       direction="column"
@@ -256,6 +283,17 @@ function SellerManagement() {
           <Text fontSize="lg" color="black" fontWeight="bold">
             Seller Table
           </Text>
+          <FormControl display="flex" alignItems="center" width={"120px"}>
+            <FormLabel htmlFor="bonus-flag" mb="0">
+              Bonus MRG
+            </FormLabel>
+            <Switch
+              isChecked={bonusFlag}
+              size={"sm"}
+              id="bonus-flag"
+              onChange={handleBonusFlag}
+            />
+          </FormControl>
           <Button
             size="sm"
             onClick={onOpen}
@@ -288,7 +326,7 @@ function SellerManagement() {
                     <pre>{companyName}</pre>
                   </Td>
                   <Td>
-                    <pre>{user?.superVisorId!=null? user?.superVisorName: "None"}</pre>
+                    <pre>{user.superVisorName || "None"}</pre>
                   </Td>
                   <Td>
                     <pre>{user.isActive ? "Yes" : "No"}</pre>
