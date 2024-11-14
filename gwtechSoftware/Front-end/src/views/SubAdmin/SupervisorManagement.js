@@ -128,28 +128,28 @@ function SupervisorManagement() {
       });
   };
 
-  const deleteUser = (id) => {
-    api()
-      .delete(`/subadmin/deletesuperVisor/${id}`)
-      .then(() => {
-        setUsers(users.filter((user) => user._id !== id));
-        toast({
-          title: "Supervisor deleted.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: "Error deleting Supervisor.",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      });
-  };
+  // const deleteUser = (id) => {
+  //   api()
+  //     .delete(`/subadmin/deletesuperVisor/${id}`)
+  //     .then(() => {
+  //       setUsers(users.filter((user) => user._id !== id));
+  //       toast({
+  //         title: "Supervisor deleted.",
+  //         status: "success",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       toast({
+  //         title: "Error deleting Supervisor.",
+  //         description: error.message,
+  //         status: "error",
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
+  //     });
+  // };
 
   const handleUserNameChange = (event) => {
     setUserName(event.target.value.trim());
@@ -230,7 +230,7 @@ function SupervisorManagement() {
       <Card
         overflowX={{ sm: "scroll", xl: "hidden" }}
         p={{ base: "5px", md: "20px" }}
-        width="60%"
+        width="50%"
         border={{ base: "none", md: "1px solid gray" }}
         borderRadius="none"
       >
@@ -253,7 +253,7 @@ function SupervisorManagement() {
             <RiUserAddLine size={24} color="white" />
           </Button>
         </CardHeader>
-        <CardBody>
+        <CardBody as="div" justifyContent="center" alignItems="center">
           <Table variant="striped" color="black">
             <Thead>
               <Tr>
@@ -287,7 +287,7 @@ function SupervisorManagement() {
                     >
                       <FaEdit size={20} color="white" />
                     </Button>
-                    <Button
+                    {/* <Button
                       size="sm"
                       onClick={() => deleteUser(user._id)}
                       bg={colorMode === "light" ? "red.500" : "red.300"}
@@ -296,7 +296,7 @@ function SupervisorManagement() {
                       }}
                     >
                       <RiDeleteBinLine size={20} color="white" />
-                    </Button>
+                    </Button> */}
                   </Td>
                 </Tr>
               ))}
