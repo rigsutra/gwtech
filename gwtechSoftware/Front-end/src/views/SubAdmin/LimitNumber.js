@@ -14,6 +14,7 @@ import {
   useToast,
   HStack,
   Select,
+  ModalOverlay,
   VStack,
   ModalContent,
   ModalBody,
@@ -271,6 +272,7 @@ const LimitNumber = () => {
       justifyContent="center"
       alignItems="center" // Add this to center children horizontally
       width="100%"
+      isCentered
     >
       <Card
         overflowX={{ sm: "scroll", xl: "hidden" }}
@@ -450,7 +452,8 @@ const LimitNumber = () => {
         </CardBody>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
         <ModalContent bg="#A6A6A6" justifyContent="center">
           <ModalHeader
             bg="#7F7F7F"
@@ -462,7 +465,11 @@ const LimitNumber = () => {
             {editing ? "EDIT LIMIT" : "ADD LIMIT"}
           </ModalHeader>
           <ModalBody>
-            <form bg="#A6A6A6" justifyContent="center" onSubmit={handleSubmit}>
+            <FormControl
+              bg="#A6A6A6"
+              justifyContent="center"
+              onSubmit={handleSubmit}
+            >
               <FormControl>
                 <FormLabel>Lottery Category Name</FormLabel>
                 <Select
@@ -545,10 +552,15 @@ const LimitNumber = () => {
                   ))}
                 </Flex>
               </FormControl>
-              <Stack direction="row" spacing={4} justify="center" mt={6} mb={6}>
+              <HStack
+                direction="row"
+                spacing={4}
+                justifyContent={"center"}
+                mt={6}
+                mb={6}
+              >
                 <Button
                   type="submit"
-                  mt={4}
                   bg="#c6d98d"
                   color="black"
                   _hover={{ bg: "#b2c270" }}
@@ -565,8 +577,8 @@ const LimitNumber = () => {
                 >
                   Cancel
                 </Button>
-              </Stack>
-            </form>
+              </HStack>
+            </FormControl>
           </ModalBody>
         </ModalContent>
       </Modal>
