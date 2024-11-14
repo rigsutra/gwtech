@@ -166,7 +166,7 @@ function SellerManagement() {
           <Text fontSize="lg" color="black" fontWeight="bold">
             Seller Table
           </Text>
-          <Button
+          {/* <Button
             size="sm"
             onClick={onOpen}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
@@ -175,7 +175,7 @@ function SellerManagement() {
             }}
           >
             <RiUserAddLine size={24} color="white" />
-          </Button>
+          </Button> */}
         </CardHeader>
         <CardBody>
           <Table variant="striped" color="black">
