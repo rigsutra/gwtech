@@ -75,7 +75,9 @@ const SaleDetails = () => {
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
+      consloe.log("responseByGameCatetory?.data?.data")
       setGameCategoryDetail(responseByGameCatetory?.data?.data);
+      
 
       const responseAllLottery = await api().get(
         `/superVisor/getselldetailsallloterycategory?seller=${selectedSellerId}&fromDate=${fromDate}`
