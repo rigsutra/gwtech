@@ -204,7 +204,7 @@ function SellerManagement() {
     setPassword(""); // Reset password for security
     setImei(user.imei);
     setIsActive(user.isActive);
-    setSelectedSuperVisor(user.superVisorId || "None"); // Set selected supervisor for editing
+    setSelectedSuperVisor(user.superVisorId); // Set selected supervisor for editing
     onOpen();
   };
 
