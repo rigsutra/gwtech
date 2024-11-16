@@ -268,18 +268,18 @@ const LimitNumber = () => {
     <Flex
       direction="column"
       pt={{ base: "120px", md: "75px" }}
-      mx="auto"
       justifyContent="center"
       alignItems="center" // Add this to center children horizontally
       width="100%"
-      isCentered
     >
       <Card
-        overflowX={{ sm: "scroll", xl: "hidden" }}
-        p={{ base: "5px", md: "20px" }}
-        width="60%"
+        overflowX="auto"
+        borderRadius={"none"}
+        p={{ base: "10px", md: "20px" }}
+        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
-        borderRadius="none"
+        boxShadow="lg"
       >
         <CardHeader
           as="div"
@@ -452,7 +452,7 @@ const LimitNumber = () => {
         </CardBody>
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent bg="#A6A6A6" justifyContent="center">
           <ModalHeader
@@ -565,6 +565,7 @@ const LimitNumber = () => {
                   color="black"
                   _hover={{ bg: "#b2c270" }}
                   width="120px"
+                  onClick={handleSubmit}
                 >
                   {editing ? "Update" : "Add"} Limit
                 </Button>
