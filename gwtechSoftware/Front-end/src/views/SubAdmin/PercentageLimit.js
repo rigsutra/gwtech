@@ -1,266 +1,215 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../../utils/customFetch.js";
 import {
   Flex,
-  Text,
   Button,
   FormControl,
   FormLabel,
   Input,
-  RadioGroup,
-  Radio,
   Stack,
   useDisclosure,
   useToast,
+  useColorMode,
+  VStack,
   HStack,
   Select,
-  ModalOverlay,
-  VStack,
-  ModalContent,
-  ModalBody,
-  ModalHeader,
+  Text,
   Box,
 } from "@chakra-ui/react";
-import { FaPlus, FaEdit } from "react-icons/fa";
-import { CgSearch } from "react-icons/cg";
+import { FaPlus } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { RiDeleteBinLine } from "react-icons/ri";
+
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Modal from "components/Modal/Modal.js";
 
-const LimitNumber = () => {
-  const [editing, setEditing] = useState(false);
-  const [currentLimit, setCurrentLimit] = useState(null);
-  const [limitNumbers, setLimitNumbers] = useState([]);
-  const [lotteryCategories, setLotteryCategories] = useState([]);
-  const [supervisors, setSupervisors] = useState([]);
-  const [selectedSellerId, setSelectedSellerId] = useState("");
-  const [sellers, setSellers] = useState([]);
-  const [selectedSupervisorId, setSelectedSupervisorId] = useState("");
-  const [selectedSupervisor, setSelectedSupervisor] = useState("");
-  const [selectedSeller, setSelectedSeller] = useState("");
-  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
-  const [blt, setBlt] = useState("");
-  const [l3c, setL3c] = useState("");
-  const [mrg, setMrg] = useState("");
-  const [l4c1, setL4c1] = useState("");
-  const [l4c2, setL4c2] = useState("");
-  const [l4c3, setL4c3] = useState("");
-  const [l5c1, setL5c1] = useState("");
-  const [l5c2, setL5c2] = useState("");
-  const [l5c3, setL5c3] = useState("");
-  const [activeView, setActiveView] = useState("");
-  const [showSearchForm, setShowSearchForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+const initConditions = [
+  { gameCategory: "L3C", limitPercent: "" },
+  { gameCategory: "L4C 1", limitPercent: "" },
+  { gameCategory: "L4C 2", limitPercent: "" },
+  { gameCategory: "L4C 3", limitPercent: "" },
+  { gameCategory: "L5C 1", limitPercent: "" },
+  { gameCategory: "L5C 2", limitPercent: "" },
+  { gameCategory: "L5C 3", limitPercent: "" },
+  { gameCategory: "MRG", limitPercent: "" },
+];
 
+const PercentageLimit = () => {
+  const [editing, setEditing] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+  const { colorMode } = useColorMode();
+
+  const [lotteryCategoryName, setLotteryCategoryName] = useState("");
+  const [conditions, setConditions] = useState(initConditions);
+  const [lotteryCategories, setLotteryCategories] = useState([]);
+  const [allConditions, setAllConditions] = useState([]);
+  const [currentCondition, setCurrentCondition] = useState();
 
   useEffect(() => {
-    const fetchInitialData = async () => {
+    if (lotteryCategoryName) setConditions(initConditions);
+  }, [lotteryCategoryName]);
+
+  useEffect(() => {
+    const fetchLotteryCategories = async () => {
       try {
-        const [
-          lotteryResponse,
-          sellersResponse,
-          supervisorsResponse,
-        ] = await Promise.all([
-          api().get("/admin/getlotterycategory"),
-          api().get("/subadmin/getsellerWhoNotHaveSupervisor"),
-          api().get("/subadmin/getsuperVisor"),
-        ]);
-        setLotteryCategories(lotteryResponse?.data?.data);
-        setSupervisors(supervisorsResponse?.data);
-        setSellers(sellersResponse?.data?.users);
+        const response = await api().get("/admin/getlotterycategory");
+        setLotteryCategories(response?.data?.data);
       } catch (error) {
+        console.error(error);
         toast({
-          title: "Error fetching initial data",
-          description: error.message,
+          title: "Error fetching lottery categories",
           status: "error",
           duration: 5000,
           isClosable: true,
         });
       }
     };
-    fetchInitialData();
-  }, [toast]);
+    fetchLotteryCategories();
+  }, []);
 
-  const handleGetLimit = async (value) => {
-    setActiveView(value);
-    if (value === "all") {
-      setShowSearchForm(false);
+  useEffect(() => {
+    const fetchConditions = async () => {
       try {
-        const response = await api().get("/subadmin/getLimitButAll");
-        setLimitNumbers(response.data);
+        const response = await api().get("/subadmin/getpercentagelimit");
+        setAllConditions(response.data);
       } catch (error) {
+        console.error(
+          "Error fetching conditions:",
+          error?.response?.data?.message || error.message
+        );
         toast({
-          title: "Error fetching limits",
+          title: "Error fetching Payment Condition",
+          description: error?.response?.data?.message || "Server error",
           status: "error",
           duration: 5000,
           isClosable: true,
         });
       }
-    } else {
-      setShowSearchForm(true);
-      setLimitNumbers([]);
-    }
+    };
+    fetchConditions();
+  }, []);
+
+  const handleNumberChange = (index, value) => {
+    const updatedConditions = conditions.map((condition, idx) =>
+      idx === index ? { ...condition, limitPercent: value } : condition
+    );
+    setConditions(updatedConditions);
   };
+
   const handleCancel = () => {
     setEditing(false);
-    setCurrentUser(null);
-    resetForm();
     onClose();
   };
-  const FetchhandleSearch = async () => {
-    setIsLoading(true);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    editing ? handleUpdate(currentCondition._id) : handleCreate();
+  };
+
+  const resetForm = () => {
+    setLotteryCategoryName("");
+    setConditions(initConditions);
+    setEditing(false);
+    onClose();
+  };
+
+  const showError = (message) => {
+    toast({
+      title: message,
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  };
+
+  const handleCreate = async () => {
     try {
-      if (
-        !activeView ||
-        (activeView !== "supervisor" && activeView !== "seller")
-      ) {
-        throw new Error("Invalid view type");
-      }
-      const endpoint = `/subadmin/getLimitBut${
-        activeView === "supervisor" ? "SuperVisor" : "Seller"
-      }`;
-      const params = {
-        seller: selectedSellerId,
-        superVisor: selectedSupervisorId,
-        lotteryCategoryName,
-      };
-      const response = await api().get(endpoint, { params });
-      setLimitNumbers(response.data);
+      const response = await api().post("/subadmin/addpercentagelimit", {
+        lotteryCategoryName: lotteryCategoryName,
+        limits: conditions,
+      });
+      resetForm();
+      setAllConditions([...allConditions, response.data]);
       toast({
-        title: "Limits fetched successfully",
+        title: "Payment condition created",
         status: "success",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     } catch (error) {
+      console.error(error);
+      showError("Error creating payment condition");
+    }
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const response = await api().patch(
+        `/subadmin/updatepercentagelimit/${id}`,
+        {
+          lotteryCategoryName: lotteryCategoryName,
+          limits: conditions,
+        }
+      );
+      setAllConditions((prevConditions) =>
+        prevConditions.map((cond) => (cond._id === id ? response.data : cond))
+      );
+      resetForm();
       toast({
-        title: "Error fetching limits",
-        description: error.message || "Please try again",
+        title: "Payment condition updated",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error updating payment condition",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
-      setLimitNumbers([]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    // Validate required fields based on activeView
-    if (activeView === "supervisor" && !selectedSupervisorId) {
-      toast({
-        title: "Please select a supervisor.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
+  const handleEdit = (condition) => {
+    if (condition) {
+      setEditing(true);
+      setLotteryCategoryName(condition.lotteryCategoryName);
+      setConditions(condition.limits);
+      setCurrentCondition(condition);
+      onOpen();
     }
-    if (activeView === "seller" && !selectedSellerId) {
-      toast({
-        title: "Please select a seller.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    FetchhandleSearch();
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const limits = [
-      { gameCategory: "BLT", limitsButs: blt },
-      { gameCategory: "L3C", limitsButs: l3c },
-      { gameCategory: "MRG", limitsButs: mrg },
-      { gameCategory: "L4C 1", limitsButs: l4c1 },
-      { gameCategory: "L4C 2", limitsButs: l4c2 },
-      { gameCategory: "L4C 3", limitsButs: l4c3 },
-      { gameCategory: "L5C 1", limitsButs: l5c1 },
-      { gameCategory: "L5C 2", limitsButs: l5c2 },
-      { gameCategory: "L5C 3", limitsButs: l5c3 },
-    ];
-    const data = {
-      lotteryCategoryName:
-        lotteryCategoryName || lotteryCategories[0]?.lotteryName,
-      limits,
-      seller: activeView === "seller" ? selectedSeller : undefined,
-      superVisor: activeView === "supervisor" ? selectedSupervisor : undefined,
-    };
-
-    try {
-      const response = editing
-        ? await api().patch(
-            `/subadmin/updatelimitbut/${currentLimit?._id}`,
-            data
-          )
-        : await api().post("/subadmin/addlimitbut", data);
-      setLimitNumbers((prev) =>
-        editing
-          ? prev.map((limit) =>
-              limit._id === currentLimit?._id ? response.data : limit
-            )
-          : [...prev, response.data]
-      );
-      onClose();
-      toast({
-        title: `Limit ${editing ? "updated" : "created"} successfully`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      toast({
-        title: `Error ${editing ? "updating" : "creating"} limit`,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const handleEdit = (limit) => {
-    setEditing(true);
-    setCurrentLimit(limit);
-    setLotteryCategoryName(limit.lotteryCategoryName);
-    setSelectedSeller(limit.seller?._id || "");
-    setSelectedSupervisor(limit.superVisor?._id || "");
-    setBlt(limit.limits[0]?.limitsButs || "");
-    setL3c(limit.limits[1]?.limitsButs || "");
-    setMrg(limit.limits[2]?.limitsButs || "");
-    setL4c1(limit.limits[3]?.limitsButs || "");
-    setL4c2(limit.limits[4]?.limitsButs || "");
-    setL4c3(limit.limits[5]?.limitsButs || "");
-    setL5c1(limit.limits[6]?.limitsButs || "");
-    setL5c2(limit.limits[7]?.limitsButs || "");
-    setL5c3(limit.limits[8]?.limitsButs || "");
-    onOpen();
   };
 
   const handleDelete = async (id) => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to delete this condition?"
+    );
+    if (!isConfirmed) return;
+
     try {
-      await api().delete(`/subadmin/deletelimitbut/${id}`);
-      setLimitNumbers((prev) => prev.filter((limit) => limit._id !== id));
+      await api()
+        .delete(`/subadmin/deletepercentagelimit/${id}`)
+        .then(() => {
+          setAllConditions(
+            allConditions.filter((condition) => condition._id !== id)
+          );
+        });
       toast({
-        title: "Limit deleted successfully",
+        title: "Payment condition deleted",
         status: "success",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     } catch (error) {
-      toast({
-        title: "Error deleting limit",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      console.error(error);
+      showError(
+        error.response?.data?.error || "Error deleting payment condition"
+      );
     }
   };
 
@@ -268,9 +217,9 @@ const LimitNumber = () => {
     <Flex
       direction="column"
       pt={{ base: "120px", md: "75px" }}
-      justifyContent="center"
-      alignItems="center" // Add this to center children horizontally
       width="100%"
+      justifyContent={"center"}
+      alignItems={"center"}
     >
       <Card
         overflowX="auto"
@@ -279,312 +228,204 @@ const LimitNumber = () => {
         width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
-        boxShadow="lg"
       >
-        <CardHeader
-          as="div"
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Text fontSize="lg" fontWeight="bold">
-            Limit Numbers
+        <CardHeader display="flex" justifyContent="space-between">
+          <Text fontSize="lg" color="black" font="Weight:bold">
+            Percentage Limit
           </Text>
-          <RadioGroup
-            onChange={handleGetLimit}
-            value={activeView}
-            display="flex"
-            gap={4}
-          >
-            <Radio
-              value="all"
-              colorScheme="blue"
-              isDisabled={isLoading}
-              size="lg"
-            >
-              All
-            </Radio>
-            <Radio
-              value="supervisor"
-              colorScheme="blue"
-              isDisabled={isLoading}
-              size="lg"
-            >
-              Supervisor
-            </Radio>
-            <Radio
-              value="seller"
-              colorScheme="blue"
-              isDisabled={isLoading}
-              size="lg"
-            >
-              Seller
-            </Radio>
-          </RadioGroup>
           <Button
+            size="md"
             onClick={() => {
-              setEditing(false);
-              onOpen();
+              if (lotteryCategories.length > 0) {
+                setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
+                onOpen();
+              }
             }}
-            bg="green.800"
-            color="white"
+            isDisabled={lotteryCategories.length === 0}
+            bg={colorMode === "light" ? "blue.500" : "blue.300"}
+            _hover={{ bg: colorMode === "light" ? "blue.600" : "blue.200" }}
+            borderRadius={"none"}
           >
-            <FaPlus />
+            <FaPlus size={24} color="white" />
           </Button>
         </CardHeader>
-
-        {showSearchForm && (
-          <CardHeader
-            display="flex"
-            flexDirection={{ base: "column", md: "row" }}
-            gap={5}
-            marginY="20px"
-            justifyContent="center"
+        <CardBody pb="15px" mt="15px">
+          <Flex
+            flexWrap="wrap"
+            flexDirection={{ base: "column", sm: "row" }}
+            justifyContent="flex-start"
+            width="100%"
           >
-            <HStack>
-              <FormControl flex={1}>
-                <FormLabel>
-                  {activeView === "seller" ? "Seller" : "Supervisor"}
-                </FormLabel>
-                <Select
-                  value={
-                    activeView === "seller"
-                      ? selectedSellerId
-                      : selectedSupervisorId
-                  }
-                  onChange={(e) =>
-                    activeView === "seller"
-                      ? setSelectedSellerId(e.target.value)
-                      : setSelectedSupervisorId(e.target.value)
-                  }
-                  width="200px"
-                >
-                  <option value="">
-                    {activeView === "seller"
-                      ? "Select seller"
-                      : "Select Supervisor"}
-                  </option>
-                  {(activeView === "seller" ? sellers : supervisors).map(
-                    (person) => (
-                      <option key={person._id} value={person._id}>
-                        {person.userName}
-                      </option>
-                    )
-                  )}
-                </Select>
-              </FormControl>
-              <FormControl flex={1}>
-                <FormLabel>Category Name</FormLabel>
-                <Select
-                  value={lotteryCategoryName}
-                  onChange={(e) => setLotteryCategoryName(e.target.value)}
-                >
-                  <option value="">All</option>
-                  {lotteryCategories.map((category) => (
-                    <option key={category._id} value={category.lotteryName}>
-                      {category.lotteryName}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-              <VStack>
-                <Text marginBottom="20px"></Text>
-                <Button
-                  onClick={handleSearch}
-                  bg="blue.600"
-                  color="white"
-                  isLoading={isLoading}
-                >
-                  <CgSearch />
-                </Button>
-              </VStack>
-            </HStack>
-          </CardHeader>
-        )}
-
-        <CardBody>
-          <Flex wrap="wrap" justify="center" gap={4}>
-            {limitNumbers.map((limit) => (
-              <VStack
-                key={limit._id}
-                border="1px solid gray"
-                p={4}
-                w={{ base: "100%", md: "350px" }}
+            {allConditions?.map((condition, index) => (
+              <Stack
+                key={index}
+                spacing={1}
+                width="350px"
+                p="5px"
+                m="10px"
+                border={"1px solid gray"}
               >
-                <HStack spacing={20}>
-                  <VStack align="start">
-                    <FormLabel>
-                      {limit.seller?.userName ||
-                        limit.superVisor?.userName ||
-                        "All"}
-                    </FormLabel>
-                    <FormLabel>{limit.lotteryCategoryName}</FormLabel>
-                  </VStack>
-                  <HStack spacing={2}>
-                    <Button onClick={() => handleEdit(limit)} bg="yellow.800">
-                      <FaEdit color="white" />
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(limit._id)}
-                      bg="red.800"
-                    >
-                      <RiDeleteBinLine color="white" />
-                    </Button>
-                  </HStack>
-                </HStack>
-                <Flex wrap="wrap" gap={2} w="full">
-                  {limit.limits.map((limitItem) => (
-                    <Box key={limitItem.gameCategory} w="45%">
-                      <FormLabel fontSize="sm">
-                        {limitItem.gameCategory}
-                      </FormLabel>
-                      <Input
-                        value={limitItem.limitsButs}
-                        isReadOnly
-                        size="sm"
-                      />
-                    </Box>
-                  ))}
-                </Flex>
-              </VStack>
+                <VStack spacing={3} align="stretch" color="black">
+                  <FormControl id="lotteryCategoryName" isRequired>
+                    <HStack justifyContent="space-between">
+                      <Box>
+                        <FormLabel>Lottery Category Name</FormLabel>
+                        <FormLabel>{condition.lotteryCategoryName}</FormLabel>
+                      </Box>
+                      <Box as="div">
+                        <Button
+                          size="sm"
+                          onClick={() => handleEdit(condition._id)}
+                          bg={
+                            colorMode === "light" ? "yellow.500" : "yellow.300"
+                          }
+                          _hover={{
+                            bg:
+                              colorMode === "light"
+                                ? "yellow.600"
+                                : "yellow.200",
+                          }}
+                          borderRadius={"none"}
+                        >
+                          <FaEdit size={20} color="white" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDelete(condition)}
+                          bg={colorMode === "light" ? "red.500" : "red.300"}
+                          _hover={{
+                            bg: colorMode === "light" ? "red.600" : "red.200",
+                          }}
+                          borderRadius={"none"}
+                          ml={2}
+                        >
+                          <RiDeleteBinLine size={20} color="white" />
+                        </Button>
+                      </Box>
+                    </HStack>
+                  </FormControl>
+                  <FormControl id="conditions" isRequired>
+                    <FormLabel>Percentage Limit</FormLabel>
+                    <Stack>
+                      <Flex justifyContent="space-between">
+                        <VStack color="black">
+                          <Box>
+                            <FormLabel fontSize={14}>L3C</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[0].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>MRG</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[7].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>L4C1</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[1].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>L4C2</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[2].limitPercent}
+                            />
+                          </Box>
+                        </VStack>
+                        <VStack color="black">
+                          <Box>
+                            <FormLabel fontSize={14}>L4C3</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[3].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>L5C1</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[4].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>L5C2</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[5].limitPercent}
+                            />
+                          </Box>
+                          <Box>
+                            <FormLabel fontSize={14}>L5C3</FormLabel>
+                            <Input
+                              isReadOnly
+                              value={condition.limits[4].limitPercent}
+                            />
+                          </Box>
+                        </VStack>
+                      </Flex>
+                    </Stack>
+                  </FormControl>
+                </VStack>
+              </Stack>
             ))}
           </Flex>
         </CardBody>
       </Card>
-
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent bg="#A6A6A6" justifyContent="center">
-          <ModalHeader
-            bg="#7F7F7F"
-            textColor="white"
-            mb={4}
-            display="flex"
-            justifyContent="center"
-          >
-            {editing ? "EDIT LIMIT" : "ADD LIMIT"}
-          </ModalHeader>
-          <ModalBody>
-            <FormControl
-              bg="#A6A6A6"
-              justifyContent="center"
-              onSubmit={handleSubmit}
-            >
-              <FormControl>
-                <FormLabel>Lottery Category Name</FormLabel>
-                <Select
-                  bg="#bfbfbf"
-                  color="black"
-                  value={lotteryCategoryName}
-                  onChange={(e) => setLotteryCategoryName(e.target.value)}
-                >
-                  {lotteryCategories.map((category) => (
-                    <option key={category._id} value={category.lotteryName}>
-                      {category.lotteryName}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {activeView === "supervisor" && (
-                <FormControl isRequired>
-                  <FormLabel>Supervisor</FormLabel>
-                  <Select
-                    bg="#bfbfbf"
-                    color="black"
-                    value={selectedSupervisor}
-                    onChange={(e) => setSelectedSupervisor(e.target.value)}
-                  >
-                    <option value="">Select Supervisor</option>
-                    {supervisors.map((supervisor) => (
-                      <option key={supervisor._id} value={supervisor._id}>
-                        {supervisor.userName}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-
-              {activeView === "seller" && (
-                <FormControl isRequired>
-                  <FormLabel>Seller</FormLabel>
-                  <Select
-                    bg="#bfbfbf"
-                    color="black"
-                    value={selectedSeller}
-                    onChange={(e) => setSelectedSeller(e.target.value)}
-                  >
-                    <option value="">Select Seller</option>
-                    {sellers.map((seller) => (
-                      <option key={seller._id} value={seller._id}>
-                        {seller.userName}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-
-              <FormControl isRequired>
-                <FormLabel>Set Limit</FormLabel>
-                <Flex wrap="wrap" gap={2}>
-                  {[
-                    { label: "BLT", value: blt, setValue: setBlt },
-                    { label: "L3C", value: l3c, setValue: setL3c },
-                    { label: "MRG", value: mrg, setValue: setMrg },
-                    { label: "L4C1", value: l4c1, setValue: setL4c1 },
-                    { label: "L4C2", value: l4c2, setValue: setL4c2 },
-                    { label: "L4C3", value: l4c3, setValue: setL4c3 },
-                    { label: "L5C1", value: l5c1, setValue: setL5c1 },
-                    { label: "L5C2", value: l5c2, setValue: setL5c2 },
-                    { label: "L5C3", value: l5c3, setValue: setL5c3 },
-                  ].map((field) => (
-                    <Box key={field.label} w="30%">
-                      <FormLabel color="#7f7f7f" fontSize="sm">
-                        {field.label}
+      <Modal
+        isOpen={isOpen}
+        onClose={handleCancel}
+        title={editing ? "Edit Condition" : "Create Condition"}
+        submitButtonText={editing ? "Update" : "Create"}
+        onSubmit={handleSubmit}
+        cancelButtonText="Cancel"
+      >
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} align="stretch">
+            <FormControl id="lotteryCategoryName" isRequired>
+              <FormLabel>Lottery Category Name</FormLabel>
+              <Select
+                value={lotteryCategoryName}
+                onChange={(event) => setLotteryCategoryName(event.target.value)}
+              >
+                {lotteryCategories.map((category) => (
+                  <option key={category._id} value={category.lotteryName}>
+                    {category.lotteryName}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl id="Conditions" isRequired>
+              <FormLabel>Payment Conditions</FormLabel>
+              <Flex justifyContent="space-between">
+                <VStack color="black">
+                  {conditions.map((condition, index) => (
+                    <Box key={index}>
+                      <FormLabel fontSize={14}>
+                        {condition.gameCategory}
                       </FormLabel>
                       <Input
+                        value={condition.limitPercent}
+                        onChange={(e) =>
+                          handleNumberChange(index, e.target.value)
+                        }
                         type="number"
-                        value={field.value}
-                        bg="#bfbfbf"
-                        onChange={(e) => field.setValue(e.target.value)}
                       />
                     </Box>
                   ))}
-                </Flex>
-              </FormControl>
-              <HStack
-                direction="row"
-                spacing={4}
-                justifyContent={"center"}
-                mt={6}
-                mb={6}
-              >
-                <Button
-                  type="submit"
-                  bg="#c6d98d"
-                  color="black"
-                  _hover={{ bg: "#b2c270" }}
-                  width="120px"
-                  onClick={handleSubmit}
-                >
-                  {editing ? "Update" : "Add"} Limit
-                </Button>
-                <Button
-                  onClick={onClose}
-                  bg="#c6d98d"
-                  color="black"
-                  _hover={{ bg: "#b2c270" }}
-                  width="120px"
-                >
-                  Cancel
-                </Button>
-              </HStack>
+                </VStack>
+              </Flex>
             </FormControl>
-          </ModalBody>
-        </ModalContent>
+          </VStack>
+        </form>
       </Modal>
     </Flex>
   );
 };
 
-export default LimitNumber;
+export default PercentageLimit;
