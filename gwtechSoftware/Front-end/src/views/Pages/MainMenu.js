@@ -55,10 +55,10 @@ const MainMenu = () => {
     setCompanyName(company);
 
     // Fetch company name from the backend
-    axios
-      .get("http://localhost:5000/api/company-name")
-      .then((response) => setCompanyName(response.data.companyName))
-      .catch((error) => console.error("Error fetching company name", error));
+    // axios
+    //   .get(``)
+    //   .then((response) => setCompanyName(response.data.companyName))
+    //   .catch((error) => console.error("Error fetching company name", error));
   }, []);
 
   const handleNavigation = (path) => {
@@ -186,6 +186,7 @@ const MainMenu = () => {
 
   const functions = roleBasedFunctions[userRole] || [];
 
+  console.log(companyName);
   return (
     <Flex
       width="100%"
@@ -204,13 +205,19 @@ const MainMenu = () => {
         justifyContent="space-between"
         width="100%"
         flexDirection="row"
-        p="10px"
+        p="15px"
         px="30px"
         textAlign={["center", "left"]}
       >
-        <Text fontSize="20px" fontWeight="bold" mb={[2, 0]} color="#fdf9bc">
-          {companyName || "Company Name"}
-        </Text>
+        <Flex fontSize="20px" fontWeight="bold" mb={[2, 0]} color="#fdf9bc">
+          {userRole === "admin" && companyName && <>{companyName}</>}
+          {userRole === "subAdmin" && companyName && <>{companyName}</>}
+          {userRole === "superVisor" && companyName && (
+            <>
+              {companyName} ,{userName && <>{userName}</>}
+            </>
+          )}
+        </Flex>
         <Text
           fontSize={["md", "xl"]}
           fontWeight="bold"
