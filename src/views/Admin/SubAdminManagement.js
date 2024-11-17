@@ -10,6 +10,7 @@ import {
   FormLabel,
   Input,
   Stack,
+  HStack,
   useDisclosure,
   useToast,
   useColorMode,
@@ -242,38 +243,58 @@ function SubAdminManagement() {
                 my="10px"
                 style={{ "box-shadow": "0 0 2px 2px white" }}
                 key={item._id}
-                width={"150px"}
+                width={{ base: "100%", md: "45%", lg: "30%" }}
+                height="fit-content"
               >
-                <CardHeader>
-                </CardHeader>
+                <CardHeader></CardHeader>
                 <CardBody justifyContent={"center"}>
-                  <div>
+                  <Flex>
                     <Flex
-                      direction={"column"}
+                      flexDirection={"column"}
                       justifyContent={"center"}
                       textAlign={"center"}
                       width={"100%"}
                     >
-                      <h4>{item?.companyName}</h4>
-                      <h5>{item?.address}</h5>
-                      <h5>{item?.userName}</h5>
-                      <h5>{item?.phoneNumber}</h5>
+                      <FormControl>
+                        <HStack justifyContent="center">
+                          <FormLabel>Co. Name</FormLabel>
+                        </HStack>
+                        <h4>{item?.companyName}</h4>
+                      </FormControl>
+                      <FormControl>
+                        <HStack justifyContent="center">
+                          <FormLabel>Phone</FormLabel>
+                        </HStack>
+                        <h5>{item?.phoneNumber}</h5>
+                      </FormControl>
+                      <FormControl>
+                        <HStack justifyContent="center">
+                          <FormLabel>Address</FormLabel>
+                        </HStack>
+                        <h5>{item?.address}</h5>
+                      </FormControl>
+                      <FormControl>
+                        <HStack justifyContent="center">
+                          <FormLabel>Username</FormLabel>
+                        </HStack>
+                        <h5>{item?.userName}</h5>
+                      </FormControl>
                       <h5>{item?.isActive ? "Active" : "Inactive"}</h5>
                     </Flex>
-                    <Flex pt={"20px"} justifyContent={"center"}>
-                      <Button
-                        size="sm"
-                        mr={2}
-                        onClick={() => handleEdit(item)}
-                        bg={colorMode === "light" ? "yellow.500" : "yellow.300"}
-                        _hover={{
-                          bg:
-                            colorMode === "light" ? "yellow.600" : "yellow.200",
-                        }}
-                      >
-                        <FaEdit size={16} color="white" />
-                      </Button>
-                      {/* <Button
+                  </Flex>
+                  <Flex pt={"20px"} justifyContent={"center"}>
+                    <Button
+                      size="sm"
+                      mr={2}
+                      onClick={() => handleEdit(item)}
+                      bg={colorMode === "light" ? "yellow.500" : "yellow.300"}
+                      _hover={{
+                        bg: colorMode === "light" ? "yellow.600" : "yellow.200",
+                      }}
+                    >
+                      <FaEdit size={16} color="white" />
+                    </Button>
+                    {/* <Button
                         size="sm"
                         onClick={() => deleteUser(item._id)}
                         bg={colorMode === "light" ? "red.500" : "red.300"}
@@ -283,8 +304,7 @@ function SubAdminManagement() {
                       >
                         <RiDeleteBinLine size={20} color="white"/>
                       </Button> */}
-                    </Flex>
-                  </div>
+                  </Flex>
                 </CardBody>
               </Card>
             ))}

@@ -144,7 +144,7 @@ const WinnerTickets = () => {
       <Card
         overflowX="auto"
         p={{ base: "10px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        width={{ base: "100%", md: "80%", lg: "65%" }} // Responsive width
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
         borderRadius={"none"}

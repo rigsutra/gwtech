@@ -43,14 +43,17 @@ function LotteryCategoryManagement() {
 
   useEffect(async () => {
     try {
-      await api().get(`/admin/getlotterycategory`).then((response) => {
-        setCategories(response.data.data);
-      });
+      await api()
+        .get(`/admin/getlotterycategory`)
+        .then((response) => {
+          setCategories(response.data.data);
+        });
     } catch (err) {}
   }, []);
 
   const createCategory = () => {
-    api().post(`/admin/addlotterycategory`, {
+    api()
+      .post(`/admin/addlotterycategory`, {
         lotteryName: lotteryName.trim(),
         startTime: startTime,
         endTime: endTime,
@@ -90,7 +93,8 @@ function LotteryCategoryManagement() {
     if (endTime !== "") {
       requestBody.endTime = endTime;
     }
-    api().patch(`/admin/updatelotterycategory/${id}`, requestBody)
+    api()
+      .patch(`/admin/updatelotterycategory/${id}`, requestBody)
       .then((response) => {
         setCategories(
           categories.map((category) =>
@@ -122,15 +126,17 @@ function LotteryCategoryManagement() {
   };
 
   const deleteCategory = (id) => {
-    api().delete(`/admin/deletelotterycategory/${id}`).then(() => {
-      setCategories(categories.filter((category) => category._id !== id));
-      toast({
-        title: "Lottery category deleted.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
+    api()
+      .delete(`/admin/deletelotterycategory/${id}`)
+      .then(() => {
+        setCategories(categories.filter((category) => category._id !== id));
+        toast({
+          title: "Lottery category deleted.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       });
-    });
   };
 
   const handleLotteryNameChange = (event) => {
@@ -173,9 +179,23 @@ function LotteryCategoryManagement() {
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
+    >
       {/* Lottery Categories Table */}
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} p={{ base: "5px", md: "20px"}} width="100%" border={{base: "none", md: "1px solid gray"}}>
+      <Card
+        overflowX="auto"
+        p={{ base: "10px", md: "20px" }}
+        width={{ base: "100%", md: "80%", lg: "50%" }} // Responsive width
+        maxWidth="1200px"
+        border={{ base: "none", md: "1px solid gray" }}
+        borderRadius={"none"}
+        boxShadow="lg"
+      >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
@@ -192,26 +212,32 @@ function LotteryCategoryManagement() {
               bg: colorMode === "light" ? "blue.600" : "blue.200",
             }}
           >
-            <AiOutlineAppstoreAdd size={24} color="white"/>
+            <AiOutlineAppstoreAdd size={24} color="white" />
           </Button>
         </CardHeader>
         <CardBody>
-          <Table variant='striped'>
+          <Table variant="striped">
             <Thead>
               <Tr>
-                <Th  >Name</Th>
-                <Th  >Start Time</Th>
-                <Th  >End Time</Th>
-                <Th  >Actions</Th>
+                <Th>Name</Th>
+                <Th>Start Time</Th>
+                <Th>End Time</Th>
+                <Th>Actions</Th>
               </Tr>
             </Thead>
             <Tbody>
               {categories.map((category) => {
                 return (
                   <Tr key={category._id}>
-                    <Td><pre>{category.lotteryName}</pre></Td>
-                    <Td><pre>{category.startTime}</pre></Td>
-                    <Td><pre>{category.endTime}</pre></Td>
+                    <Td fontSize="md">
+                      <pre>{category.lotteryName}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{category.startTime}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{category.endTime}</pre>
+                    </Td>
                     <Td>
                       <Button
                         size="sm"
@@ -223,7 +249,7 @@ function LotteryCategoryManagement() {
                             colorMode === "light" ? "yellow.600" : "yellow.200",
                         }}
                       >
-                        <FaEdit size={20} color="white"/>
+                        <FaEdit size={16} color="white" />
                       </Button>
                       {/* <Button
                         size="sm"

@@ -41,8 +41,10 @@ const AdminSaleReports = () => {
   // State Variables
   const [subadmins, setSubadmins] = useState([]);
   const [selectedSubadminId, setSelectedSubadminId] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
+  const [fromDate, setFromDate] = useState(
+    new Date().toLocaleDateString("en-CA")
+  );
+  const [toDate, setToDate] = useState(new Date().toLocaleDateString("en-CA"));
   const [lotteryCategoryName, setLotteryCategoryName] = useState([]);
   const [chargePerSeller, setChargePerSeller] = useState(0);
   const [totalCharge, setTotalCharge] = useState(0);
@@ -72,7 +74,6 @@ const AdminSaleReports = () => {
     const fetchLotteryCategories = async () => {
       try {
         const response = await api().get("/admin/getlotterycategory");
-        console.log(response.data.data);
         setLotteryCategoryName(response.data.data);
       } catch (error) {
         console.error(error);
@@ -227,113 +228,161 @@ const AdminSaleReports = () => {
   };
 
   return (
-    <Flex direction="column" p={{ base: "20px", md: "40px" }}>
-      <Card width="100%">
-        <CardHeader>
-          <Text fontSize="2xl" fontWeight="bold">
-            Admin Sale Reports
-          </Text>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4} align="stretch">
-            {/* Subadmin Selection */}
-            <FormControl id="subadmin" isRequired>
-              <FormLabel>Select Subadmin</FormLabel>
-              <Select
-                placeholder="Select Subadmin"
-                value={selectedSubadminId}
-                onChange={(e) => setSelectedSubadminId(e.target.value)}
-              >
-                {subadmins.map((subadmin) => (
-                  <option key={subadmin._id} value={subadmin._id}>
-                    {subadmin.userName}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Date Range Selection */}
-            <FormControl id="dateRange" isRequired>
-              <FormLabel>Select Date Range</FormLabel>
-              <HStack spacing={4}>
-                <Input
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  max={toDate}
-                />
-                <Text>to</Text>
-                <Input
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  min={fromDate}
-                />
-              </HStack>
-            </FormControl>
-
-            {/* Lottery Category Name (Optional) */}
-            {/* Lottery Category Selection */}
-            <FormControl id="lotteryCategoryName" width="330px" isRequired>
-              <HStack justifyContent="space-between" py="5px">
-                <FormLabel p="10px" m="0">
-                  Category Name
-                </FormLabel>
-                <Select
-                  onChange={(event) =>
-                    setLotteryCategoryName(event.target.value.trim())
-                  }
-                  width="200px"
-                  value={lotteryCategoryName}
-                >
-                  <option value="" style={{ backgroundColor: "#e3e2e2" }}>
-                    All Categories
-                  </option>
-                  {lotteryCategoryName.map((category) => (
-                    <option
-                      key={category._id}
-                      value={category.lotteryName}
-                      style={{ backgroundColor: "#e3e2e2" }}
-                    >
-                      {category.lotteryName}
-                    </option>
-                  ))}
-                </Select>
-              </HStack>
-            </FormControl>
-
-            {/* Charge per Seller Input */}
-            <FormControl id="chargePerSeller" isRequired>
-              <FormLabel>Charge per Qualifying Seller (₹)</FormLabel>
-              <NumberInput
-                min={0}
-                precision={2}
-                value={chargePerSeller}
-                onChange={handleChargeChange}
-              >
-                <NumberInputField placeholder="Enter charge amount" />
-              </NumberInput>
-            </FormControl>
-
-            {/* Fetch Reports Button */}
-            <Button
-              leftIcon={<CgSearch />}
-              colorScheme="teal"
-              onClick={fetchReports}
-              isLoading={loading}
-              loadingText="Fetching"
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
+    >
+      <Card
+        overflowX="auto"
+        p={{ base: "10px", md: "20px" }}
+        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        maxWidth="1200px"
+        border={{ base: "none", md: "1px solid gray" }}
+        borderRadius={"none"}
+        boxShadow="lg"
+      >
+        <CardHeader
+          p="6px 0px 22px 0px"
+          display="flex"
+          justifyContent="space-between"
+        >
+          <Flex
+            flexWrap="wrap"
+            flexDirection={{ base: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={"center"}
+            width="100%"
+          >
+            <Text fontSize="lg" color="black" font="Weight:bold" mb="10px">
+              Sale Reports
+            </Text>
+            <Flex
+              color="black"
+              flexWrap="wrap"
+              flexDirection={{ base: "column", sm: "row" }}
+              justifyContent="flex-start"
+              width="100%"
+              alignItems="center"
             >
-              Fetch Sale Reports
-            </Button>
+              {/* Subadmin Selection */}
 
-            {/* Display Metrics */}
+              <FormControl id="subadmin" width="330px" isRequired pl={5}>
+                <HStack justifyContent="space-between">
+                  <FormLabel>Select Subadmin </FormLabel>
+                  <Select
+                    placeholder="Select Subadmin"
+                    value={selectedSubadminId}
+                    onChange={(e) => setSelectedSubadminId(e.target.value)}
+                  >
+                    {subadmins.map((subadmin) => (
+                      <option key={subadmin._id} value={subadmin._id}>
+                        {subadmin.userName}
+                      </option>
+                    ))}
+                  </Select>
+                </HStack>
+              </FormControl>
+              <FormControl
+                id="lotteryCategoryName"
+                width="350px"
+                isRequired
+                pl={10}
+                py="5px"
+              >
+                <HStack justifyContent="space-between">
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onChange={(event) =>
+                      setLotteryCategoryName(event.target.value)
+                    }
+                    placeholder="Select Category"
+                    width="200px"
+                  >
+                    <option value={""} style={{ backgroundColor: "#e3e2e2" }}>
+                      All
+                    </option>
+                    {lotteryCategoryName.map((category) => (
+                      <option
+                        key={category._id}
+                        value={category.lotteryName}
+                        style={{ backgroundColor: "#e3e2e2" }}
+                      >
+                        {category.lotteryName}
+                      </option>
+                    ))}
+                  </Select>
+                </HStack>
+              </FormControl>
+
+              {/* Date Range Selection */}
+              <FormControl id="fromDate" width="330px" isRequired py="5px">
+                <HStack justifyContent="space-between">
+                  <FormLabel>From</FormLabel>
+                  <Input
+                    type="date"
+                    value={fromDate}
+                    onChange={(event) => setFromDate(event.target.value)}
+                    width="200px"
+                  />
+                </HStack>
+              </FormControl>
+              <FormControl
+                pl={10}
+                id="toDate"
+                width="330px"
+                isRequired
+                py="5px"
+              >
+                <HStack justifyContent="space-between">
+                  <FormLabel>To</FormLabel>
+                  <Input
+                    type="date"
+                    value={toDate}
+                    onChange={(event) => setToDate(event.target.value)}
+                    width="200px"
+                  />
+                </HStack>
+              </FormControl>
+
+              {/* Lottery Category Name (Optional) */}
+              {/* Lottery Category Selection */}
+
+              {/* Charge per Seller Input */}
+              <FormControl id="chargePerSeller" width="330px" isRequired>
+                <HStack justifyContent="space-between">
+                  <FormLabel>Charge P/S ($)</FormLabel>
+                  <NumberInput
+                    min={0}
+                    precision={2}
+                    value={chargePerSeller}
+                    onChange={handleChargeChange}
+                  >
+                    <NumberInputField placeholder="Enter charge amount" />
+                  </NumberInput>
+                </HStack>
+              </FormControl>
+
+              {/* Fetch Reports Button */}
+              <Button
+                ml={10}
+                leftIcon={<CgSearch />}
+                colorScheme="teal"
+                onClick={fetchReports}
+                isLoading={loading}
+                loadingText="Fetching"
+              ></Button>
+              {/* Display Metrics */}
+            </Flex>
             <Box>
-              <Text fontSize="lg" fontWeight="medium">
-                Number of Qualifying Sellers: {totalQualifyingSellers}
-              </Text>
-              <Text fontSize="lg" fontWeight="medium">
-                Total Charge: ₹{totalCharge.toFixed(2)}
-              </Text>
+              {/* <Text fontSize="lg" fontWeight="medium">
+                      Number of Qualifying Sellers: {totalQualifyingSellers}
+                    </Text>
+                    <Text fontSize="lg" fontWeight="medium">
+                      Total Charge: ₹{totalCharge.toFixed(2)}
+                    </Text> */}
               <Button
                 mt={2}
                 colorScheme="blue"
@@ -343,43 +392,12 @@ const AdminSaleReports = () => {
                 Generate Invoice
               </Button>
             </Box>
+          </Flex>
+        </CardHeader>
+        <CardBody>
+          {/* Qualifying Sellers Table */}
 
-            {/* Qualifying Sellers Table */}
-            <Box overflowX="auto" mt={4}>
-              <Table variant="striped" colorScheme="gray">
-                <Thead>
-                  <Tr>
-                    <Th>Seller Number</Th>
-                    <Th>Price P/S(₹)</Th>
-                    <Th>Total (₹)</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {loading ? (
-                    <Tr>
-                      <Td colSpan={4} textAlign="center">
-                        <Spinner size="lg" />
-                      </Td>
-                    </Tr>
-                  ) : qualifyingSellers.length > 0 ? (
-                    sellerInfo.map((seller) => (
-                      <Tr key={seller._id}>
-                        <Td>{seller.seller.length}</Td>
-                        <Td>₹{seller.totalSales.toFixed(2)}</Td>
-                        <Td>₹{seller.paidAmount.toFixed(2)}</Td>
-                      </Tr>
-                    ))
-                  ) : (
-                    <Tr>
-                      <Td colSpan={4} textAlign="center">
-                        No qualifying sellers found for the selected criteria.
-                      </Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </Box>
-          </VStack>
+          <Table variant="striped" colorScheme="gray"></Table>
         </CardBody>
       </Card>
     </Flex>

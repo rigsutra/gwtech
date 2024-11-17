@@ -343,22 +343,33 @@ const WinningNumbersManagement = () => {
   };
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex
+      direction="column"
+      pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
+    >
       <Card
-        overflowX={{ sm: "scroll", xl: "hidden" }}
-        p={{ base: "5px", md: "20px" }}
-        width="100%"
+        overflowX="auto"
+        p={{ base: "10px", md: "20px" }}
+        width={{ base: "100%", md: "80%", lg: "65%" }} // Responsive width
+        maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
+        borderRadius="none"
+        boxShadow="lg"
       >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
+          flexDirection={{ base: "column", sm: "row" }}
           justifyContent="space-between"
+          alignItems={{ base: "flex-start", sm: "center" }}
         >
           <Flex
             flexWrap="wrap"
-            flexDirection="column"
-            justifyContent="flex-start"
+            flexDirection={{ base: "column", sm: "row" }}
+            justifyContent="space-between"
             width="100%"
           >
             <Text fontSize="lg" fontWeight="bold">
@@ -369,25 +380,25 @@ const WinningNumbersManagement = () => {
               justifyContent="space-start"
               alignItems={"center"}
             >
-              <FormControl id="fromDate" width="320px" py="10px" isRequired>
+              <FormControl id="fromDate" width="250px" py="10px" isRequired>
                 <HStack justifyContent="space-between">
                   <FormLabel>From</FormLabel>
                   <Input
                     type="date"
                     value={fromDate}
                     onChange={(event) => setFromDate(event.target.value)}
-                    width="200px"
+                    width="180px"
                   />
                 </HStack>
               </FormControl>
-              <FormControl id="toDate" width="320px" py="10px" isRequired>
+              <FormControl id="toDate" width="250px" py="10px" isRequired>
                 <HStack justifyContent="space-between">
                   <FormLabel>To</FormLabel>
                   <Input
                     type="date"
                     value={toDate}
                     onChange={(event) => setToDate(event.target.value)}
-                    width="200px"
+                    width="180px"
                   />
                 </HStack>
               </FormControl>
@@ -504,7 +515,7 @@ const WinningNumbersManagement = () => {
                           {/* BLT2 - Second */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
-                              2nd (Second)
+                              2nd (Sec)
                             </FormLabel>
                             <Input
                               placeholder="Second"
@@ -537,14 +548,6 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[3]?.number}
                             />
                           </Box>
-                        </VStack>
-
-                        {/* MRG Fields */}
-                        <VStack
-                          flexBasis={{ base: "100%", md: "30%" }}
-                          color="black"
-                          mx="3px"
-                        >
                           {/* MRG1 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
@@ -556,6 +559,14 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[10]?.number}
                             />
                           </Box>
+                        </VStack>
+
+                        {/* MRG Fields */}
+                        <VStack
+                          flexBasis={{ base: "100%", md: "30%" }}
+                          color="black"
+                          mx="3px"
+                        >
                           {/* MRG2 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
@@ -578,47 +589,6 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[12]?.number}
                             />
                           </Box>
-                          {/*MRG4 */}
-                        </VStack>
-                        <Box>
-                          <FormLabel fontSize={14} mb="0">
-                            MRG4
-                          </FormLabel>
-                          <Input
-                            placeholder="MRG4"
-                            isReadOnly={true}
-                            value={number?.numbers[13]?.number}
-                          />
-                        </Box>
-                        {/* MRG5 */}
-                        <Box>
-                          <FormLabel fontSize={14} mb="0">
-                            MRG5
-                          </FormLabel>
-                          <Input
-                            placeholder="MRG5"
-                            isReadOnly={true}
-                            value={number?.numbers[14]?.number}
-                          />
-                        </Box>
-                        {/* MRG6 */}
-                        <Box>
-                          <FormLabel fontSize={14} mb="0">
-                            MRG6
-                          </FormLabel>
-                          <Input
-                            placeholder="MRG6"
-                            isReadOnly={true}
-                            value={number?.numbers[15]?.number}
-                          />
-                        </Box>
-
-                        {/* L4C and L5C Fields */}
-                        <VStack
-                          flexBasis={{ base: "100%", md: "30%" }}
-                          color="black"
-                          mx="3px"
-                        >
                           {/* L4C1 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">
@@ -641,6 +611,47 @@ const WinningNumbersManagement = () => {
                               value={number?.numbers[5]?.number}
                             />
                           </Box>
+                          {/*MRG4 */}
+                        </VStack>
+                        {/* <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG4
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG4"
+                            isReadOnly={true}
+                            value={number?.numbers[13]?.number}
+                          />
+                        </Box> */}
+                        {/* MRG5 */}
+                        {/* <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG5
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG5"
+                            isReadOnly={true}
+                            value={number?.numbers[14]?.number}
+                          />
+                        </Box> */}
+                        {/* MRG6 */}
+                        {/* <Box>
+                          <FormLabel fontSize={14} mb="0">
+                            MRG6
+                          </FormLabel>
+                          <Input
+                            placeholder="MRG6"
+                            isReadOnly={true}
+                            value={number?.numbers[15]?.number}
+                          />
+                        </Box> */}
+
+                        {/* L4C and L5C Fields */}
+                        <VStack
+                          flexBasis={{ base: "100%", md: "30%" }}
+                          color="black"
+                          mx="3px"
+                        >
                           {/* L4C3 */}
                           <Box>
                             <FormLabel fontSize={14} mb="0">

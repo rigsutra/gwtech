@@ -91,7 +91,7 @@ const PercentageLimit = () => {
     };
     fetchConditions();
   }, []);
-
+  console.log(allConditions);
   const handleNumberChange = (index, value) => {
     const updatedConditions = conditions.map((condition, idx) =>
       idx === index ? { ...condition, limitPercent: value } : condition
@@ -291,7 +291,7 @@ const PercentageLimit = () => {
                         </Button>
                         <Button
                           size="sm"
-                          onClick={() => handleDelete(condition)}
+                          onClick={() => handleDelete(condition._id)}
                           bg={colorMode === "light" ? "red.500" : "red.300"}
                           _hover={{
                             bg: colorMode === "light" ? "red.600" : "red.200",
