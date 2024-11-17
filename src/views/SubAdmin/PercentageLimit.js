@@ -222,7 +222,7 @@ const PercentageLimit = () => {
         overflowX="auto"
         borderRadius={"none"}
         p={{ base: "10px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "60%" }}
+        width={{ base: "100%", md: "80%", lg: "65%" }}
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
       >
@@ -389,16 +389,18 @@ const PercentageLimit = () => {
       <Modal
         isOpen={isOpen}
         onClose={handleCancel}
-        title={editing ? "Edit Condition" : "Create Condition"}
-        submitButtonText={editing ? "Update" : "Create"}
+        // title={editing ? "Edit Condition" : "Create Condition"}
+        // submitButtonText={editing ? "Update" : "Create"}
         onSubmit={handleSubmit}
-        cancelButtonText="Cancel"
+        // cancelButtonText="Cancel"
       >
-        <form onSubmit={handleSubmit}>
+        <form bg="#A6A6A6" justifyContent="center" onSubmit={handleSubmit}>
           <VStack spacing={4} align="stretch">
             <FormControl id="lotteryCategoryName" isRequired>
               <FormLabel>Lottery Category Name</FormLabel>
               <Select
+                // bg="#bfbfbf"
+                // color="black"
                 value={lotteryCategoryName}
                 onChange={(event) => setLotteryCategoryName(event.target.value)}
                 disabled={editing}
@@ -449,6 +451,33 @@ const PercentageLimit = () => {
             </FormControl>
           </VStack>
         </form>
+        <HStack
+          direction="row"
+          spacing={4}
+          justifyContent={"center"}
+          mt={6}
+          mb={6}
+        >
+          <Button
+            type="submit"
+            bg="#c6d98d"
+            color="black"
+            _hover={{ bg: "#b2c270" }}
+            width="120px"
+            onClick={handleSubmit}
+          >
+            {editing ? "Update" : "Add"} Limit
+          </Button>
+          <Button
+            onClick={onClose}
+            bg="#c6d98d"
+            color="black"
+            _hover={{ bg: "#b2c270" }}
+            width="120px"
+          >
+            Cancel
+          </Button>
+        </HStack>
       </Modal>
     </Flex>
   );
