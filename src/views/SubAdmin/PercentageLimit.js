@@ -46,17 +46,13 @@ const PercentageLimit = () => {
   const [conditions, setConditions] = useState(initConditions);
   const [lotteryCategories, setLotteryCategories] = useState([]);
   const [allConditions, setAllConditions] = useState([]);
-  const [currentCondition, setCurrentCondition] = useState();
-
-  useEffect(() => {
-    if (lotteryCategoryName) setConditions(initConditions);
-  }, [lotteryCategoryName]);
+  const [currentCondition, setCurrentCondition] = useState(null);
 
   useEffect(() => {
     const fetchLotteryCategories = async () => {
       try {
         const response = await api().get("/admin/getlotterycategory");
-        setLotteryCategories(response?.data?.data);
+        setLotteryCategories(response?.data?.data || []);
       } catch (error) {
         console.error(error);
         toast({
@@ -74,7 +70,9 @@ const PercentageLimit = () => {
     const fetchConditions = async () => {
       try {
         const response = await api().get("/subadmin/getpercentagelimit");
-        setAllConditions(response.data);
+        console.log("API Conditions Response:", response.data);
+        // Assuming the API returns an array of conditions
+        setAllConditions(response.data || []);
       } catch (error) {
         console.error(
           "Error fetching conditions:",
@@ -91,7 +89,7 @@ const PercentageLimit = () => {
     };
     fetchConditions();
   }, []);
-  console.log(allConditions);
+
   const handleNumberChange = (index, value) => {
     const updatedConditions = conditions.map((condition, idx) =>
       idx === index ? { ...condition, limitPercent: value } : condition
@@ -100,8 +98,7 @@ const PercentageLimit = () => {
   };
 
   const handleCancel = () => {
-    setEditing(false);
-    onClose();
+    resetForm();
   };
 
   const handleSubmit = (event) => {
@@ -113,6 +110,7 @@ const PercentageLimit = () => {
     setLotteryCategoryName("");
     setConditions(initConditions);
     setEditing(false);
+    setCurrentCondition(null);
     onClose();
   };
 
@@ -131,6 +129,7 @@ const PercentageLimit = () => {
         lotteryCategoryName: lotteryCategoryName,
         limits: conditions,
       });
+      console.log("Create Response:", response.data);
       resetForm();
       setAllConditions([...allConditions, response.data]);
       toast({
@@ -154,6 +153,7 @@ const PercentageLimit = () => {
           limits: conditions,
         }
       );
+      console.log("Update Response:", response.data);
       setAllConditions((prevConditions) =>
         prevConditions.map((cond) => (cond._id === id ? response.data : cond))
       );
@@ -178,8 +178,8 @@ const PercentageLimit = () => {
   const handleEdit = (condition) => {
     if (condition) {
       setEditing(true);
-      setLotteryCategoryName(condition.lotteryCategoryName);
-      setConditions(condition.limits);
+      setLotteryCategoryName(condition.lotteryCategoryName || "");
+      setConditions(condition.limits || initConditions);
       setCurrentCondition(condition);
       onOpen();
     }
@@ -192,13 +192,10 @@ const PercentageLimit = () => {
     if (!isConfirmed) return;
 
     try {
-      await api()
-        .delete(`/subadmin/deletepercentagelimit/${id}`)
-        .then(() => {
-          setAllConditions(
-            allConditions.filter((condition) => condition._id !== id)
-          );
-        });
+      await api().delete(`/subadmin/deletepercentagelimit/${id}`);
+      setAllConditions(
+        allConditions.filter((condition) => condition._id !== id)
+      );
       toast({
         title: "Payment condition deleted",
         status: "success",
@@ -225,19 +222,21 @@ const PercentageLimit = () => {
         overflowX="auto"
         borderRadius={"none"}
         p={{ base: "10px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        width={{ base: "100%", md: "80%", lg: "60%" }}
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
       >
         <CardHeader display="flex" justifyContent="space-between">
-          <Text fontSize="lg" color="black" font="Weight:bold">
+          <Text fontSize="lg" color="black" fontWeight="bold">
             Percentage Limit
           </Text>
           <Button
             size="md"
             onClick={() => {
               if (lotteryCategories.length > 0) {
+                setEditing(false);
                 setLotteryCategoryName(lotteryCategories[0]?.lotteryName);
+                setConditions(initConditions);
                 onOpen();
               }
             }}
@@ -256,124 +255,134 @@ const PercentageLimit = () => {
             justifyContent="flex-start"
             width="100%"
           >
-            {allConditions?.map((condition, index) => (
-              <Stack
-                key={index}
-                spacing={1}
-                width="350px"
-                p="5px"
-                m="10px"
-                border={"1px solid gray"}
-              >
-                <VStack spacing={3} align="stretch" color="black">
-                  <FormControl id="lotteryCategoryName" isRequired>
-                    <HStack justifyContent="space-between">
-                      <Box>
-                        <FormLabel>Lottery Category Name</FormLabel>
-                        <FormLabel>{condition.lotteryCategoryName}</FormLabel>
-                      </Box>
-                      <Box as="div">
-                        <Button
-                          size="sm"
-                          onClick={() => handleEdit(condition._id)}
-                          bg={
-                            colorMode === "light" ? "yellow.500" : "yellow.300"
-                          }
-                          _hover={{
-                            bg:
+            {allConditions?.map((condition, index) => {
+              if (!condition) {
+                console.warn(`Condition at index ${index} is undefined`);
+                return null;
+              }
+              return (
+                <Stack
+                  key={index}
+                  spacing={1}
+                  width="350px"
+                  p="5px"
+                  m="10px"
+                  border={"1px solid gray"}
+                >
+                  <VStack spacing={3} align="stretch" color="black">
+                    <FormControl id="lotteryCategoryName" isRequired>
+                      <HStack justifyContent="space-between">
+                        <Box>
+                          <FormLabel>Lottery Category Name</FormLabel>
+                          <FormLabel>
+                            {condition.lotteryCategoryName || "N/A"}
+                          </FormLabel>
+                        </Box>
+                        <Box as="div">
+                          <Button
+                            size="sm"
+                            onClick={() => handleEdit(condition)}
+                            bg={
                               colorMode === "light"
-                                ? "yellow.600"
-                                : "yellow.200",
-                          }}
-                          borderRadius={"none"}
-                        >
-                          <FaEdit size={20} color="white" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleDelete(condition._id)}
-                          bg={colorMode === "light" ? "red.500" : "red.300"}
-                          _hover={{
-                            bg: colorMode === "light" ? "red.600" : "red.200",
-                          }}
-                          borderRadius={"none"}
-                          ml={2}
-                        >
-                          <RiDeleteBinLine size={20} color="white" />
-                        </Button>
-                      </Box>
-                    </HStack>
-                  </FormControl>
-                  <FormControl id="conditions" isRequired>
-                    <FormLabel>Percentage Limit</FormLabel>
-                    <Stack>
-                      <Flex justifyContent="space-between">
-                        <VStack color="black">
-                          <Box>
-                            <FormLabel fontSize={14}>L3C</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[0].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>MRG</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[7].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>L4C1</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[1].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>L4C2</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[2].limitPercent}
-                            />
-                          </Box>
-                        </VStack>
-                        <VStack color="black">
-                          <Box>
-                            <FormLabel fontSize={14}>L4C3</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[3].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>L5C1</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[4].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>L5C2</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[5].limitPercent}
-                            />
-                          </Box>
-                          <Box>
-                            <FormLabel fontSize={14}>L5C3</FormLabel>
-                            <Input
-                              isReadOnly
-                              value={condition.limits[4].limitPercent}
-                            />
-                          </Box>
-                        </VStack>
-                      </Flex>
-                    </Stack>
-                  </FormControl>
-                </VStack>
-              </Stack>
-            ))}
+                                ? "yellow.500"
+                                : "yellow.300"
+                            }
+                            _hover={{
+                              bg:
+                                colorMode === "light"
+                                  ? "yellow.600"
+                                  : "yellow.200",
+                            }}
+                            borderRadius={"none"}
+                          >
+                            <FaEdit size={20} color="white" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleDelete(condition._id)}
+                            bg={colorMode === "light" ? "red.500" : "red.300"}
+                            _hover={{
+                              bg: colorMode === "light" ? "red.600" : "red.200",
+                            }}
+                            borderRadius={"none"}
+                            ml={2}
+                          >
+                            <RiDeleteBinLine size={20} color="white" />
+                          </Button>
+                        </Box>
+                      </HStack>
+                    </FormControl>
+                    <FormControl id="conditions" isRequired>
+                      <FormLabel>Percentage Limit</FormLabel>
+                      <Stack>
+                        <Flex justifyContent="space-between">
+                          <VStack color="black">
+                            <Box>
+                              <FormLabel fontSize={14}>L3C</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[0]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>L4C1</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[1]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>L4C2</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[2]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>L4C3</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[3]?.limitPercent || ""}
+                              />
+                            </Box>
+                          </VStack>
+                          <VStack color="black">
+                            <Box>
+                              <FormLabel fontSize={14}>L5C1</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[4]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>L5C2</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[5]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>L5C3</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[6]?.limitPercent || ""}
+                              />
+                            </Box>
+                            <Box>
+                              <FormLabel fontSize={14}>MRG</FormLabel>
+                              <Input
+                                isReadOnly
+                                value={condition.limits[7]?.limitPercent || ""}
+                              />
+                            </Box>
+                          </VStack>
+                        </Flex>
+                      </Stack>
+                    </FormControl>
+                  </VStack>
+                </Stack>
+              );
+            })}
           </Flex>
         </CardBody>
       </Card>
@@ -392,6 +401,7 @@ const PercentageLimit = () => {
               <Select
                 value={lotteryCategoryName}
                 onChange={(event) => setLotteryCategoryName(event.target.value)}
+                disabled={editing}
               >
                 {lotteryCategories.map((category) => (
                   <option key={category._id} value={category.lotteryName}>
@@ -401,10 +411,10 @@ const PercentageLimit = () => {
               </Select>
             </FormControl>
             <FormControl id="Conditions" isRequired>
-              <FormLabel>Payment Conditions</FormLabel>
+              <FormLabel>Percentage Limits</FormLabel>
               <Flex justifyContent="space-between">
                 <VStack color="black">
-                  {conditions.map((condition, index) => (
+                  {conditions.slice(0, 4).map((condition, index) => (
                     <Box key={index}>
                       <FormLabel fontSize={14}>
                         {condition.gameCategory}
@@ -413,6 +423,22 @@ const PercentageLimit = () => {
                         value={condition.limitPercent}
                         onChange={(e) =>
                           handleNumberChange(index, e.target.value)
+                        }
+                        type="number"
+                      />
+                    </Box>
+                  ))}
+                </VStack>
+                <VStack color="black">
+                  {conditions.slice(4, 8).map((condition, index) => (
+                    <Box key={index + 4}>
+                      <FormLabel fontSize={14}>
+                        {condition.gameCategory}
+                      </FormLabel>
+                      <Input
+                        value={condition.limitPercent}
+                        onChange={(e) =>
+                          handleNumberChange(index + 4, e.target.value)
                         }
                         type="number"
                       />
