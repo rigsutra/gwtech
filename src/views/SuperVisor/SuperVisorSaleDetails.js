@@ -75,7 +75,6 @@ const SaleDetails = () => {
       const responseByGameCatetory = await api().get(
         `/superVisor/getselldetailsbygamecategory?seller=${selectedSellerId}&lotteryCategoryName=${lotteryCategoryName.trim()}&fromDate=${fromDate}`
       );
-      connsole.log(responseByGameCatetory);
       setGameCategoryDetail(responseByGameCatetory?.data?.data);
 
       const responseAllLottery = await api().get(

@@ -146,22 +146,27 @@ function SellerManagement() {
   return (
     <Flex
       direction="column"
-      alignItems="center"
-      justifyContent="center"
       pt={{ base: "120px", md: "75px" }}
+      justifyContent="center"
+      alignItems="center" // Add this to center children horizontally
+      width="100%"
     >
       {/* Sellers Table */}
       <Card
-        overflowX={{ sm: "scroll", xl: "hidden" }}
-        p={{ base: "5px", md: "20px" }}
-        width="50%"
-        justifyContent="center"
+        overflowX="auto"
+        p={{ base: "10px", md: "20px" }}
+        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
+        borderRadius={"none"}
+        boxShadow="lg"
       >
         <CardHeader
           p="6px 0px 22px 0px"
           display="flex"
+          flexDirection={{ base: "column", sm: "row" }}
           justifyContent="space-between"
+          alignItems={{ base: "flex-start", sm: "center" }}
         >
           <Text fontSize="lg" color="black" fontWeight="bold">
             Seller Table
