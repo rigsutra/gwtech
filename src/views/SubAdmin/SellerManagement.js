@@ -25,8 +25,6 @@ import {
   ModalBody,
   ModalCloseButton,
   Select,
-  Center,
-  VStack, // Import Select for the dropdown
 } from "@chakra-ui/react";
 
 import { RiUserAddLine } from "react-icons/ri";
@@ -48,8 +46,8 @@ function SellerManagement() {
   const [editing, setEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [companyName, setCompanyName] = useState("");
-  const [superVisors, setSuperVisors] = useState([]); // Store supervisors list
-  const [selectedSuperVisor, setSelectedSuperVisor] = useState(""); // Selected supervisor ID
+  const [superVisors, setSuperVisors] = useState([]);
+  const [selectedSuperVisor, setSelectedSuperVisor] = useState("");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -61,8 +59,7 @@ function SellerManagement() {
     const fetchSupervisors = async () => {
       try {
         const response = await api().get(`/subadmin/getsuperVisor`);
-        console.log(response);
-        setSuperVisors(response.data); // Set the fetched supervisors
+        setSuperVisors(response.data);
       } catch (err) {
         console.error(err);
       }
@@ -74,8 +71,15 @@ function SellerManagement() {
     const fetchSellers = async () => {
       try {
         const response = await api().get(`/subadmin/getseller`);
-        console.log(response.data);
-        setUsers(response?.data?.users);
+        const processedUsers = response?.data?.users.map((user) => ({
+          ...user,
+          // Set superVisorName to "None" if it's "N/A" or falsy
+          superVisorName:
+            user.superVisorName && user.superVisorName !== "N/A"
+              ? user.superVisorName
+              : "None",
+        }));
+        setUsers(processedUsers);
         setCompanyName(response?.data?.companyName);
         setBonusFlag(response?.data?.bonusFlag);
       } catch (err) {
@@ -85,76 +89,78 @@ function SellerManagement() {
     fetchSellers();
   }, []);
 
-  const createUser = () => {
-    console.log(userName, password, isActive, imei, selectedSuperVisor);
-    api()
-      .post(`/subadmin/addseller`, {
+  const createUser = async () => {
+    try {
+      const response = await api().post(`/subadmin/addseller`, {
         userName: userName.trim(),
         password,
         isActive,
         imei: imei.trim(),
-        superVisorId: selectedSuperVisor || "", // Use selected supervisor ID
-      })
-      .then((response) => {
-        setUsers([...users, response.data]);
-        setUserName("");
-        setPassword("");
-        setImei("");
-        setIsActive(true);
-        resetForm();
-        onClose();
-        toast({
-          title: "Seller created.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: "Error creating Seller.",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        superVisorId: selectedSuperVisor || "",
       });
+      // Refresh the users list
+      const fetchResponse = await api().get(`/subadmin/getseller`);
+      const processedUsers = fetchResponse?.data?.users.map((user) => ({
+        ...user,
+        superVisorName:
+          user.superVisorName && user.superVisorName !== "N/A"
+            ? user.superVisorName
+            : "None",
+      }));
+      setUsers(processedUsers);
+      resetForm();
+      onClose();
+      toast({
+        title: "Seller created.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error creating Seller.",
+        description: error.response?.data?.message || error.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
-  const updateUser = (id) => {
-    const requestBody = {
-      isActive,
-      userName: userName.trim(),
-      imei: imei.trim(),
-      superVisorId: selectedSuperVisor, // Include selected supervisor ID in update
-    };
-    if (password !== "") {
-      requestBody.password = password;
-    }
-    api()
-      .patch(`/subadmin/updateseller/${id}`, requestBody)
-      .then((response) => {
-        setUsers(users.map((user) => (user._id === id ? response.data : user)));
-        resetForm();
-        setEditing(false);
-        setCurrentUser(null);
-        onClose();
-        toast({
-          title: "User updated.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-      })
-      .catch((error) => {
-        toast({
-          title: "Error updating user.",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+  const updateUser = async (id, updatedData) => {
+    try {
+      // Send the update request
+      await api().patch(`/subadmin/updateseller/${id}`, updatedData);
+
+      // Fetch the updated user details
+      const response = await api().get(`/subadmin/getseller`);
+      // Process the users in the same way as in fetchSellers
+      const processedUsers = response?.data?.users.map((user) => ({
+        ...user,
+        superVisorName:
+          user.superVisorName && user.superVisorName !== "N/A"
+            ? user.superVisorName
+            : "None",
+      }));
+      setUsers(processedUsers);
+
+      toast({
+        title: "User updated.",
+        description: "The user has been successfully updated.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
       });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast({
+        title: "Error updating user.",
+        description: error.response?.data?.message || "An error occurred.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const deleteUser = (id) => {
@@ -185,26 +191,39 @@ function SellerManagement() {
     setPassword("");
     setImei("");
     setIsActive(true);
-    setSelectedSuperVisor(""); // Reset selected supervisor
+    setSelectedSuperVisor("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (editing) {
-      updateUser(currentUser._id);
-    } else {
-      createUser();
+
+    const updatedData = {
+      userName: userName.trim(),
+      imei: imei.trim(),
+      isActive: isActive,
+      superVisorId: selectedSuperVisor,
+    };
+
+    if (password) {
+      updatedData.password = password;
     }
+
+    if (editing) {
+      await updateUser(currentUser._id, updatedData);
+    } else {
+      await createUser();
+    }
+    onClose();
   };
 
   const handleEdit = (user) => {
     setEditing(true);
     setCurrentUser(user);
     setUserName(user.userName);
-    setPassword(""); // Reset password for security
+    setPassword("");
     setImei(user.imei);
     setIsActive(user.isActive);
-    setSelectedSuperVisor(user.superVisorId); // Set selected supervisor for editing
+    setSelectedSuperVisor(user.superVisorId);
     onOpen();
   };
 
@@ -233,7 +252,7 @@ function SellerManagement() {
   };
 
   const handleSuperVisorChange = (event) => {
-    setSelectedSuperVisor(event.target.value); // Update selected supervisor ID
+    setSelectedSuperVisor(event.target.value);
   };
 
   const handleBonusFlag = () => {
@@ -264,14 +283,14 @@ function SellerManagement() {
       direction="column"
       pt={{ base: "120px", md: "75px" }}
       justifyContent="center"
-      alignItems="center" // Add this to center children horizontally
+      alignItems="center"
       width="100%"
     >
       {/* Sellers Table */}
       <Card
         overflowX="auto"
         p={{ base: "10px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "60%" }} // Responsive width
+        width={{ base: "100%", md: "80%", lg: "60%" }}
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
         borderRadius={"none"}
@@ -335,7 +354,7 @@ function SellerManagement() {
                 <Tr key={user._id}>
                   <Td>{user.userName}</Td>
                   <Td>{companyName}</Td>
-                  <Td>{user.superVisorName || "None"}</Td>
+                  <Td>{user.superVisorName}</Td>
                   <Td>{user.isActive ? "Yes" : "No"}</Td>
                   <Td>
                     <Flex gap={2}>
@@ -373,7 +392,7 @@ function SellerManagement() {
       <Modal
         isOpen={isOpen}
         onClose={handleCancel}
-        title="ADD SELLER"
+        title={editing ? "EDIT SELLER" : "ADD SELLER"}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         colorMode={colorMode}
@@ -403,7 +422,7 @@ function SellerManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   />
                 </Flex>
               </FormControl>
@@ -419,7 +438,7 @@ function SellerManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   />
                 </Flex>
               </FormControl>
@@ -435,7 +454,7 @@ function SellerManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   />
                 </Flex>
               </FormControl>
@@ -451,7 +470,7 @@ function SellerManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   >
                     {superVisors.map((superVisor) => (
                       <option key={superVisor._id} value={superVisor._id}>
@@ -462,17 +481,19 @@ function SellerManagement() {
                 </Flex>
               </FormControl>
               <FormControl bg="#bfbfbf">
-                <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
-                  Active:
-                </FormLabel>
-                <Checkbox
-                  isChecked={isActive}
-                  onChange={handleIsActiveChange}
-                  colorScheme="gray"
-                  size="lg"
-                >
-                  Active
-                </Checkbox>
+                <Flex alignItems="center">
+                  <FormLabel color="#7f7f7f" mb="0" mr={4} width="120px">
+                    Active:
+                  </FormLabel>
+                  <Checkbox
+                    isChecked={isActive}
+                    onChange={handleIsActiveChange}
+                    colorScheme="gray"
+                    size="lg"
+                  >
+                    Active
+                  </Checkbox>
+                </Flex>
               </FormControl>
             </Stack>
             <Stack direction="row" spacing={4} justify="center" mt={6} mb={6}>
