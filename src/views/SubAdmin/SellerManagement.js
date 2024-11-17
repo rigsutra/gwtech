@@ -102,10 +102,7 @@ function SellerManagement() {
       const fetchResponse = await api().get(`/subadmin/getseller`);
       const processedUsers = fetchResponse?.data?.users.map((user) => ({
         ...user,
-        superVisorName:
-          user.superVisorName && user.superVisorName !== "N/A"
-            ? user.superVisorName
-            : "None",
+        superVisorName: user.superVisorName,
       }));
       setUsers(processedUsers);
       resetForm();
@@ -137,10 +134,7 @@ function SellerManagement() {
       // Process the users in the same way as in fetchSellers
       const processedUsers = response?.data?.users.map((user) => ({
         ...user,
-        superVisorName:
-          user.superVisorName && user.superVisorName !== "N/A"
-            ? user.superVisorName
-            : "None",
+        superVisorName: user.superVisorName,
       }));
       setUsers(processedUsers);
 

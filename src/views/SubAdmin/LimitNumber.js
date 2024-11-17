@@ -70,7 +70,9 @@ const LimitNumber = () => {
           api().get("/subadmin/getsuperVisor"),
         ]);
         setLotteryCategories(lotteryResponse?.data?.data);
+        console.log(supervisorsResponse?.data);
         setSupervisors(supervisorsResponse?.data);
+        console.log(sellersResponse?.data?.users);
         setSellers(sellersResponse?.data?.users);
       } catch (error) {
         toast({
