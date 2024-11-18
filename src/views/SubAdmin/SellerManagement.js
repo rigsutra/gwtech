@@ -1,3 +1,5 @@
+// src/pages/SellerManagement.jsx
+
 import React, { useState, useEffect } from "react";
 import api from "../../utils/customFetch.js";
 // Chakra imports
@@ -73,7 +75,6 @@ function SellerManagement() {
         const response = await api().get(`/subadmin/getseller`);
         const processedUsers = response?.data?.users.map((user) => ({
           ...user,
-          // Set superVisorName to "None" if it's "N/A" or falsy
           superVisorName:
             user.superVisorName && user.superVisorName !== "N/A"
               ? user.superVisorName
@@ -89,20 +90,17 @@ function SellerManagement() {
     fetchSellers();
   }, []);
 
-  const createUser = async () => {
+  const createUser = async (userData) => {
     try {
-      const response = await api().post(`/subadmin/addseller`, {
-        userName: userName.trim(),
-        password,
-        isActive,
-        imei: imei.trim(),
-        superVisorId: selectedSuperVisor || "",
-      });
+      const response = await api().post(`/subadmin/addseller`, userData);
       // Refresh the users list
       const fetchResponse = await api().get(`/subadmin/getseller`);
       const processedUsers = fetchResponse?.data?.users.map((user) => ({
         ...user,
-        superVisorName: user.superVisorName,
+        superVisorName:
+          user.superVisorName && user.superVisorName !== "N/A"
+            ? user.superVisorName
+            : "None",
       }));
       setUsers(processedUsers);
       resetForm();
@@ -126,19 +124,17 @@ function SellerManagement() {
 
   const updateUser = async (id, updatedData) => {
     try {
-      // Include password only if it's not empty
-      if (password !== "") {
-        updatedData.password = password;
-      }
       // Send the update request
       await api().patch(`/subadmin/updateseller/${id}`, updatedData);
 
       // Fetch the updated user details
       const response = await api().get(`/subadmin/getseller`);
-      // Process the users in the same way as in fetchSellers
       const processedUsers = response?.data?.users.map((user) => ({
         ...user,
-        superVisorName: user.superVisorName || "",
+        superVisorName:
+          user.superVisorName && user.superVisorName !== "N/A"
+            ? user.superVisorName
+            : "None",
       }));
       setUsers(processedUsers);
 
@@ -162,26 +158,29 @@ function SellerManagement() {
   };
 
   const deleteUser = (id) => {
-    api()
-      .delete(`/subadmin/deleteseller/${id}`)
-      .then(() => {
-        setUsers(users.filter((user) => user._id !== id));
-        toast({
-          title: "User deleted.",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
+    // Confirmation modal
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      api()
+        .delete(`/subadmin/deleteseller/${id}`)
+        .then(() => {
+          setUsers(users.filter((user) => user._id !== id));
+          toast({
+            title: "User deleted.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: "Error deleting user.",
+            description: error.message,
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
         });
-      })
-      .catch((error) => {
-        toast({
-          title: "Error deleting user.",
-          description: error.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      });
+    }
   };
 
   const resetForm = () => {
@@ -199,7 +198,7 @@ function SellerManagement() {
       userName: userName.trim(),
       imei: imei.trim(),
       isActive: isActive,
-      superVisorId: selectedSuperVisor,
+      superVisorId: selectedSuperVisor || "",
     };
 
     if (password) {
@@ -209,8 +208,9 @@ function SellerManagement() {
     if (editing) {
       await updateUser(currentUser._id, updatedData);
     } else {
-      await createUser();
+      await createUser(updatedData);
     }
+    resetForm();
     onClose();
   };
 
@@ -221,7 +221,7 @@ function SellerManagement() {
     setPassword("");
     setImei(user.imei);
     setIsActive(user.isActive);
-    setSelectedSuperVisor(user.superVisorId);
+    setSelectedSuperVisor(user.superVisorId || "");
     onOpen();
   };
 
@@ -327,7 +327,11 @@ function SellerManagement() {
           <Button
             size="sm"
             mt={{ base: 2, sm: 0 }}
-            onClick={onOpen}
+            onClick={() => {
+              setEditing(false);
+              resetForm();
+              onOpen();
+            }}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
             _hover={{
               bg: colorMode === "light" ? "blue.600" : "blue.200",
@@ -421,6 +425,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
+                    isRequired
                   />
                 </Flex>
               </FormControl>
@@ -437,6 +442,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
+                    isRequired={!editing}
                   />
                 </Flex>
               </FormControl>
@@ -453,7 +459,10 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    isRequired
+                    isRequired={!editing}
+                    placeholder={
+                      editing ? "Leave blank to keep current password" : ""
+                    }
                   />
                 </Flex>
               </FormControl>
@@ -470,7 +479,6 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    isRequired
                   >
                     {superVisors.map((superVisor) => (
                       <option key={superVisor._id} value={superVisor._id}>
