@@ -126,6 +126,10 @@ function SellerManagement() {
 
   const updateUser = async (id, updatedData) => {
     try {
+      // Include password only if it's not empty
+      if (password !== "") {
+        updatedData.password = password;
+      }
       // Send the update request
       await api().patch(`/subadmin/updateseller/${id}`, updatedData);
 
@@ -134,7 +138,7 @@ function SellerManagement() {
       // Process the users in the same way as in fetchSellers
       const processedUsers = response?.data?.users.map((user) => ({
         ...user,
-        superVisorName: user.superVisorName,
+        superVisorName: user.superVisorName || "",
       }));
       setUsers(processedUsers);
 
@@ -449,6 +453,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
+                    isRequired
                   />
                 </Flex>
               </FormControl>
@@ -465,6 +470,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
+                    isRequired
                   >
                     {superVisors.map((superVisor) => (
                       <option key={superVisor._id} value={superVisor._id}>

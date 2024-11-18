@@ -353,15 +353,15 @@ const SoldTickets = () => {
           >
             <Stack
               spacing={1}
-              borderRadius="3px"
+              // borderRadius="3px"
               m="5px"
               boxShadow="0px 0px 2px white"
               width="100%"
             >
-              <VStack spacing={3} align="stretch">
-                <Table variant="striped">
+              <VStack spacing={4}>
+                <Table>
                   <Thead>
-                    <Tr>
+                    <Tr padding={"none"}>
                       <Th>Ticket ID</Th>
                       <Th>Ticket Price</Th>
                       <Th>Paid Amount</Th> {/* New Column */}
