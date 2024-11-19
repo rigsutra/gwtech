@@ -469,12 +469,7 @@ const SaleDetails = () => {
         </CardBody>
       </Card>
 
-      <Modal
-        as="div"
-        isOpen={isOpen}
-        onClose={handleCancel}
-        colorMode={colorMode}
-      >
+      <Modal isOpen={isOpen} onClose={handleCancel} colorMode={colorMode}>
         <ModalContent padding={10} maxWidth="100%" width="fit-content">
           <ModalCloseButton />
           <Stack spacing={5} mt="30px" overflowX="auto">
