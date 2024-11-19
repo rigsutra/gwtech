@@ -160,9 +160,9 @@ const WinningNumbersManagement = () => {
         newNumbers[10].number = `${newNumbers[0].number}×${newNumbers[1].number}`; // MRG1
         newNumbers[11].number = `${newNumbers[0].number}×${newNumbers[2].number}`; // MRG2
         newNumbers[12].number = `${newNumbers[1].number}×${newNumbers[2].number}`; // MRG3
-        // newNumbers[13].number = `${newNumbers[1].number}×${newNumbers[0].number}`; // MRG4
-        // newNumbers[14].number = `${newNumbers[2].number}×${newNumbers[0].number}`; // MRG5
-        // newNumbers[15].number = `${newNumbers[2].number}×${newNumbers[1].number}`; // MRG6
+        newNumbers[13].number = `${newNumbers[1].number}×${newNumbers[0].number}`; // MRG4
+        newNumbers[14].number = `${newNumbers[2].number}×${newNumbers[0].number}`; // MRG5
+        newNumbers[15].number = `${newNumbers[2].number}×${newNumbers[1].number}`; // MRG6
       }
 
       return newNumbers;
