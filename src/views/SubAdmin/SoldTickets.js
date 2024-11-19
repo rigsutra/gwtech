@@ -208,7 +208,7 @@ const SoldTickets = () => {
       <Card
         overflowX="auto"
         p={{ base: "5px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "70%" }} // Responsive width
+        width={{ base: "100%", md: "80%", lg: "78%" }} // Responsive width
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
         borderRadius={"none"}
@@ -359,94 +359,108 @@ const SoldTickets = () => {
               width="100%"
             >
               <VStack spacing={4}>
-                <Table>
-                  <Thead>
-                    <Tr padding={"none"}>
-                      <Th>Ticket ID</Th>
-                      <Th>Ticket Price</Th>
-                      <Th>Paid Amount</Th> {/* New Column */}
-                      <Th>Date</Th>
-                      <Th>Lottery</Th>
-                      <Th>Seller</Th>
-                      <Th>Company</Th>
-                      <Th>Action</Th>
-                    </Tr>
-                  </Thead>
-                  {loading ? (
-                    <Tbody>
-                      <Tr>
-                        <Td colSpan={8}>
-                          <Loading />
-                        </Td>
+                <Flex overflowX="auto">
+                  <Table>
+                    <Thead>
+                      <Tr padding="none">
+                        <Th whiteSpace="nowrap">Ticket ID</Th>
+                        <Th whiteSpace="nowrap">Price</Th>
+                        <Th whiteSpace="nowrap">Paid</Th>
+                        <Th whiteSpace="nowrap">Date</Th>
+                        <Th whiteSpace="nowrap">Lottery</Th>
+                        <Th whiteSpace="nowrap">Seller</Th>
+                        <Th whiteSpace="nowrap">Company</Th>
+                        <Th whiteSpace="nowrap">Action</Th>
                       </Tr>
-                    </Tbody>
-                  ) : (
-                    <Tbody>
-                      {soldTickets.map((item) => {
-                        const totalAmount = item.numbers.reduce(
-                          (acc, number) => {
-                            if (!number.bonus) return acc + number.amount;
-                            return acc;
-                          },
-                          0
-                        );
+                    </Thead>
+                    {loading ? (
+                      <Tbody>
+                        <Tr>
+                          <Td colSpan={6}>
+                            <Loading />
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    ) : (
+                      <Tbody>
+                        {soldTickets.map((item) => {
+                          const totalAmount = item.numbers.reduce(
+                            (acc, number) => {
+                              if (!number.bonus) return acc + number.amount;
+                              return acc;
+                            },
+                            0
+                          );
 
-                        // Get the paid amount from the ticketPaidMap
-                        const key = `${item.seller}-${item.ticketId}`;
-                        const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "N/A"
+                          // Get the paid amount from the ticketPaidMap
+                          const key = `${item.seller}-${item.ticketId}`;
+                          const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "N/A"
 
-                        return (
-                          <Tr key={item._id}>
-                            <Td>
-                              <Button
-                                className="tableInterBtn"
-                                size="sm"
-                                width="100%"
-                                backgroundColor={"#edf2f7"}
-                                onClick={() =>
-                                  handleGetTicketNumbers(item.numbers)
+                          return (
+                            <Tr key={item._id} width="80%">
+                              <Td>
+                                <Button
+                                  className="tableInterBtn"
+                                  size="sm"
+                                  width="70%"
+                                  backgroundColor={"#edf2f7"}
+                                  onClick={() =>
+                                    handleGetTicketNumbers(item.numbers)
+                                  }
+                                >
+                                  {item.ticketId}
+                                </Button>
+                              </Td>
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {totalAmount}
+                              </Td>
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {paidAmount}
+                              </Td>{" "}
+                              {/* Display the Paid Amount */}
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {formatDate(item.date.substr(0, 10))}
+                              </Td>
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {item.lotteryCategoryName}
+                              </Td>
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {
+                                  sellerInfo.find(
+                                    (sitem) => sitem._id === item.seller
+                                  )?.userName
                                 }
-                              >
-                                {item.ticketId}
-                              </Button>
-                            </Td>
-                            <Td>{totalAmount}</Td>
-                            <Td>{paidAmount}</Td>{" "}
-                            {/* Display the Paid Amount */}
-                            <Td>{formatDate(item.date.substr(0, 10))}</Td>
-                            <Td>{item.lotteryCategoryName}</Td>
-                            <Td>
-                              {
-                                sellerInfo.find(
-                                  (sitem) => sitem._id === item.seller
-                                )?.userName
-                              }
-                            </Td>
-                            <Td>{companyName}</Td>
-                            <Td>
-                              <Button
-                                className="tableInterBtn"
-                                size="sm"
-                                onClick={() => deleteTicket(item._id)}
-                                bg={
-                                  colorMode === "light" ? "red.600" : "blue.300"
-                                }
-                                _hover={{
-                                  bg:
+                              </Td>
+                              <Td whiteSpace="nowrap" fontSize="14px">
+                                {companyName}
+                              </Td>
+                              <Td>
+                                <Button
+                                  className="tableInterBtn"
+                                  size="sm"
+                                  onClick={() => deleteTicket(item._id)}
+                                  bg={
                                     colorMode === "light"
-                                      ? "red.300"
-                                      : "blue.200",
-                                }}
-                              >
-                                <RiDeleteBinLine size={14} color="white" />
-                              </Button>
-                            </Td>
-                          </Tr>
-                        );
-                      })}
-                    </Tbody>
-                  )}
-                </Table>
+                                      ? "red.600"
+                                      : "blue.300"
+                                  }
+                                  _hover={{
+                                    bg:
+                                      colorMode === "light"
+                                        ? "red.300"
+                                        : "blue.200",
+                                  }}
+                                >
+                                  <RiDeleteBinLine size={14} color="white" />
+                                </Button>
+                              </Td>
+                            </Tr>
+                          );
+                        })}
+                      </Tbody>
+                    )}
+                  </Table>
+                </Flex>
               </VStack>
             </Stack>
           </Flex>

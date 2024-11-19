@@ -327,13 +327,27 @@ const SoldTickets = () => {
                 <Table variant="striped">
                   <Thead>
                     <Tr>
-                      <Th>Ticket ID</Th>
-                      <Th>Ticket Price</Th>
-                      <Th>Date</Th>
-                      <Th>Lottery</Th>
-                      <Th>Seller</Th>
-                      <Th>Seller Company</Th>
-                      <Th>Action</Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Ticket ID
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Price
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Date
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Lottery
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Seller
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Company
+                      </Th>
+                      <Th whiteSpace="nowrap" fontSize="sm">
+                        Action
+                      </Th>
                     </Tr>
                   </Thead>
                   {loading ? (
@@ -373,16 +387,20 @@ const SoldTickets = () => {
                               </Button>
                             </Td>
                             <Td>
-                              <pre> {totalAmount}</pre>
+                              <pre fontSize="14px"> {totalAmount}</pre>
                             </Td>
                             <Td>
-                              <pre>{formatDate(item.date.substr(0, 10))}</pre>
+                              <pre fontSize="14px">
+                                {formatDate(item.date.substr(0, 10))}
+                              </pre>
                             </Td>
                             <Td>
-                              <pre>{item.lotteryCategoryName}</pre>
+                              <pre fontSize="14px">
+                                {item.lotteryCategoryName}
+                              </pre>
                             </Td>
                             <Td>
-                              <pre>
+                              <pre fontSize="14px">
                                 {
                                   sellerInfo.find(
                                     (sitem) => sitem._id === item.seller
@@ -391,7 +409,7 @@ const SoldTickets = () => {
                               </pre>
                             </Td>
                             <Td>
-                              <pre>
+                              <pre fontSize="14px">
                                 {
                                   sellerInfo.find(
                                     (sitem) => sitem._id === item.seller
