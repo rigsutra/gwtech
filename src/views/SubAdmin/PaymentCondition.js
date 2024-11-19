@@ -80,7 +80,7 @@ const PaymentCondition = () => {
           supervisorsResponse,
         ] = await Promise.all([
           api().get("/admin/getlotterycategory"),
-          api().get("/subadmin/getsellerWhoNotHaveSupervisor"),
+          api().get("/subadmin/getseller"),
           api().get("/subadmin/getsuperVisor"),
         ]);
         setLotteryCategories(lotteryResponse?.data?.data || []);
