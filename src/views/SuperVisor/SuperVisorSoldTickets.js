@@ -147,6 +147,7 @@ const SoldTickets = () => {
 
   const handleGetTicketNumbers = async (numbers) => {
     try {
+      console.log(numbers);
       setGameNumbers(numbers);
       onOpen();
     } catch (ex) {
@@ -167,6 +168,12 @@ const SoldTickets = () => {
     // Return the original string if it doesn't match the expected format
     return dateString;
   };
+
+  const ticketPaidMap = soldTickets.reduce((map, ticket) => {
+    const key = `${ticket.seller}-${ticket.ticketId}`;
+    map[key] = ticket.paidAmount || "None";
+    return map;
+  }, {});
 
   return (
     <Flex
@@ -340,6 +347,16 @@ const SoldTickets = () => {
                   ) : (
                     <Tbody>
                       {soldTickets.map((item) => {
+                        const totalAmount = item.numbers.reduce(
+                          (acc, number) => {
+                            if (!number.bonus) return acc + number.amount;
+                            return acc;
+                          },
+                          0
+                        );
+                        const key = `${item.seller}-${item.ticketId}`;
+                        const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "N/A"
+
                         return (
                           <Tr key={item._id}>
                             <Td>
@@ -356,7 +373,7 @@ const SoldTickets = () => {
                               </Button>
                             </Td>
                             <Td>
-                              <pre>{item.ticketPrice}</pre>
+                              <pre> {totalAmount}</pre>
                             </Td>
                             <Td>
                               <pre>{formatDate(item.date.substr(0, 10))}</pre>

@@ -80,6 +80,7 @@ function SellerManagement() {
               ? user.superVisorName
               : "None",
         }));
+        console.log("processedUsers", processedUsers);
         setUsers(processedUsers);
         setCompanyName(response?.data?.companyName);
         setBonusFlag(response?.data?.bonusFlag);
@@ -425,7 +426,6 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    isRequired
                   />
                 </Flex>
               </FormControl>
@@ -442,7 +442,6 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    isRequired={!editing}
                   />
                 </Flex>
               </FormControl>
@@ -459,10 +458,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    isRequired={!editing}
-                    placeholder={
-                      editing ? "Leave blank to keep current password" : ""
-                    }
+                    placeholder={editing ? "change current password" : ""}
                   />
                 </Flex>
               </FormControl>
