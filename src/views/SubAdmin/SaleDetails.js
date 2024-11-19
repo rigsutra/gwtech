@@ -17,6 +17,8 @@ import {
   Stack,
   useDisclosure,
   useToast,
+  ModalContent,
+  ModalCloseButton,
   useColorMode,
   VStack,
   HStack,
@@ -461,102 +463,105 @@ const SaleDetails = () => {
       </Card>
 
       <Modal isOpen={isOpen} onClose={handleCancel} colorMode={colorMode}>
-        <Stack spacing={2}>
-          <Flex>
+        <ModalContent padding={10} maxWidth="100%" width="fit-content">
+          <ModalCloseButton />
+          <Stack spacing={2}>
+            <Flex>
+              <Table variant="striped">
+                <Tbody>
+                  <Tr>
+                    <Td>
+                      <pre>{selectedGame}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{selectedNumber}</pre>
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>
+                      <pre>Date</pre>
+                    </Td>
+                    <Td>
+                      <pre>{selectedDate}</pre>
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>
+                      <pre>Lottery</pre>
+                    </Td>
+                    <Td>
+                      <pre>{selectedLottery}</pre>
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+              <Table variant="striped">
+                <Tbody>
+                  <Tr>
+                    <Td>
+                      <pre>Limit</pre>
+                    </Td>
+                    <Td>
+                      <pre>{limit}</pre>
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>
+                      <pre>Pari</pre>
+                    </Td>
+                    <Td>
+                      <pre>{gameNumberSellAmountSum}</pre>
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td>
+                      <pre>Available</pre>
+                    </Td>
+                    <Td>
+                      <pre>{limit - gameNumberSellAmountSum}</pre>
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </Flex>
             <Table variant="striped">
+              <Thead>
+                <Tr>
+                  <Th>Seller</Th>
+                  <Th>Company</Th>
+                  <Th>Tickets</Th>
+                  <Th>Price</Th>
+                </Tr>
+              </Thead>
               <Tbody>
-                <Tr>
-                  <Td>
-                    <pre>{selectedGame}</pre>
-                  </Td>
-                  <Td>
-                    <pre>{selectedNumber}</pre>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <pre>Date</pre>
-                  </Td>
-                  <Td>
-                    <pre>{selectedDate}</pre>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <pre>Lottery</pre>
-                  </Td>
-                  <Td>
-                    <pre>{selectedLottery}</pre>
-                  </Td>
-                </Tr>
+                {Object.values(gameNumberDetail).map((item, index) => (
+                  <Tr key={index}>
+                    <Td>
+                      <pre>{item.name}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{item.company}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{item.ticketCount}</pre>
+                    </Td>
+                    <Td>
+                      <pre>{item.sum}</pre>
+                    </Td>
+                  </Tr>
+                ))}
               </Tbody>
+              <Thead>
+                <Tr>
+                  <Th></Th>
+                  <Th>Total</Th>
+                  <Th>{tickets}</Th>
+                  <Th>{gameNumberSellAmountSum}</Th>
+                </Tr>
+              </Thead>
             </Table>
-            <Table variant="striped">
-              <Tbody>
-                <Tr>
-                  <Td>
-                    <pre>Limit</pre>
-                  </Td>
-                  <Td>
-                    <pre>{limit}</pre>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <pre>Pari</pre>
-                  </Td>
-                  <Td>
-                    <pre>{gameNumberSellAmountSum}</pre>
-                  </Td>
-                </Tr>
-                <Tr>
-                  <Td>
-                    <pre>Available</pre>
-                  </Td>
-                  <Td>
-                    <pre>{limit - gameNumberSellAmountSum}</pre>
-                  </Td>
-                </Tr>
-              </Tbody>
-            </Table>
-          </Flex>
-          <Table variant="striped">
-            <Thead>
-              <Tr>
-                <Th>Seller</Th>
-                <Th>Company</Th>
-                <Th>Tickets</Th>
-                <Th>Price</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {Object.values(gameNumberDetail).map((item, index) => (
-                <Tr key={index}>
-                  <Td>
-                    <pre>{item.name}</pre>
-                  </Td>
-                  <Td>
-                    <pre>{item.company}</pre>
-                  </Td>
-                  <Td>
-                    <pre>{item.ticketCount}</pre>
-                  </Td>
-                  <Td>
-                    <pre>{item.sum}</pre>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-            <Thead>
-              <Tr>
-                <Th></Th>
-                <Th>Total</Th>
-                <Th>{tickets}</Th>
-                <Th>{gameNumberSellAmountSum}</Th>
-              </Tr>
-            </Thead>
-          </Table>
-        </Stack>
+          </Stack>
+        </ModalContent>
       </Modal>
     </Flex>
   );
