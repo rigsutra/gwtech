@@ -119,10 +119,10 @@ const SoldTickets = () => {
       setSoldTickets(allTickets);
       setWinningTickets(allWinningTickets);
 
-      // Create a mapping from "seller-ticketId" to paidAmount(s)
+      // Create a mapping from "seller-ticketId-lotteryCategoryName" to paidAmount(s)
       const paidMap = {};
       allWinningTickets.forEach((ticket) => {
-        const key = `${ticket.seller}-${String(ticket.ticketId)}`;
+        const key = `${ticket.seller}-${ticket.ticketId}-${ticket.lotteryCategoryName}`;
         paidMap[key] = ticket.paidAmount;
       });
       console.log("Paid Map:", paidMap); // Debugging
@@ -142,7 +142,9 @@ const SoldTickets = () => {
 
   const deleteTicket = async (id) => {
     try {
-      const result = confirm("Do you really want to delete this ticket?");
+      const result = window.confirm(
+        "Do you really want to delete this ticket?"
+      );
       if (result) {
         const res = await api().delete(`/subadmin/deleteticket/${id}`);
         console.log(res.data);
@@ -376,7 +378,7 @@ const SoldTickets = () => {
                     {loading ? (
                       <Tbody>
                         <Tr>
-                          <Td colSpan={6}>
+                          <Td colSpan={8}>
                             <Loading />
                           </Td>
                         </Tr>
@@ -393,8 +395,8 @@ const SoldTickets = () => {
                           );
 
                           // Get the paid amount from the ticketPaidMap
-                          const key = `${item.seller}-${item.ticketId}`;
-                          const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "N/A"
+                          const key = `${item.seller}-${item.ticketId}-${item.lotteryCategoryName}`;
+                          const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "None"
 
                           return (
                             <Tr key={item._id} width="80%">
