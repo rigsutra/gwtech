@@ -22,9 +22,12 @@ import {
   useToast,
   useColorMode,
   Switch,
+  Modal,
+  ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
+  ModalFooter,
   ModalCloseButton,
   Select,
 } from "@chakra-ui/react";
@@ -37,7 +40,6 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import Modal from "components/Modal/Modal.js";
 
 function SellerManagement() {
   const [users, setUsers] = useState([]);
@@ -392,14 +394,8 @@ function SellerManagement() {
       </Card>
 
       {/* Create/Edit User Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={handleCancel}
-        title={editing ? "EDIT SELLER" : "ADD SELLER"}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        colorMode={colorMode}
-      >
+      <Modal isOpen={isOpen} onClose={handleCancel} isCentered>
+        <ModalOverlay />
         <ModalContent bg="#A6A6A6" justifyContent="center">
           <ModalHeader
             bg="#7F7F7F"
@@ -458,7 +454,7 @@ function SellerManagement() {
                     color="black"
                     height="40px"
                     width="300px"
-                    placeholder={editing ? "change current password" : ""}
+                    placeholder={editing ? "Change current password" : ""}
                   />
                 </Flex>
               </FormControl>

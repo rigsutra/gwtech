@@ -19,6 +19,9 @@ import {
   ModalContent,
   ModalBody,
   ModalHeader,
+  Modal,
+  ModalFooter,
+  ModalCloseButton,
   Box,
 } from "@chakra-ui/react";
 import { FaPlus, FaEdit } from "react-icons/fa";
@@ -27,7 +30,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import Modal from "components/Modal/Modal.js";
+// import Modal from "components/Modal/Modal.js";
 
 const LimitNumber = () => {
   const [editing, setEditing] = useState(false);

@@ -19,20 +19,21 @@ import {
   useDisclosure,
   useToast,
   useColorMode,
+  Modal,
+  ModalOverlay,
   ModalContent,
   ModalHeader,
   ModalBody,
+  ModalFooter,
   ModalCloseButton,
 } from "@chakra-ui/react";
 import { RiUserAddLine } from "react-icons/ri";
 import { FaEdit } from "react-icons/fa";
-import { RiDeleteBinLine } from "react-icons/ri";
 
 // Custom components
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import Modal from "components/Modal/Modal.js";
 
 function SupervisorManagement() {
   const [users, setUsers] = useState([]);
@@ -41,7 +42,7 @@ function SupervisorManagement() {
   const [isActive, setIsActive] = useState(true);
   const [editing, setEditing] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [isAddMode, setIsAddMode] = useState(true); // New state to track mode
+  const [isAddMode, setIsAddMode] = useState(true);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -67,7 +68,6 @@ function SupervisorManagement() {
         userName,
         password,
         isActive,
-        // companyName,
       })
       .then((response) => {
         setUsers([...users, response.data]);
@@ -93,13 +93,12 @@ function SupervisorManagement() {
 
   const updateUser = (id) => {
     const requestBody = {
-      userName: userName || currentUser.userName, // Use existing value if not updated
-      // companyName: companyName || currentUser.companyName, // Use existing value if not updated
-      isActive: isActive !== undefined ? isActive : currentUser.isActive, // Update only if specified
+      userName: userName || currentUser.userName,
+      isActive: isActive !== undefined ? isActive : currentUser.isActive,
     };
 
     if (password !== "") {
-      requestBody.password = password; // Only add password if provided
+      requestBody.password = password;
     }
 
     api()
@@ -128,36 +127,9 @@ function SupervisorManagement() {
       });
   };
 
-  // const deleteUser = (id) => {
-  //   api()
-  //     .delete(`/subadmin/deletesuperVisor/${id}`)
-  //     .then(() => {
-  //       setUsers(users.filter((user) => user._id !== id));
-  //       toast({
-  //         title: "Supervisor deleted.",
-  //         status: "success",
-  //         duration: 3000,
-  //         isClosable: true,
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       toast({
-  //         title: "Error deleting Supervisor.",
-  //         description: error.message,
-  //         status: "error",
-  //         duration: 3000,
-  //         isClosable: true,
-  //       });
-  //     });
-  // };
-
   const handleUserNameChange = (event) => {
     setUserName(event.target.value.trim());
   };
-
-  // const handleCompanyNameChange = (event) => {
-  //   setCompanyName(event.target.value.trim());
-  // };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value.trim());
@@ -173,7 +145,7 @@ function SupervisorManagement() {
     if (!userName) {
       toast({
         title: "Error",
-        description: "Username and company name are required.",
+        description: "Username is required.",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -190,18 +162,17 @@ function SupervisorManagement() {
 
   const handleEdit = (user) => {
     setEditing(true);
-    setIsAddMode(false); // Set to false for edit mode
+    setIsAddMode(false);
     setCurrentUser(user);
     setUserName(user.userName);
-    setPassword(""); // Reset password for security
-    // setCompanyName(user.companyName);
+    setPassword("");
     setIsActive(user.isActive);
     onOpen();
   };
 
   const handleAddSupervisor = () => {
     setEditing(false);
-    setIsAddMode(true); // Set to true for add mode
+    setIsAddMode(true);
     resetForm();
     onOpen();
   };
@@ -214,7 +185,6 @@ function SupervisorManagement() {
   const resetForm = () => {
     setUserName("");
     setPassword("");
-    // setCompanyName("");
     setIsActive(true);
   };
 
@@ -222,7 +192,7 @@ function SupervisorManagement() {
     <Flex
       direction="column"
       justifyContent="center"
-      alignItems="center" // Add this to center children horizontally
+      alignItems="center"
       width="100%"
       pt={{ base: "120px", md: "75px" }}
     >
@@ -253,7 +223,7 @@ function SupervisorManagement() {
           <Button
             size="sm"
             mt={{ base: 2, sm: 0 }}
-            onClick={handleAddSupervisor} // Separate button to add supervisor
+            onClick={handleAddSupervisor}
             bg={colorMode === "light" ? "blue.500" : "blue.300"}
             _hover={{
               bg: colorMode === "light" ? "blue.600" : "blue.200",
@@ -296,6 +266,7 @@ function SupervisorManagement() {
                     >
                       <FaEdit size={20} color="white" />
                     </Button>
+                    {/* Uncomment if you want a delete button */}
                     {/* <Button
                       size="sm"
                       onClick={() => deleteUser(user._id)}
@@ -315,16 +286,8 @@ function SupervisorManagement() {
       </Card>
 
       {/* Create/Edit User Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={handleCancel}
-        title={isAddMode ? "Create User" : "Edit User"} // Change title based on mode
-        submitButtonText={isAddMode ? "Create" : "Update"} // Change button text based on mode
-        onSubmit={handleSubmit}
-        cancelButtonText="Cancel"
-        onCancel={handleCancel}
-        colorMode={colorMode}
-      >
+      <Modal isOpen={isOpen} onClose={handleCancel} isCentered>
+        <ModalOverlay />
         <ModalContent bg="#A6A6A6" justifyContent="center">
           <ModalHeader
             bg="#7F7F7F"
@@ -350,7 +313,7 @@ function SupervisorManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   />
                 </Flex>
               </FormControl>
@@ -366,7 +329,7 @@ function SupervisorManagement() {
                     bg="#bfbfbf"
                     color="black"
                     height="40px"
-                    width="300px" // Set fixed width
+                    width="300px"
                   />
                 </Flex>
               </FormControl>
