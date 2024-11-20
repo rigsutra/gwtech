@@ -55,6 +55,9 @@ const SoldTickets = () => {
   const [gameNumbers, setGameNumbers] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // New state variable for mapping seller IDs to seller names
+  const [sellerIdNameMap, setSellerIdNameMap] = useState({});
+
   useEffect(() => {
     const fetchLotteryCategories = async () => {
       try {
@@ -77,6 +80,13 @@ const SoldTickets = () => {
         const response = await api().get("/subadmin/getseller");
         setSellerInfo(response.data.users);
         setCompanyName(response.data.companyName);
+
+        // Create mapping from seller IDs to seller names
+        const idNameMap = {};
+        response.data.users.forEach((user) => {
+          idNameMap[user._id] = user.userName;
+        });
+        setSellerIdNameMap(idNameMap);
       } catch (error) {
         console.error(error);
         toast({
@@ -123,6 +133,7 @@ const SoldTickets = () => {
       const paidMap = {};
       allWinningTickets.forEach((ticket) => {
         const key = `${ticket.seller}-${ticket.ticketId}-${ticket.lotteryCategoryName}`;
+        console.log("Paid Map Key:", key);
         paidMap[key] = ticket.paidAmount;
       });
       console.log("Paid Map:", paidMap); // Debugging
@@ -204,13 +215,13 @@ const SoldTickets = () => {
       direction="column"
       pt={{ base: "120px", md: "75px" }}
       justifyContent="center"
-      alignItems="center" // Add this to center children horizontally
+      alignItems="center"
       width="100%"
     >
       <Card
         overflowX="auto"
         p={{ base: "5px", md: "20px" }}
-        width={{ base: "100%", md: "80%", lg: "78%" }} // Responsive width
+        width={{ base: "100%", md: "80%", lg: "78%" }}
         maxWidth="1200px"
         border={{ base: "none", md: "1px solid gray" }}
         borderRadius={"none"}
@@ -355,7 +366,6 @@ const SoldTickets = () => {
           >
             <Stack
               spacing={1}
-              // borderRadius="3px"
               m="5px"
               boxShadow="0px 0px 2px white"
               width="100%"
@@ -394,9 +404,14 @@ const SoldTickets = () => {
                             0
                           );
 
+                          // Get seller name using sellerIdNameMap
+                          const sellerName = sellerIdNameMap[item.seller];
+                          // Construct the key using seller name
+                          const key = `${sellerName}-${item.ticketId}-${item.lotteryCategoryName}`;
+                          console.log("Render Key:", key);
                           // Get the paid amount from the ticketPaidMap
-                          const key = `${item.seller}-${item.ticketId}-${item.lotteryCategoryName}`;
-                          const paidAmount = ticketPaidMap[key] || "None"; // If no paid amount, show "None"
+                          const paidAmount = ticketPaidMap[key] || "None";
+                          console.log("Paid Amount:", paidAmount);
 
                           return (
                             <Tr key={item._id} width="80%">
@@ -418,8 +433,7 @@ const SoldTickets = () => {
                               </Td>
                               <Td whiteSpace="nowrap" fontSize="14px">
                                 {paidAmount}
-                              </Td>{" "}
-                              {/* Display the Paid Amount */}
+                              </Td>
                               <Td whiteSpace="nowrap" fontSize="14px">
                                 {formatDate(item.date.substr(0, 10))}
                               </Td>
@@ -427,11 +441,7 @@ const SoldTickets = () => {
                                 {item.lotteryCategoryName}
                               </Td>
                               <Td whiteSpace="nowrap" fontSize="14px">
-                                {
-                                  sellerInfo.find(
-                                    (sitem) => sitem._id === item.seller
-                                  )?.userName
-                                }
+                                {sellerName}
                               </Td>
                               <Td whiteSpace="nowrap" fontSize="14px">
                                 {companyName}
